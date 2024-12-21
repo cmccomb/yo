@@ -1,0 +1,86 @@
+#!/usr/bin/env zsh
+
+function yo() {
+  # Add documentation and early exit for -h and --help arguments
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "
+yo - A command line assistant that uses AI to answer questions.
+
+Usage:
+  yo [question]
+
+  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
+
+Options:
+  -h, --help    Show this help message and exit.
+"
+    return 0
+  fi
+
+  # Set the stop character for one-off questions.
+  STOP_CHARACTER="✌️"
+
+  # Set the path to the Jan model directory
+  JAN_MODEL_PATH="/Users/work/Library/Application Support/Jan/data/models"
+
+  # Set the provider of the Jan model
+  PROVIDER="huggingface.co"
+
+  # The Hugging Face username
+  HF_USERNAME="bartowski"
+
+  # The series, size, tuning, quantization, and type of the model
+  SERIES="Qwen2.5-Coder"
+  SIZE="3B"
+  TUNING="Instruct"
+  QUANT="Q4_K_M"
+  TYPE="gguf"
+
+  # The repository name and model name
+  REPO_NAME="${SERIES}-${SIZE}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
+  MODEL_NAME="${SERIES}-${SIZE}-${TUNING}-${QUANT}.${TYPE}"
+
+  # The path to the model
+  MODEL_PATH="${JAN_MODEL_PATH}/${PROVIDER}/${HF_USERNAME}/${REPO_NAME}/${MODEL_NAME}"
+
+  LLM_PROMPT="
+You are Yo, a helpful assistant that interacts with a user through the command line. The current time and date is: $(date).
+
+Here is some more information about the system you inhabit.
+$(system_profiler SPSoftwareDataType SPHardwareDataType | grep -E 'System Version|Model Identifier|Total Number of Cores|Chip|Memory' | grep -v 'Secure Virtual memory')
+
+The user is currently located in the directory: $(pwd).
+
+Here is a tree of the current directory (up to 2 levels deep):
+$(tree -a -L 2)
+
+Here are the 5 most recent commands used in the command line:
+$(history -5)
+
+Your task is to answer the user's questions as efficiently and as accurately as possible.
+You responses will be shown as raw text.
+Your responses should be as short as possible.
+"
+
+  # Run different versions depending on whether or not there's an argument
+  if [ -n "$1" ]; then
+    llama-cli \
+      --model "$MODEL_PATH" \
+      --prompt "$LLM_PROMPT\nEnd your message with $STOP_CHARACTER to return control to the user.\nUser Query:\n$*\nYour Response:\n" \
+      --reverse-prompt "$STOP_CHARACTER" \
+      --no-display-prompt \
+      --temp 0.1 \
+      2>/dev/null
+  else
+    llama-cli \
+      --model "$MODEL_PATH" \
+      --prompt "$LLM_PROMPT" \
+      --conversation \
+      --no-display-prompt \
+      --temp 0.2 \
+      2>/dev/null
+  fi
+}
+
+# Add to ~/.zshrc
+declare -f yo | cat >> ~/.zshrc
