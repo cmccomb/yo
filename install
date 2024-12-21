@@ -3,5 +3,11 @@
 # Yo to the shell
 zsh <(curl -s https://cmccomb.com/yo/src)
 
+# Check to see if llama-cli is available
+if ! command -v llama-cli &> /dev/null; then
+  echo "Yo requires llama-cli to be installed. Please install it by running 'pip install llama-cli'."
+  return 1
+fi
+
 # Yo to the ~/.zshrc
 declare -f yo | cat >> ~/.zshrc

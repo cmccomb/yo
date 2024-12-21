@@ -1,10 +1,10 @@
 #!/usr/bin/env zsh
 
 function yo() {
-  # Add documentation and early exit for -h and --help arguments
+
   if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "
-yo - A command line assistant that uses AI to answer questions.
+yo - A command line AI assistant.
 
 Usage:
   yo [question]
@@ -81,6 +81,3 @@ Your responses should be as short as possible.
       2>/dev/null
   fi
 }
-
-# Add to ~/.zshrc
-#declare -f yo | cat >> ~/.zshrc
