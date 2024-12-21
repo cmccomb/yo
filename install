@@ -1,43 +1,29 @@
 #!/usr/bin/env zsh
 
 # Check to see if llama-cli is available
-if ! command -v llama-cli &> /dev/null; then
-  echo "Yo requires llama-cli to be installed. It appears that 'llama-cli' is not installed on your system."
-  read -p "Would you like to install it now? (y/n): " choice
-  if [[ "$choice" =~ ^[yY]$ ]]; then
-    echo "Installing llama-cli..."
-    pip install llama-cli
-    if [ $? -eq 0 ]; then
-      echo "llama-cli has been successfully installed."
-    else
-      echo "There was an error installing llama-cli. Please try installing it manually."
-      return 1
-    fi
-  else
-    echo "Installation canceled. Please install llama-cli and try again."
-    return 1
-  fi
+if ! command -v llama-cli &>/dev/null; then
+	echo "Yo requires llama-cli to be installed. It appears that 'llama-cli' is not installed on your system."
+	read -p "Would you like to install it now? (y/n): " choice
+	if [[ "$choice" =~ ^[yY]$ ]]; then
+		echo "Installing llama-cli..."
+		pip install llama-cli
+		if [ $? -eq 0 ]; then
+			echo "llama-cli has been successfully installed."
+		else
+			echo "There was an error installing llama-cli. Please try installing it manually."
+			return 1
+		fi
+	else
+		echo "Installation canceled. Please install llama-cli and try again."
+		return 1
+	fi
 fi
-
-# The Hugging Face username
-HF_USERNAME="bartowski"
-
-# The series, size, tuning, quantization, and type of the model
-SERIES="Qwen2.5.1-Coder"
-SIZE="7B"
-TUNING="Instruct"
-QUANT="Q2_K"
-TYPE="gguf"
-
-# The repository name and model name
-REPO_NAME="${SERIES}-${SIZE}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
-MODEL_NAME="${SERIES}-${SIZE}-${TUNING}-${QUANT}.${TYPE}"
-
-# Download model with llama-cli
-llama-cli --hf-repo "${HF_USERNAME}/${REPO_NAME}" --hf-file $MODEL_NAME
 
 # Yo to the shell
 zsh <(curl -s https://cmccomb.com/yo/src)
 
+# Run yo and download the model
+yo introduce yourself
+
 # Yo to the ~/.zshrc
-declare -f yo | cat >> ~/.zshrc
+declare -f yo | cat >>~/.zshrc
