@@ -82,5 +82,7 @@ Your responses should be as short as possible.
   fi
 }
 
+export yo
+
 # Add to ~/.zshrc
 declare -f yo | cat >> ~/.zshrc
