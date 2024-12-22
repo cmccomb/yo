@@ -6,144 +6,87 @@ function yo() {
 	# Symbol used to signal the end of one-off sessions
 	local STOP_SYMBOL="✌️"
 
-	# Function to display usage instructions
+	# Display usage instructions
 	function show_help() {
-		echo "
-yo - A command-line AI assistant.
+		cat <<-EOF
+			yo - A command-line AI assistant.
 
-Usage:
-  yo [options] [question]
+			Usage:
+			  yo [options] [question]
 
-Description:
-  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
+			Description:
+			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
-Options:
-  -h, --help          Show this help message and exit.
-  -r, --read [file]   Integrate information from the specified file (supports text files and PDFs).
-  -v, --verbose       Enable verbose mode for detailed output.
-"
+			Options:
+			  -h, --help          Show this help message and exit.
+			  -r, --read [file]   Integrate information from the specified file (supports text files and PDFs).
+			  -v, --verbose       Enable verbose mode for detailed output.
+		EOF
 	}
 
-	# Function to generate a prompt for one-off question-answering
-	function generate_one_off_prompt() {
-		local query=$1
-		local content=$2
-		local filename=$3
-		local prompt="
-You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal.
+	# Generate a prompt for one-off or interactive sessions
+	function generate_prompt() {
+		local mode=$1 content=$2 filename=$3 query=$4
+		local prompt=""
+		prompt+="You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal. "
+		prompt+="It is currently $(date). "
+		prompt+="You were invoked from the $(pwd) directory "
+		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
+		prompt+=" with: $(sysctl -n hw.ncpu ) cores, "
+		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
+		prompt+="and $( df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
 
-The date and time are currently: $(date).
-
-"
-		# Include file content and name if provided
 		if [[ -n "$content" ]]; then
-			prompt+="Relevant Information from file \"$filename\":
-================= BEGINNING OF FILE CONTENTS =================
-$content
-==================== END OF FILE CONTENTS ====================
-
-"
+			prompt+="Relevant Information from file \"$filename\":\n"
+			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
+			prompt+="$content\n"
+			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
 		fi
 
-		prompt+="Your task is to answer the user's question directly.
-Your answer will be shown as raw text in a terminal window.
-Your answer should be as short as possible while still being specific, helpful, and actionable.
-Your answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
+		if [[ $mode == "one-off" ]]; then
+			prompt+="Your task is to answer the user's question directly. "
+			prompt+="Your answer will be concise, helpful, and actionable. "
+			prompt+="End your answer with the stop symbol '$STOP_SYMBOL'.\n\n"
+			prompt+="User Query: $query $STOP_SYMBOL\n"
+			prompt+="Your Super-Short Answer:"
+		else
+			prompt+="Your task is to assist the user in an interactive session, responding concisely and accurately."
+		fi
 
-Here is an example:
-User Query: what is two plus two $STOP_SYMBOL
-Your Super-Short Answer: four $STOP_SYMBOL
-
-Here is another example:
-User Query: what is the command to change directories $STOP_SYMBOL
-Your Super-Short Answer: cd $STOP_SYMBOL
-
-Now, here is the real user query:
-User Query: $query $STOP_SYMBOL
-Your Super-Short Answer:"
 		echo "$prompt"
 	}
 
-	# Function to generate a prompt for interactive chat sessions
-	function generate_interactive_prompt() {
-		local content=$1
-		local filename=$2
-		local prompt="
-You are playing the role of Yo.
-Yo is a helpful assistant that interacts with a user through an interactive chat interface in the terminal.
-The current time and date is: $(date).
-
-"
-
-		# Include file content and name if provided
-		if [[ -n "$content" ]]; then
-			prompt+="Relevant Information from file \"$filename\":
-================= BEGINNING OF FILE CONTENTS =================
-$content
-==================== END OF FILE CONTENTS ====================
-
-"
-		fi
-
-		prompt+="Your task is to answer the user's questions efficiently and accurately.
-Your responses will be shown as raw text in a terminal window.
-Your responses should be concise but complete.
-"
-		echo "$prompt"
-	}
-
-	# Function to extract content from a file (supports text and PDF files)
+	# Extract content from a file (supports text and PDF files)
 	function extract_content() {
-		local file=$1
-		local truncate_length=$2
+		local file=$1 max_length=$2
+		[[ ! -f "$file" ]] && { echo "Error: File not found." >&2; return 1; }
 
-		if [[ -f "$file" ]]; then
-			local content
-			case $file in
+		local content
+		case $file in
 			*.pdf)
-				# Extract text from PDF files using pdftotext
-				if command -v pdftotext >/dev/null 2>&1; then
-					content=$(pdftotext "$file" - 2>/dev/null)
-				else
-					echo "Error: pdftotext is not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+				command -v pdftotext >/dev/null 2>&1 || {
+					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
 					return 1
-				fi
+				}
+				content=$(pdftotext "$file" - 2>/dev/null)
 				;;
 			*.txt | *)
-				# Extract text from plain text files
 				content=$(cat "$file")
 				;;
-			esac
+		esac
 
-			# Truncate content if a length limit is provided
-			if [[ -n "$truncate_length" && "$truncate_length" -gt 0 ]]; then
-				content=${content:0:$truncate_length}
-			fi
-
-			echo "$content"
-		else
-			echo "Error: File not found or invalid file specified." >&2
-			return 1
-		fi
+		[[ -n "$max_length" && "$max_length" -gt 0 ]] && content=${content:0:$max_length}
+		echo "$content"
 	}
 
-	# Function to start a llama-cli session
+	# Start a llama-cli session
 	function start_llama_session() {
-		local repo_name=$1
-		local model_name=$2
-		local prompt=$3
-		local interactive=$4
-		local verbose=$5
-		#		local draft_model_size="0.5B" # Draft model size
-		#
-		#
-		#    local draft_model_name="${SERIES}-${draft_model_size}-${TUNING}-GGUF_${SERIES}-${draft_model_size}-${TUNING}-${quant}.${TYPE}"
-		#    local draft_model_path="/Users/mccomb/Library/Caches/llama.cpp/${HF_USERNAME}_${draft_model_name}"
+		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 verbose=$5
 		local args=(
 			--threads "$(sysctl -n hw.logicalcpu_max)"
 			--hf-repo "$repo_name"
 			--hf-file "$model_name"
-			--temp 0.5
+			--temp 0.2
 			--prompt "$prompt"
 			--seed 42
 			--flash-attn
@@ -151,14 +94,12 @@ Your responses should be concise but complete.
 			--mirostat 2
 		)
 
-		# Add conversation flag for interactive mode
 		if [[ $interactive == true ]]; then
-			args+=(--conversation --no-warmup --prompt-cache "$HOME/.yo_interactive_prompt_cache")
+			args+=(--conversation --prompt-cache "$HOME/.yo_interactive_prompt_cache")
 		else
 			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "$HOME/.yo_oneoff_prompt_cache")
 		fi
 
-		# Suppress unnecessary output if verbose mode is disabled
 		if [[ $verbose != true ]]; then
 			llama-cli "${args[@]}" --no-display-prompt 2>/dev/null
 		else
@@ -166,82 +107,53 @@ Your responses should be concise but complete.
 		fi
 	}
 
-	# Argument parsing and session type determination
-	local read_mode=false
-	local read_file=""
-	local query=""
-	local verbose=false
-
-	# Loop through provided arguments
+	# Parse arguments
+	local read_mode=false read_file="" query="" verbose=false
 	while [[ $# -gt 0 ]]; do
 		case $1 in
-		-h | --help)
-			show_help
-			return 0
-			;;
-		--read | -r)
-			read_mode=true
-			# Check if a file is specified with the read flag
-			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				read_file=$2
-				shift
-			else
-				echo "Error: --read or -r flag requires a file to be specified." >&2
-				return 1
-			fi
-			;;
-		-v | --verbose)
-			verbose=true
-			;;
-		*)
-			# Concatenate query arguments
-			query+="$1 "
-			;;
+			-h | --help) show_help; return 0 ;;
+			-r | --read)
+				read_mode=true
+				[[ -n $2 && ! $2 =~ ^- ]] && { read_file=$2; shift; } || { echo "Error: --read requires a file." >&2; return 1; }
+				;;
+			-v | --verbose) verbose=true ;;
+			*) query+="$1 " ;;
 		esac
 		shift
 	done
 
-	# Handle file content extraction if read mode is enabled
+	# Handle file reading
 	local content=""
-	if [[ $read_mode == true ]]; then
-		if [[ -z "$read_file" ]]; then
-			echo "Error: No file specified for --read or -r flag." >&2
-			return 1
-		fi
-
-		content=$(extract_content "$read_file" 10000)
-
-		if [[ $? -ne 0 ]]; then
-			echo "Failed to extract content. Exiting."
-			return 1
-		fi
+	if [[ $read_mode == true && -n "$read_file" ]]; then
+		content=$(extract_content "$read_file" 10000) || return 1
 	fi
 
-	local HF_USERNAME="bartowski" # Hugging Face username
-	local SERIES="Qwen2.5"        # Model series
-	local TUNING="Instruct"       # Model tuning
-	local TYPE="gguf"             # Model type
+  local quant_provider="bartowski" # Hugging Face username
+	local model_series="Qwen2.5"        # Model series
+	local tuning="Instruct"       # Model tuning
+	local filetype="gguf"             # Model type
 
-	# Execute the appropriate session type based on the query
+	# Configure model settings
+	local quant size repo_name model_name
 	if [[ -n "$query" ]]; then
-		# Establish settings
-		local quant="Q4_K_M" # Quantization level
-		local size="3B"      # Model size
-		local repo_name="${HF_USERNAME}/${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
-		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
-		# One-off query mode
-		local one_off_prompt
-		one_off_prompt=$(generate_one_off_prompt "$query" "$content" "$read_file")
-		start_llama_session "$repo_name" "$model_name" "$one_off_prompt" false $verbose
+		size="3B"
+		quant="Q4_K_M"
 	else
-		# Establish settings
-		local quant="Q4_K_M" # Quantization level
-		local size="14B" # Model size
-		local repo_name="${HF_USERNAME}/${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
-		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
-		# Interactive chat session
-		local interactive_prompt
-		interactive_prompt=$(generate_interactive_prompt "$content" "$read_file")
-		start_llama_session "$repo_name" "$model_name" "$interactive_prompt" true $verbose
+		size="14B"
+		quant="IQ4_XS"
+	fi
+	repo_name="${quant_provider}/${model_series}-${size}-${tuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
+	model_name="${model_series}-${size}-${tuning}-${quant}.${filetype}"
+
+	# Generate and start appropriate session
+	local prompt
+	if [[ -n "$query" ]]; then
+		prompt=$(generate_prompt "one-off" "$content" "$read_file" "$query")
+		start_llama_session "$repo_name" "$model_name" "$prompt" false $verbose
+	else
+		prompt=$(generate_prompt "interactive" "$content" "$read_file")
+		start_llama_session "$repo_name" "$model_name" "$prompt" true $verbose
 	fi
 }
+
+export yo

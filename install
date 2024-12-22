@@ -3,7 +3,8 @@
 # Check to see if llama-cli is available
 if ! command -v llama-cli &>/dev/null; then
 	echo "Yo requires llama-cli to be installed. It appears that 'llama-cli' is not installed on your system."
-	read -p "Would you like to install it now? (y/n): " choice
+	echo "Would you like to install it now? (y/n): "
+	read choice
 	if [[ "$choice" =~ ^[yY]$ ]]; then
 		echo "Installing llama-cli..."
 		pip install llama-cli
@@ -22,7 +23,8 @@ fi
 # Check to see if pdftotext is available
 if ! command -v pdftotext &>/dev/null; then
   echo "Yo requires pdftotext to be installed. It appears that 'pdftotext' is not installed on your system."
-  read -p "Would you like to install it now? (y/n): " choice
+  echo "Would you like to install it now? (y/n): "
+  read choice
   if [[ "$choice" =~ ^[yY]$ ]]; then
     echo "Installing pdftotext..."
     pip install pdftotext
@@ -41,8 +43,6 @@ fi
 # Yo to the shell
 zsh <(curl -s https://cmccomb.com/yo/src)
 
-# Run yo and download the model
-yo introduce yourself
 
 # Yo to the ~/.zshrc
-declare -f yo | cat >>~/.zshrc
+echo 'zsh <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc
