@@ -151,9 +151,9 @@ function yo() {
     # Generate
     local terms
     if [[ $verbose != true ]]; then
-      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-3B-Instruct-GGUF" --hf-file "Qwen2.5-3B-Instruct-Q4_K_M.gguf" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
+      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
     else
-      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-3B-Instruct-GGUF" --hf-file "Qwen2.5-3B-Instruct-Q4_K_M.gguf" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt --verbose-prompt)
+      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms"  -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt --verbose-prompt)
     fi
 
     # Only take the first line
@@ -182,9 +182,9 @@ function yo() {
 		)
 
 		if [[ $interactive == true ]]; then
-			args+=(--conversation --prompt-cache "$HOME/.yo_interactive_prompt_cache")
+			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name")
 		else
-			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "$HOME/.yo_oneoff_prompt_cache")
+			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "/tmp/.yo_oneoff_prompt_cache_$repo_name_$model_name")
 		fi
 
 		if [[ $verbose != true ]]; then
