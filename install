@@ -1,52 +1,54 @@
 #!/usr/bin/env zsh
 
-# Check to see if llama-cli is available
-if ! command -v llama-cli &>/dev/null; then
-	echo "Yo requires llama-cli to be installed. It appears that 'llama-cli' is not installed on your system."
-	echo "Would you like to install it now? (y/n): "
-	read -r choice
-	if [[ "$choice" =~ ^[yY]$ ]]; then
-		echo "Installing llama-cli..."
-		pip install llama-cli
-		if [ $? -eq 0 ]; then
-			echo "llama-cli has been successfully installed."
-		else
-			echo "There was an error installing llama-cli. Please try installing it manually."
-			return 1
-		fi
-	else
-		echo "Installation canceled. Please install llama-cli and try again."
-		return 1
-	fi
+# Check to see if homebrew is installed and install it if it is not
+if ! command -v brew &> /dev/null; then
+  echo "Homebrew not found. Installing Homebrew..."
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  echo "Homebrew installation complete."
+else
+  echo "Homebrew is already installed."
 fi
 
-# Check to see if pdftotext is available
-if ! command -v pdftotext &>/dev/null; then
-  echo "Yo requires pdftotext to be installed. It appears that 'pdftotext' is not installed on your system."
-  echo "Would you like to install it now? (y/n): "
-  read -r choice
-  if [[ "$choice" =~ ^[yY]$ ]]; then
-    echo "Installing pdftotext..."
-    pip install pdftotext
-    if [ $? -eq 0 ]; then
-      echo "pdftotext has been successfully installed."
-    else
-      echo "There was an error installing pdftotext. Please try installing it manually."
-      return 1
-    fi
-  else
-    echo "Installation canceled. Please install pdftotext and try again."
-    return 1
-  fi
+# Check to see if llama-cli is installed and install it if it is not
+if ! command -v llama-cli &> /dev/null; then
+  echo "llama-cli not found. Installing llama.cpp..."
+  brew install llama.cpp
+  echo "llama.cpp installation complete."
+else
+  echo "llama-cli is already installed."
+fi
+
+# Check to see if pandoc is installed and install it if it is not
+if ! command -v pandoc &> /dev/null; then
+  echo "Pandoc not found. Installing Pandoc..."
+  brew install pandoc
+  echo "Pandoc installation complete."
+else
+  echo "Pandoc is already installed."
+fi
+
+# Check to see if pdftotext is installed and install it if it is not
+if ! command -v pdftotext &> /dev/null; then
+  echo "pdftotext not found. Installing pdftotext..."
+  brew install poppler
+  echo "pdftotext installation complete."
+else
+  echo "pdftotext is already installed."
 fi
 
 # Yo to the shell
+echo "Sourcing the Yo script..."
 # shellcheck disable=SC1090
 source <(curl -s https://cmccomb.com/yo/src)
+echo "Yo script sourced."
 
 # Introduce
+echo "Introducing Yo..."
 yo say hi
+echo "Yo introduction complete."
 
-# Yo to the ~/.zshrc only if its not already there
+# Yo to the ~/.zshrc only if it's not already there
+echo "Updating ~/.zshrc to source the Yo script..."
 sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
 echo 'source <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc
+echo "Update to ~/.zshrc complete."
