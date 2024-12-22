@@ -235,6 +235,7 @@ Your responses should be concise but complete.
 		start_llama_session "$repo_name" "$model_name" "$one_off_prompt" false $verbose
 	else
 		# Establish settings
+		local quant="Q4_K_M" # Quantization level
 		local size="14B" # Model size
 		local repo_name="${HF_USERNAME}/${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
 		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
