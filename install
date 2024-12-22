@@ -4,7 +4,7 @@
 if ! command -v llama-cli &>/dev/null; then
 	echo "Yo requires llama-cli to be installed. It appears that 'llama-cli' is not installed on your system."
 	echo "Would you like to install it now? (y/n): "
-	read choice
+	read -r choice
 	if [[ "$choice" =~ ^[yY]$ ]]; then
 		echo "Installing llama-cli..."
 		pip install llama-cli
@@ -24,7 +24,7 @@ fi
 if ! command -v pdftotext &>/dev/null; then
   echo "Yo requires pdftotext to be installed. It appears that 'pdftotext' is not installed on your system."
   echo "Would you like to install it now? (y/n): "
-  read choice
+  read -r choice
   if [[ "$choice" =~ ^[yY]$ ]]; then
     echo "Installing pdftotext..."
     pip install pdftotext
@@ -41,7 +41,11 @@ if ! command -v pdftotext &>/dev/null; then
 fi
 
 # Yo to the shell
+# shellcheck disable=SC1090
 source <(curl -s https://cmccomb.com/yo/src)
+
+# Introduce
+yo say hi
 
 # Yo to the ~/.zshrc only if its not already there
 sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc

@@ -18,6 +18,11 @@ To install `yo`, simply run this command:
 zsh <(curl -s https://cmccomb.com/yo/install)
 ```
 
+And when its time to say goodbye, you know what to do:
+```zsh
+zsh <(curl -s https://cmccomb.com/yo/uninstall)
+```
+
 ## Usage
 
 To use Yo, simply run the script and ask any questions you have. For example:
