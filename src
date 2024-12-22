@@ -129,18 +129,16 @@ Your responses should be concise but complete.
 
 	# Function to start a llama-cli session
 	function start_llama_session() {
-		local size=$1
-		local HF_USERNAME="bartowski" # Hugging Face username
-		local SERIES="Qwen2.5"        # Model series
-		local TUNING="Instruct"       # Model tuning
-		local TYPE="gguf"             # Model type
-		local quant="Q4_K_M"          # Quantization level
-		local repo_name="${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
-		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
-		local prompt=$2
-		local interactive=$3
-		local verbose=$4
-
+		local repo_name=$1
+		local model_name=$2
+		local prompt=$3
+		local interactive=$4
+		local verbose=$5
+		#		local draft_model_size="0.5B" # Draft model size
+		#
+		#
+		#    local draft_model_name="${SERIES}-${draft_model_size}-${TUNING}-GGUF_${SERIES}-${draft_model_size}-${TUNING}-${quant}.${TYPE}"
+		#    local draft_model_path="/Users/mccomb/Library/Caches/llama.cpp/${HF_USERNAME}_${draft_model_name}"
 		local args=(
 			--hf-repo "${HF_USERNAME}/${repo_name}"
 			--hf-file "$model_name"
@@ -213,16 +211,30 @@ Your responses should be concise but complete.
 		fi
 	fi
 
+	local HF_USERNAME="bartowski" # Hugging Face username
+	local SERIES="Qwen2.5"        # Model series
+	local TUNING="Instruct"       # Model tuning
+	local TYPE="gguf"             # Model type
+
 	# Execute the appropriate session type based on the query
 	if [[ -n "$query" ]]; then
+		# Establish settings
+		local quant="Q4_K_M" # Quantization level
+		local size="3B"      # Model size
+		local repo_name="${HF_USERNAME}/${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
+		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
 		# One-off query mode
 		local one_off_prompt
 		one_off_prompt=$(generate_one_off_prompt "$query" "$content" "$read_file")
-		start_llama_session "3B" "$one_off_prompt" false $verbose
+		start_llama_session "$repo_name" "$model_name" "$one_off_prompt" false $verbose
 	else
+		# Establish settings
+		local size="14B" # Model size
+		local repo_name="${HF_USERNAME}/${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
+		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
 		# Interactive chat session
 		local interactive_prompt
 		interactive_prompt=$(generate_interactive_prompt "$content" "$read_file")
-		start_llama_session "7B" "$interactive_prompt" true $verbose
+		start_llama_session "$repo_name" "$model_name" "$interactive_prompt" true $verbose
 	fi
 }
