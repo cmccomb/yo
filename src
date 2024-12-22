@@ -19,7 +19,7 @@ Description:
 
 Options:
   -h, --help          Show this help message and exit.
-  -r, --read [file]   Use RAG functionality to integrate information from the specified file (supports text files and PDFs).
+  -r, --read [file]   Integrate information from the specified file (supports text files and PDFs).
   -v, --verbose       Enable verbose mode for detailed output.
 "
 	}
@@ -44,9 +44,21 @@ $content
 		fi
 
 		prompt+="Your task is to answer the user's question efficiently and accurately.
+The date and time are currently: $(date).
 Your answer will be shown as raw text in a terminal window.
-Your answer should be as short as possible.
+Your answer should be as short as possible while still being complete.
 Your answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
+
+Here is an example:
+User Query: what is two plus two $STOP_SYMBOL
+Your Super-Short Answer: four $STOP_SYMBOL
+
+
+Here is an example:
+User Query: what is the command to change directories $STOP_SYMBOL
+Your Super-Short Answer: cd $STOP_SYMBOL
+
+Now, here is the real user query. Provide a concise answer and end it with the stop symbol.
 User Query: $query $STOP_SYMBOL
 Your Super-Short Answer:"
 		echo "$prompt"
