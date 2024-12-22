@@ -2,6 +2,10 @@
 
 Yo is a command-line assistant that interacts with the user and provides information about the system and recent commands.
 
+> "Hello! I'm Yo, your friendly assistant here to help with any questions or tasks you might have. I'm designed to be efficient and accurate, providing concise responses to make your interactions as smooth as possible."
+> 
+> \- Yo
+
 ## Installation
 
 To try out `yo`, run this command:
