@@ -4,11 +4,7 @@
 function yo() {
 
 	# Constants
-	local STOP_SYMBOL="✌️"     # Character to end one-off sessions
-	local HF_USERNAME="bartowski" # Hugging Face username
-	local SERIES="Qwen2.5-Coder"  # Model series
-	local TUNING="Instruct"       # Model tuning
-	local TYPE="gguf"             # Model type
+	local STOP_SYMBOL="✌️" # Character to end one-off sessions
 
 	# Display usage instructions
 	function show_help() {
@@ -33,22 +29,22 @@ Options:
 		local content=$2
 		local prompt="
 You are playing the role of Yo, a helpful assistant that interacts with users in the MacOS terminal through one-off answers.
-Your responses will be shown as raw text.
-Your responses should be concise but complete.
-You answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
 
 "
 		if [[ -n "$content" ]]; then
 			prompt+="Relevant Information:
-````txt
+================= BEGINNING OF FILE CONTENTS =================
 $content
-````
+==================== END OF FILE CONTENTS ====================
 "
 		fi
 
-		prompt+="User Query: $query $STOP_SYMBOL
-Your Short Answer:
-"
+		prompt+="Your task is to answer the user's question efficiently and accurately.
+Your answer will be shown as raw text in a terminal window.
+Your answer should be as short as possible.
+You answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
+User Query: $query $STOP_SYMBOL
+Your Super-Short Answer:"
 		echo "$prompt"
 	}
 
@@ -60,30 +56,18 @@ You are playing the role of Yo.
 Yo is a helpful assistant that interacts with a user through an interactive chat interface in the terminal.
 The current time and date is: $(date).
 
-Here is some information about the system:
-$(system_profiler SPSoftwareDataType SPHardwareDataType | grep -E 'System Version|Model Identifier|Total Number of Cores|Chip|Memory' | grep -v 'Secure Virtual Memory')
-
-The user is currently located in the directory: $(pwd).
-
-Here is a tree of the current directory (up to 2 levels deep, but truncated after 25 lines):
-$(ls -lRh | head -n 25)
-
-Here are the 10 most recent shell commands executed by the user:
-$(history | tail -3)
-
 "
 
 		if [[ -n "$content" ]]; then
 			prompt+="Relevant Information:
-````txt
+================= BEGINNING OF FILE CONTENTS =================
 $content
-````
+==================== END OF FILE CONTENTS ====================
 "
 		fi
 
 		prompt+="Your task is to answer the user's questions efficiently and accurately.
-Your responses will be shown as raw text.
-You can ask the user to take debugging or troubleshooting steps as needed.
+Your responses will be shown as raw text in a terminal window.
 Your responses should be concise but complete.
 "
 		echo "$prompt"
@@ -97,17 +81,17 @@ Your responses should be concise but complete.
 		if [[ -f "$file" ]]; then
 			local content
 			case $file in
-				*.pdf)
-					if command -v pdftotext >/dev/null 2>&1; then
-						content=$(pdftotext "$file" - 2>/dev/null)
-					else
-						echo "Error: pdftotext is not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-						return 1
-					fi
-					;;
-				*.txt|*)
-					content=$(cat "$file")
-					;;
+			*.pdf)
+				if command -v pdftotext >/dev/null 2>&1; then
+					content=$(pdftotext "$file" - 2>/dev/null)
+				else
+					echo "Error: pdftotext is not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+					return 1
+				fi
+				;;
+			*.txt | *)
+				content=$(cat "$file")
+				;;
 			esac
 
 			if [[ -n "$truncate_length" && "$truncate_length" -gt 0 ]]; then
@@ -124,6 +108,10 @@ Your responses should be concise but complete.
 	# Start a llama-cli session
 	function start_llama_session() {
 		local size=$1
+		local HF_USERNAME="bartowski" # Hugging Face username
+		local SERIES="Qwen2.5"        # Model series
+		local TUNING="Instruct"             # Model tuning
+		local TYPE="gguf"             # Model type
 		local quant="Q4_K_M"
 		local repo_name="${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
 		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
@@ -137,6 +125,7 @@ Your responses should be concise but complete.
 				--prompt "$prompt" \
 				--conversation \
 				--no-display-prompt \
+				--temp 0.2 \
 				2>/dev/null
 		else
 			llama-cli \
@@ -145,6 +134,7 @@ Your responses should be concise but complete.
 				--prompt "$prompt" \
 				--reverse-prompt "$STOP_SYMBOL" \
 				--no-display-prompt \
+				--temp 0.2 \
 				2>/dev/null
 		fi
 	}
@@ -156,23 +146,23 @@ Your responses should be concise but complete.
 
 	while [[ $# -gt 0 ]]; do
 		case $1 in
-			-h|--help)
-				show_help
-				return 0
-				;;
-			--read|-r)
-				read_mode=true
-				if [[ -n $2 && ! $2 =~ ^- ]]; then
-					read_file=$2
-					shift
-				else
-					echo "Error: --read or -r flag requires a file to be specified." >&2
-					return 1
-				fi
-				;;
-			*)
-				query+="$1 "
-				;;
+		-h | --help)
+			show_help
+			return 0
+			;;
+		--read | -r)
+			read_mode=true
+			if [[ -n $2 && ! $2 =~ ^- ]]; then
+				read_file=$2
+				shift
+			else
+				echo "Error: --read or -r flag requires a file to be specified." >&2
+				return 1
+			fi
+			;;
+		*)
+			query+="$1 "
+			;;
 		esac
 		shift
 	done
@@ -185,7 +175,7 @@ Your responses should be concise but complete.
 			return 1
 		fi
 
-		content=$(extract_content "$read_file" 1000)
+		content=$(extract_content "$read_file" 10000)
 
 		if [[ $? -ne 0 ]]; then
 			echo "Failed to extract content. Exiting."
@@ -197,11 +187,12 @@ Your responses should be concise but complete.
 		# Handle one-off query
 		local one_off_prompt
 		one_off_prompt=$(generate_one_off_prompt "$query" "$content")
-		start_llama_session "3B" "$one_off_prompt" false
+		start_llama_session "7B" "$one_off_prompt" false
 	else
-		# Interactive session
+		# Start iInteractive session
 		local interactive_prompt
 		interactive_prompt=$(generate_interactive_prompt "$content")
 		start_llama_session "7B" "$interactive_prompt" true
 	fi
 }
+
