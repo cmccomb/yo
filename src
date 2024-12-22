@@ -3,7 +3,7 @@
 # `yo` - A command-line AI assistant
 function yo() {
 
-    # Symbol used to signal the end of one-off sessions
+	# Symbol used to signal the end of one-off sessions
 	local STOP_SYMBOL="✌️"
 
 	# Function to display usage instructions
@@ -28,16 +28,18 @@ Options:
 	function generate_one_off_prompt() {
 		local query=$1
 		local content=$2
+		local filename=$3
 		local prompt="
 You are playing the role of Yo, a helpful assistant that interacts with users in the MacOS terminal through one-off answers.
 
 "
-		# Include file content if provided
+		# Include file content and name if provided
 		if [[ -n "$content" ]]; then
-			prompt+="Relevant Information:
+			prompt+="Relevant Information from file \"$filename\":
 ================= BEGINNING OF FILE CONTENTS =================
 $content
 ==================== END OF FILE CONTENTS ====================
+
 "
 		fi
 
@@ -53,6 +55,7 @@ Your Super-Short Answer:"
 	# Function to generate a prompt for interactive chat sessions
 	function generate_interactive_prompt() {
 		local content=$1
+		local filename=$2
 		local prompt="
 You are playing the role of Yo.
 Yo is a helpful assistant that interacts with a user through an interactive chat interface in the terminal.
@@ -60,12 +63,13 @@ The current time and date is: $(date).
 
 "
 
-		# Include file content if provided
+		# Include file content and name if provided
 		if [[ -n "$content" ]]; then
-			prompt+="Relevant Information:
+			prompt+="Relevant Information from file \"$filename\":
 ================= BEGINNING OF FILE CONTENTS =================
 $content
 ==================== END OF FILE CONTENTS ====================
+
 "
 		fi
 
@@ -201,12 +205,12 @@ Your responses should be concise but complete.
 	if [[ -n "$query" ]]; then
 		# One-off query mode
 		local one_off_prompt
-		one_off_prompt=$(generate_one_off_prompt "$query" "$content")
+		one_off_prompt=$(generate_one_off_prompt "$query" "$content" "$read_file")
 		start_llama_session "7B" "$one_off_prompt" false $verbose
 	else
 		# Interactive chat session
 		local interactive_prompt
-		interactive_prompt=$(generate_interactive_prompt "$content")
+		interactive_prompt=$(generate_interactive_prompt "$content" "$read_file")
 		start_llama_session "7B" "$interactive_prompt" true $verbose
 	fi
 }
