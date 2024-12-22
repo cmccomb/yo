@@ -4,7 +4,7 @@ Yo is a command-line assistant that interacts with the user and provides informa
 
 > "Hello! I'm Yo, your friendly assistant here to help with any questions or tasks you might have. I'm designed to be efficient and accurate, providing concise responses to make your interactions as smooth as possible."
 > 
-> \- Yo
+> \- Yo ✌️
 
 ## Installation
 
@@ -24,13 +24,33 @@ zsh <(curl -s https://cmccomb.com/yo/uninstall)
 ```
 
 ## Usage
-
-To use Yo, simply run the script and ask any questions you have. For example:
-```bash
-yo I just pasted your sourcecode into the last command line input. help me write a readme.md for you.
+Get a quick answer
+```shell,no_run
+$ yo what is the capital of france
+ Paris ✌️
 ```
 
-Alternatively, just run the base command to open an interactive session:
-```bash
-yo
-``` 
+Start an interactive session:
+```shell,no_run
+$ yo
+
+> what is the capital of france
+The capital of France is Paris.
+```
+
+Integrate information from a file:
+```shell,no_run
+$ yo --read README.md how can I improve this source readme
+ Review the README.md file for consistency and clarity, and consider adding examples and usage instructions. ✌️
+```
+
+Integrate information from a URL:
+```shell,no_run
+$ yo --read https://www.wikipedia.org/wiki/Paris how big is paris
+ Paris has an area of approximately 105 square kilometers. ✌️
+```
+Integrate Google search results:
+```shell,no_run
+$ yo --search what is the capital of tobago
+ The capital of Tobago is Scarborough. ✌️
+```

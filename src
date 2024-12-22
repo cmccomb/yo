@@ -18,10 +18,23 @@ function yo() {
 			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
 			Options:
-			  -h, --help          Show this help message and exit.
-			  -r, --read [file]   Integrate information from the specified file (supports text files and PDFs).
-			  -v, --verbose       Enable verbose mode for detailed output.
-			  -s, --search        Perform a web search and integrate the results into the LLM's context for generating a response.
+			  -h, --help              Show this help message and exit.
+			  -r, --read [file|url]   Integrate information from the specified file (supports plain text files, URLs, and PDFs).
+			  -s, --search            Integrate Google search results.
+			  -v, --verbose           Enable verbose mode for detailed output.
+
+      Examples:
+        1. Answer a question:
+          $ yo "What is the capital of France?"
+        2. Start an interactive session:
+          $ yo
+        3. Integrate information from a file:
+          $ yo --read src "How can I improve this source code?"
+        4. Integrate information from a URL:
+          $ yo --read https://www.wikipedia.org/wiki/Paris how big is paris
+        5. Integrate Google search results:
+          $ yo --search what is the capital of tobago
+
 		EOF
 	}
 
