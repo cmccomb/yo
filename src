@@ -32,9 +32,9 @@ function yo() {
 		prompt+="It is currently $(date). "
 		prompt+="You were invoked from the $(pwd) directory "
 		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-		prompt+=" with: $(sysctl -n hw.ncpu ) cores, "
+		prompt+=" with: $(sysctl -n hw.ncpu) cores, "
 		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
-		prompt+="and $( df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
 
 		if [[ -n "$content" ]]; then
 			prompt+="Relevant Information from file \"$filename\":\n"
@@ -56,24 +56,38 @@ function yo() {
 		echo "$prompt"
 	}
 
-	# Extract content from a file (supports text and PDF files)
+	# Extract content from a file or URL (supports text and PDF files)
 	function extract_content() {
-		local file=$1 max_length=$2
-		[[ ! -f "$file" ]] && { echo "Error: File not found." >&2; return 1; }
-
+		local source=$1 max_length=$2
 		local content
-		case $file in
+
+		if [[ $source =~ ^https?:// ]]; then
+			# Fetch content from URL
+			content=$(curl -s "$source" | pandoc -f html -t plain)
+			if [[ $? -ne 0 ]]; then
+				echo "Error: Failed to fetch content from URL." >&2
+				return 1
+			fi
+		else
+			# Fetch content from file
+			[[ ! -f "$source" ]] && {
+				echo "Error: File not found." >&2
+				return 1
+			}
+
+			case $source in
 			*.pdf)
 				command -v pdftotext >/dev/null 2>&1 || {
 					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
 					return 1
 				}
-				content=$(pdftotext "$file" - 2>/dev/null)
+				content=$(pdftotext "$source" - 2>/dev/null)
 				;;
 			*.txt | *)
-				content=$(cat "$file")
+				content=$(cat "$source")
 				;;
-		esac
+			esac
+		fi
 
 		[[ -n "$max_length" && "$max_length" -gt 0 ]] && content=${content:0:$max_length}
 		echo "$content"
@@ -111,13 +125,22 @@ function yo() {
 	local read_mode=false read_file="" query="" verbose=false
 	while [[ $# -gt 0 ]]; do
 		case $1 in
-			-h | --help) show_help; return 0 ;;
-			-r | --read)
-				read_mode=true
-				[[ -n $2 && ! $2 =~ ^- ]] && { read_file=$2; shift; } || { echo "Error: --read requires a file." >&2; return 1; }
-				;;
-			-v | --verbose) verbose=true ;;
-			*) query+="$1 " ;;
+		-h | --help)
+			show_help
+			return 0
+			;;
+		-r | --read)
+			read_mode=true
+			[[ -n $2 && ! $2 =~ ^- ]] && {
+				read_file=$2
+				shift
+			} || {
+				echo "Error: --read requires a file." >&2
+				return 1
+			}
+			;;
+		-v | --verbose) verbose=true ;;
+		*) query+="$1 " ;;
 		esac
 		shift
 	done
@@ -128,10 +151,10 @@ function yo() {
 		content=$(extract_content "$read_file" 10000) || return 1
 	fi
 
-  local quant_provider="bartowski" # Hugging Face username
-	local model_series="Qwen2.5"        # Model series
-	local tuning="Instruct"       # Model tuning
-	local filetype="gguf"             # Model type
+	local quant_provider="bartowski" # Hugging Face username
+	local model_series="Qwen2.5"     # Model series
+	local tuning="Instruct"          # Model tuning
+	local filetype="gguf"            # Model type
 
 	# Configure model settings
 	local quant size repo_name model_name
