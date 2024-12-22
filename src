@@ -156,4 +156,4 @@ function yo() {
 	fi
 }
 
-export yo
+yo say hi

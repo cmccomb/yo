@@ -41,8 +41,8 @@ if ! command -v pdftotext &>/dev/null; then
 fi
 
 # Yo to the shell
-zsh <(curl -s https://cmccomb.com/yo/src)
+source <(curl -s https://cmccomb.com/yo/src)
 
-
-# Yo to the ~/.zshrc
-echo 'zsh <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc
+# Yo to the ~/.zshrc only if its not already there
+sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
+echo 'source <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc
