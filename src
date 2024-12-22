@@ -3,10 +3,10 @@
 # `yo` - A command-line AI assistant
 function yo() {
 
-	# Constants
-	local STOP_SYMBOL="✌️" # Character to end one-off sessions
+    # Symbol used to signal the end of one-off sessions
+	local STOP_SYMBOL="✌️"
 
-	# Display usage instructions
+	# Function to display usage instructions
 	function show_help() {
 		echo "
 yo - A command-line AI assistant.
@@ -20,10 +20,11 @@ Description:
 Options:
   -h, --help          Show this help message and exit.
   -r, --read [file]   Use RAG functionality to integrate information from the specified file (supports text files and PDFs).
+  -v, --verbose       Enable verbose mode for detailed output.
 "
 	}
 
-	# Generate one-off prompt
+	# Function to generate a prompt for one-off question-answering
 	function generate_one_off_prompt() {
 		local query=$1
 		local content=$2
@@ -31,6 +32,7 @@ Options:
 You are playing the role of Yo, a helpful assistant that interacts with users in the MacOS terminal through one-off answers.
 
 "
+		# Include file content if provided
 		if [[ -n "$content" ]]; then
 			prompt+="Relevant Information:
 ================= BEGINNING OF FILE CONTENTS =================
@@ -42,13 +44,13 @@ $content
 		prompt+="Your task is to answer the user's question efficiently and accurately.
 Your answer will be shown as raw text in a terminal window.
 Your answer should be as short as possible.
-You answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
+Your answer should end with the stop symbol '$STOP_SYMBOL' to return control to the user.
 User Query: $query $STOP_SYMBOL
 Your Super-Short Answer:"
 		echo "$prompt"
 	}
 
-	# Generate interactive prompt
+	# Function to generate a prompt for interactive chat sessions
 	function generate_interactive_prompt() {
 		local content=$1
 		local prompt="
@@ -58,6 +60,7 @@ The current time and date is: $(date).
 
 "
 
+		# Include file content if provided
 		if [[ -n "$content" ]]; then
 			prompt+="Relevant Information:
 ================= BEGINNING OF FILE CONTENTS =================
@@ -73,7 +76,7 @@ Your responses should be concise but complete.
 		echo "$prompt"
 	}
 
-	# Extract content from a file (supports text and PDF files)
+	# Function to extract content from a file (supports text and PDF files)
 	function extract_content() {
 		local file=$1
 		local truncate_length=$2
@@ -82,6 +85,7 @@ Your responses should be concise but complete.
 			local content
 			case $file in
 			*.pdf)
+				# Extract text from PDF files using pdftotext
 				if command -v pdftotext >/dev/null 2>&1; then
 					content=$(pdftotext "$file" - 2>/dev/null)
 				else
@@ -90,10 +94,12 @@ Your responses should be concise but complete.
 				fi
 				;;
 			*.txt | *)
+				# Extract text from plain text files
 				content=$(cat "$file")
 				;;
 			esac
 
+			# Truncate content if a length limit is provided
 			if [[ -n "$truncate_length" && "$truncate_length" -gt 0 ]]; then
 				content=${content:0:$truncate_length}
 			fi
@@ -105,45 +111,48 @@ Your responses should be concise but complete.
 		fi
 	}
 
-	# Start a llama-cli session
+	# Function to start a llama-cli session
 	function start_llama_session() {
 		local size=$1
 		local HF_USERNAME="bartowski" # Hugging Face username
 		local SERIES="Qwen2.5"        # Model series
-		local TUNING="Instruct"             # Model tuning
+		local TUNING="Instruct"       # Model tuning
 		local TYPE="gguf"             # Model type
-		local quant="Q4_K_M"
+		local quant="Q4_K_M"          # Quantization level
 		local repo_name="${SERIES}-${size}-${TUNING}-$(echo $TYPE | tr '[:lower:]' '[:upper:]')"
 		local model_name="${SERIES}-${size}-${TUNING}-${quant}.${TYPE}"
 		local prompt=$2
 		local interactive=$3
+		local verbose=$4
 
+		local args=(
+			--hf-repo "${HF_USERNAME}/${repo_name}"
+			--hf-file "$model_name"
+			--prompt "$prompt"
+		)
+
+		# Add conversation flag for interactive mode
 		if [[ $interactive == true ]]; then
-			llama-cli \
-				--hf-repo "${HF_USERNAME}/${repo_name}" \
-				--hf-file "$model_name" \
-				--prompt "$prompt" \
-				--conversation \
-				--no-display-prompt \
-				--temp 0.2 \
-				2>/dev/null
+			args+=(--conversation)
 		else
-			llama-cli \
-				--hf-repo "${HF_USERNAME}/${repo_name}" \
-				--hf-file "$model_name" \
-				--prompt "$prompt" \
-				--reverse-prompt "$STOP_SYMBOL" \
-				--no-display-prompt \
-				--temp 0.2 \
-				2>/dev/null
+			args+=(--reverse-prompt "$STOP_SYMBOL")
+		fi
+
+		# Suppress unnecessary output if verbose mode is disabled
+		if [[ $verbose != true ]]; then
+			llama-cli "${args[@]}" --no-display-prompt 2>/dev/null
+		else
+			llama-cli "${args[@]}"
 		fi
 	}
 
-	# Parse arguments and determine session type
+	# Argument parsing and session type determination
 	local read_mode=false
 	local read_file=""
 	local query=""
+	local verbose=false
 
+	# Loop through provided arguments
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 		-h | --help)
@@ -152,6 +161,7 @@ Your responses should be concise but complete.
 			;;
 		--read | -r)
 			read_mode=true
+			# Check if a file is specified with the read flag
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				read_file=$2
 				shift
@@ -160,14 +170,18 @@ Your responses should be concise but complete.
 				return 1
 			fi
 			;;
+		-v | --verbose)
+			verbose=true
+			;;
 		*)
+			# Concatenate query arguments
 			query+="$1 "
 			;;
 		esac
 		shift
 	done
 
-	# Handle RAG functionality
+	# Handle file content extraction if read mode is enabled
 	local content=""
 	if [[ $read_mode == true ]]; then
 		if [[ -z "$read_file" ]]; then
@@ -183,16 +197,16 @@ Your responses should be concise but complete.
 		fi
 	fi
 
+	# Execute the appropriate session type based on the query
 	if [[ -n "$query" ]]; then
-		# Handle one-off query
+		# One-off query mode
 		local one_off_prompt
 		one_off_prompt=$(generate_one_off_prompt "$query" "$content")
-		start_llama_session "7B" "$one_off_prompt" false
+		start_llama_session "7B" "$one_off_prompt" false $verbose
 	else
-		# Start iInteractive session
+		# Interactive chat session
 		local interactive_prompt
 		interactive_prompt=$(generate_interactive_prompt "$content")
-		start_llama_session "7B" "$interactive_prompt" true
+		start_llama_session "7B" "$interactive_prompt" true $verbose
 	fi
 }
-
