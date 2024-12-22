@@ -206,7 +206,7 @@ Your responses should be concise but complete.
 		# One-off query mode
 		local one_off_prompt
 		one_off_prompt=$(generate_one_off_prompt "$query" "$content" "$read_file")
-		start_llama_session "7B" "$one_off_prompt" false $verbose
+		start_llama_session "3B" "$one_off_prompt" false $verbose
 	else
 		# Interactive chat session
 		local interactive_prompt
