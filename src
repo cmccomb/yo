@@ -140,23 +140,29 @@ Your responses should be concise but complete.
 		#    local draft_model_name="${SERIES}-${draft_model_size}-${TUNING}-GGUF_${SERIES}-${draft_model_size}-${TUNING}-${quant}.${TYPE}"
 		#    local draft_model_path="/Users/mccomb/Library/Caches/llama.cpp/${HF_USERNAME}_${draft_model_name}"
 		local args=(
-			--hf-repo "${HF_USERNAME}/${repo_name}"
+			--threads "$(sysctl -n hw.logicalcpu_max)"
+			--hf-repo "$repo_name"
 			--hf-file "$model_name"
+			--temp 0.5
 			--prompt "$prompt"
+			--seed 42
+			--flash-attn
+			--prio 3
+			--mirostat 2
 		)
 
 		# Add conversation flag for interactive mode
 		if [[ $interactive == true ]]; then
-			args+=(--conversation)
+			args+=(--conversation --no-warmup --prompt-cache "$HOME/.yo_interactive_prompt_cache")
 		else
-			args+=(--reverse-prompt "$STOP_SYMBOL")
+			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "$HOME/.yo_oneoff_prompt_cache")
 		fi
 
 		# Suppress unnecessary output if verbose mode is disabled
 		if [[ $verbose != true ]]; then
 			llama-cli "${args[@]}" --no-display-prompt 2>/dev/null
 		else
-			llama-cli "${args[@]}"
+			llama-cli "${args[@]}" --verbose-prompt
 		fi
 	}
 
