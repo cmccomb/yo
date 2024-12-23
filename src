@@ -7,6 +7,12 @@ function yo() {
 	### UTILITIES AND CONSTANTS ##########################################################################################
 	######################################################################################################################
 
+  # Custom search API key
+  local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
+  local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
+  local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
+
+
 	# Version
 	local VERSION="0.1.0"
 
@@ -67,31 +73,26 @@ function yo() {
 	### SEARCH ###########################################################################################################
 	######################################################################################################################
 
-	# Perform a web search with user-provided terms
-	function perform_search() {
-		# Parse arguments
-		local terms="$1"
+# Perform a web search with user-provided terms
+function perform_search() {
+  # Parse arguments
+  local terms=$1
 
-		# Make variables
-		local url result search_term_slug
+  # Make variables
+  local url search_term_slug response
 
-		# Generate search URL
-		search_term_slug=$(echo "$terms" | sed 's/ /+/g')
-		url="https://www.google.com/search?q=$search_term_slug"
+  # Generate search URL
+  search_term_slug=$(echo "$terms" | sed 's/ /%20/g')
 
-		# Perform search and extract file_info
-		result=$(curl -sL "$url" | pandoc -f html -t plain --quiet)
-		if [[ $? -ne 0 ]]; then
-			echo "Error: Failed to perform web search." >&2
-			return 1
-		fi
+  # Example API call
+  url="$GOOGLE_CSE_BASE_URL?key=$GOOGLE_CSE_API_KEY&cx=$GOOGLE_CSE_ID&q=$search_term_slug"
 
-		# Remove extraneous file_info (e.g., "People also search for")
-		result=$(echo "$result" | sed -n '/People also search for/q;p')
+  # Perform search and extract relevant information
+  response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\"")
 
-		# Return search results
-		echo "$result"
-	}
+  # Return response
+  echo $response
+}
 
 	# Extract optimized search terms using a small model
 	function extract_search_terms() {
@@ -216,8 +217,8 @@ function yo() {
 
 		# Add query and instructions based on mode
 		if [[ $mode == "one-off" ]]; then
-			prompt+="Your task is to answer the user's question directly. "
-			prompt+="Your answer will be concise, helpful, and actionable. "
+			prompt+="Your task is to directly answer the user's question. "
+			prompt+="Your answer will be concise, helpful, and immediately usable. "
 			prompt+="End your answer with the stop symbol $STOP_SYMBOL.\n\n"
 			prompt+="User Query: $query $STOP_SYMBOL\n"
 			prompt+="Your Super-Short Answer:"
