@@ -18,12 +18,12 @@ function yo() {
 
 	# Define parameters for the task model
 	local TASK_MODEL_USERNAME=$MODEL_USERNAME
-	local TASK_MODEL_SERIES=$MODEL_SERIES
+	local TASK_MODEL_SERIES="Llama-3.2"
 	local TASK_MODEL_FINETUNING=$MODEL_FINETUNING
-	local TASK_MODEL_SIZE="1.5B"
+	local TASK_MODEL_SIZE="1B"
 	local TASK_MODEL_QUANT="Q4_K_M"
 	local TASK_MODEL_FILETYPE=$MODEL_FILETYPE
-	local TASK_MODEL_NEW_TOKENS=8
+	local TASK_MODEL_NEW_TOKENS=16
 	local TASK_MODEL_TEMP=0.2
 
 	# Define parameters for the casual model
