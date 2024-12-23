@@ -66,18 +66,18 @@ function yo() {
 
 	# Perform a web search with user-provided terms
 	function perform_search() {
+		local terms="$1"
 		local url result search_term_slug
-		search_term_slug=$(echo $1 | sed 's/ /+/g')
+		search_term_slug=$(echo "$terms" | sed 's/ /+/g')
 		url="https://www.google.com/search?q=$search_term_slug"
-		result=$(curl -sL $url | pandoc -f html -t plain --quiet)
+		result=$(curl -sL "$url" | pandoc -f html -t plain --quiet)
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Failed to perform web search." >&2
 			return 1
 		fi
 
-		# Remove everything after "People also search for"
+		# Remove extraneous content (e.g., "People also search for")
 		result=$(echo "$result" | sed -n '/People also search for/q;p')
-
 		echo "$result"
 	}
 
