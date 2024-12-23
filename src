@@ -37,16 +37,19 @@ function yo() {
 			Description:
 			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
-			LLM Context Options:
-			  -r, --read "PATH"       Inform the response by extracting information from the specified file or URL. Supports
-			                          text-based files (e.g., .txt, .md, .py, etc.), PDF files via pdftotext, and web pages
-			                          via curl and pandoc.
+			Context Options:
+			  These options help you control the information that Yo uses to answer your question.
+			  -r, --read "PATH"       Extract information from the specified file or URL and integrate the results into Yo's
+			                          context. Supports text-based files (e.g., .txt, .md, .py, etc.), PDF files via
+			                          pdftotext, and web pages via curl and pandoc.
 			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
-			                          the LLM's context. Requires an active internet connection.
+			                          Yo's context. Requires an active internet connection.
 			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
-			                          into the LLM's context. Requires an active internet connection.
+			                          into Yo's context. Requires an active internet connection.
+        -y, --system            Perform several system commands and integrate the information into Yo's context.
 
 			General Purpose Options:
+			  These options provide general functionality.
 			  -h, --help              Show this help message and exit.
 			  -v, --verbose           Enable verbose mode for detailed output.
 			  -V, --version           Show the version and exit.
@@ -198,17 +201,20 @@ function yo() {
 	function generate_prompt() {
 
 		# Parse arguments
-		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
+		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6 add_system_info=$7
 
 		# Generate basic prompt
 		local prompt=""
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
-		prompt+="It is currently $(date). "
-		prompt+="You were invoked from the $(pwd) directory "
-		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-		prompt+="with $(sysctl -n hw.ncpu) cores, "
-		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
-		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+
+		if [[ $add_system_info == true ]]; then
+      prompt+="It is currently $(date). "
+      prompt+="You were invoked from the $(pwd) directory "
+      prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
+      prompt+="with $(sysctl -n hw.ncpu) cores, "
+      prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
+      prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+    fi
 
 		# Add file file_info if available
 		if [[ -n "$file_info" ]]; then
@@ -280,7 +286,8 @@ function yo() {
 	######################################################################################################################
 
 	# Parse arguments
-	local read_mode=false read_file="" query="" verbose=false search_mode=false surf_mode=false search_terms=""
+	local read_file="" query="" search_terms=""
+	local read_mode=false add_system_info=false search_mode=false surf_mode=false verbose=false
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 		-h | --help)
@@ -313,6 +320,7 @@ function yo() {
 			fi
 			;;
 		-S | --surf) surf_mode=true ;;
+		-y | --system) add_system_info=true ;;
 		*) query+="$1 " ;;
 		esac
 		shift
@@ -355,7 +363,7 @@ function yo() {
 
 	# Generate and start appropriate session
 	local prompt
-	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms")
+	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms" $add_system_info)
 	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose
 
 }
