@@ -98,7 +98,7 @@ function yo() {
 		response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\"")
 
 		# Return response
-		echo $response
+		echo "$response"
 	}
 
 	# Extract optimized search terms using a small model
@@ -132,7 +132,7 @@ function yo() {
 		terms=$(echo "$terms" | head -n 1)
 
 		# Remove end of text if needed
-		terms=$(echo "$terms" | sed 's/\[end of text\]//g')
+		terms="${terms//\[end of text\]/}"
 
 		# Return results
 		echo "$terms"
@@ -153,8 +153,7 @@ function yo() {
 
 		if [[ $source =~ ^https?:// ]]; then
 			# Fetch file_info from URL
-			file_info=$(curl -s "$source" | pandoc -f html -t plain --quiet)
-			if [[ $? -ne 0 ]]; then
+			if ! file_info=$(curl -s "$source" | pandoc -f html -t plain --quiet); then
 				echo "Error: Failed to fetch file_info from URL." >&2
 				return 1
 			fi
@@ -285,13 +284,13 @@ function yo() {
 			;;
 		-r | --read)
 			read_mode=true
-			[[ -n $2 && ! $2 =~ ^- ]] && {
+			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				read_file=$2
 				shift
-			} || {
+			else
 				echo "Error: --read requires a file." >&2
 				return 1
-			}
+			fi
 			;;
 		-v | --verbose) verbose=true ;;
 		-V | --version)
@@ -300,13 +299,13 @@ function yo() {
 			;;
 		-s | --search)
 			search_mode=true
-			[[ -n $2 && $2 =~ ^".*"$ ]] && {
+			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
 				search_terms=$2
 				shift
-			} || {
+			else
 				echo "Error: --search requires quoted terms." >&2
 				return 1
-			}
+			fi
 			;;
 		-S | --surf) surf_mode=true ;;
 		*) query+="$1 " ;;
