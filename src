@@ -198,7 +198,7 @@ function yo() {
 	function generate_prompt() {
 
 		# Parse arguments
-		local mode=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
+		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
 
 		# Generate basic prompt
 		local prompt=""
@@ -226,8 +226,8 @@ function yo() {
 			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
 		fi
 
-		# Add query and instructions based on mode
-		if [[ $mode == "one-off" ]]; then
+		# Add query and instructions based on interactive
+		if [[ $interactive == false ]]; then
 			prompt+="Your task is to directly answer the user's question. "
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
 			prompt+="End your answer with the stop symbol $STOP_SYMBOL.\n\n"
@@ -340,16 +340,14 @@ function yo() {
 	local filetype="gguf"            # Model type
 
 	# Configure specific model based on one-off or interactive session
-	local quant size repo_name model_name interaction_type
+	local quant size repo_name model_name
 	if [[ -n "$query" ]]; then
 		size="3B"
 		quant="Q4_K_M"
-		interaction_type="one-off"
 		interactive=false
 	else
 		size="14B"
 		quant="IQ4_XS"
-		interaction_type="interactive"
 		interactive=true
 	fi
 	repo_name="${quant_provider}/${model_series}-${size}-${tuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
@@ -357,7 +355,7 @@ function yo() {
 
 	# Generate and start appropriate session
 	local prompt
-	prompt=$(generate_prompt "$interaction_type" "$file_info" "$read_file" "$query" "$search_info" "$search_terms")
+	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms")
 	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose
 
 }
