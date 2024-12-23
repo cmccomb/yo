@@ -13,12 +13,12 @@ To try out `yo`, run this command:
 source <(curl -s https://cmccomb.com/yo/src)
 ```
 
-To install `yo`, simply run this command:
+To install `yo` and keep it updated, simply run this command:
 ```zsh
 zsh <(curl -s https://cmccomb.com/yo/install)
 ```
 
-And when its time to say goodbye, you know what to do:
+And when its time to say goodbye and uninstall, here's what you need:
 ```zsh
 zsh <(curl -s https://cmccomb.com/yo/uninstall)
 ```
