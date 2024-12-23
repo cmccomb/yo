@@ -46,7 +46,7 @@ function yo() {
 			                          Yo's context. Requires an active internet connection.
 			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 			                          into Yo's context. Requires an active internet connection.
-        -y, --system            Perform several system commands and integrate the information into Yo's context.
+			  -y, --system            Perform several system commands and integrate the information into Yo's context.
 
 			General Purpose Options:
 			  These options provide general functionality.
@@ -133,7 +133,7 @@ function yo() {
 		if [[ $verbose != true ]]; then
 			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
 		else
-			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt --verbose-prompt)
+			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt)
 		fi
 
 		# Only take the first line
@@ -208,13 +208,13 @@ function yo() {
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
 
 		if [[ $add_system_info == true ]]; then
-      prompt+="It is currently $(date). "
-      prompt+="You were invoked from the $(pwd) directory "
-      prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-      prompt+="with $(sysctl -n hw.ncpu) cores, "
-      prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
-      prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
-    fi
+			prompt+="It is currently $(date). "
+			prompt+="You were invoked from the $(pwd) directory "
+			prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
+			prompt+="with $(sysctl -n hw.ncpu) cores, "
+			prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
+			prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+		fi
 
 		# Add file file_info if available
 		if [[ -n "$file_info" ]]; then
