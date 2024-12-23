@@ -12,6 +12,9 @@ function yo() {
 	local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
 	local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
 
+	# Maximum length of file content to extract
+	local MAX_FILE_CONTENT_LENGTH=10000
+
 	# Version
 	local VERSION="0.1.0"
 
@@ -197,7 +200,7 @@ function yo() {
 
 		# Generate basic prompt
 		local prompt=""
-		prompt+="You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal. "
+		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
 		prompt+="It is currently $(date). "
 		prompt+="You were invoked from the $(pwd) directory "
 		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
@@ -316,7 +319,7 @@ function yo() {
 	# Handle file reading
 	local file_info=""
 	if [[ $read_mode == true && -n "$read_file" ]]; then
-		file_info=$(extract_file_info "$read_file" 10000) || return 1
+		file_info=$(extract_file_info "$read_file" $MAX_FILE_CONTENT_LENGTH) || return 1
 	fi
 
 	# Handle search operations
