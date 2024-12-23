@@ -222,6 +222,10 @@ function yo() {
 			}
 			;;
 		-v | --verbose) verbose=true ;;
+		-V | --version)
+			show_version
+			return 0
+			;;
 		-s | --search) search_mode=true ;;
 		*) query+="$1 " ;;
 		esac
