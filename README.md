@@ -38,19 +38,24 @@ $ yo
 The capital of France is Paris.
 ```
 
-Integrate information from a file:
+Integrate information from a file or URL:
 ```shell,no_run
 $ yo --read README.md how can I improve this source readme
  Review the README.md file for consistency and clarity, and consider adding examples and usage instructions. ✌️
 ```
 
-Integrate information from a URL:
 ```shell,no_run
 $ yo --read https://www.wikipedia.org/wiki/Paris how big is paris
  Paris has an area of approximately 105 square kilometers. ✌️
 ```
+
 Integrate Google search results:
 ```shell,no_run
-$ yo --search what is the capital of tobago
- The capital of Tobago is Scarborough. ✌️
+$ yo --surf what is the capital of trinidad and tobago
+ Port of Spain ✌️
+```
+
+```shell,no_run
+$ yo --search "trinidad and tobago major cities" what is the capital of trinidad and tobago
+ Port of Spain ✌️
 ```
