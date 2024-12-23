@@ -15,7 +15,7 @@ function yo() {
 
 	# Display version information
 	function show_version() {
-		echo "yo v$VERSION"
+		echo "yo v$VERSION $STOP_SYMBOL"
 	}
 
 	# Display usage instructions
@@ -69,39 +69,50 @@ function yo() {
 
 	# Perform a web search with user-provided terms
 	function perform_search() {
+		# Parse arguments
 		local terms="$1"
+
+		# Make variables
 		local url result search_term_slug
+
+		# Generate search URL
 		search_term_slug=$(echo "$terms" | sed 's/ /+/g')
 		url="https://www.google.com/search?q=$search_term_slug"
+
+		# Perform search and extract file_info
 		result=$(curl -sL "$url" | pandoc -f html -t plain --quiet)
 		if [[ $? -ne 0 ]]; then
 			echo "Error: Failed to perform web search." >&2
 			return 1
 		fi
 
-		# Remove extraneous content (e.g., "People also search for")
+		# Remove extraneous file_info (e.g., "People also search for")
 		result=$(echo "$result" | sed -n '/People also search for/q;p')
+
+		# Return search results
 		echo "$result"
 	}
 
 	# Extract optimized search terms using a small model
 	function extract_search_terms() {
+
+		# Parse arguments
 		local query=$1 verbose=$2
-		local prompt="Your task is to extract the most relevant search terms from the following query for a web search.
 
-    Here is an example:
-    User Query: how large is the capital of france $STOP_SYMBOL
-    Search Terms: paris capital population area
+		# Generate prompt
+		local prompt=""
+		prompt+="Your task is to extract the most relevant search terms from the following query for a web search.\n\n"
+		prompt+="Here is an example:\n"
+		prompt+="User Query: how large is the capital of france $STOP_SYMBOL\n"
+		prompt+="Search Terms: paris capital population area\n\n"
+		prompt+="Here is another:\n"
+		prompt+="User Query: what is the furthest planet from the sun $STOP_SYMBOL\n"
+		prompt+="Search Terms: solar system furthest planet distance\n\n"
+		prompt+="Here is the real one.\n"
+		prompt+="User Query: $query\n"
+		prompt+="Search Terms: "
 
-    Here is another:
-    User Query: what is the furthest planet from the sun $STOP_SYMBOL
-    Search Terms: solar system furthest planet distance
-
-    Here is the real one!
-    User Query: $query
-    Search Terms: "
-
-		# Generate
+		# Generate response
 		local terms
 		if [[ $verbose != true ]]; then
 			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
@@ -123,20 +134,24 @@ function yo() {
 	### CONTENT EXTRACTION ###############################################################################################
 	######################################################################################################################
 
-	# Extract content from a file or URL (supports text and PDF files)
-	function extract_content() {
+	# Extract file_info from a file or URL (supports text and PDF files)
+	function extract_file_info() {
+
+		# Parse arguments
 		local source=$1 max_length=$2
-		local content
+
+		# Make variables
+		local file_info
 
 		if [[ $source =~ ^https?:// ]]; then
-			# Fetch content from URL
-			content=$(curl -s "$source" | pandoc -f html -t plain --quiet)
+			# Fetch file_info from URL
+			file_info=$(curl -s "$source" | pandoc -f html -t plain --quiet)
 			if [[ $? -ne 0 ]]; then
-				echo "Error: Failed to fetch content from URL." >&2
+				echo "Error: Failed to fetch file_info from URL." >&2
 				return 1
 			fi
 		else
-			# Fetch content from file
+			# Fetch file_info from file
 			[[ ! -f "$source" ]] && {
 				echo "Error: File not found." >&2
 				return 1
@@ -148,16 +163,19 @@ function yo() {
 					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
 					return 1
 				}
-				content=$(pdftotext "$source" - 2>/dev/null)
+				file_info=$(pdftotext "$source" - 2>/dev/null)
 				;;
 			*.txt | *)
-				content=$(cat "$source")
+				file_info=$(cat "$source")
 				;;
 			esac
 		fi
 
-		[[ -n "$max_length" && "$max_length" -gt 0 ]] && content=${content:0:$max_length}
-		echo "$content"
+		# Trim to max length if needed
+		[[ -n "$max_length" && "$max_length" -gt 0 ]] && file_info=${file_info:0:$max_length}
+
+		# Return file_info
+		echo "$file_info"
 	}
 
 	######################################################################################################################
@@ -166,7 +184,11 @@ function yo() {
 
 	# Generate a prompt for one-off or interactive sessions
 	function generate_prompt() {
-		local mode=$1 content=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
+
+		# Parse arguments
+		local mode=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
+
+		# Generate basic prompt
 		local prompt=""
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal. "
 		prompt+="It is currently $(date). "
@@ -176,13 +198,15 @@ function yo() {
 		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
 		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
 
-		if [[ -n "$content" ]]; then
+		# Add file file_info if available
+		if [[ -n "$file_info" ]]; then
 			prompt+="Relevant information from this file: $filename:\n"
 			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
-			prompt+="$content\n"
+			prompt+="$file_info\n"
 			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
 		fi
 
+		# Add search information if available
 		if [[ -n "$search_terms" ]]; then
 			prompt+="Relevant information from web search using these terms: $search_terms:\n"
 			prompt+="================= BEGINNING OF SEARCH RESULTS =================\n"
@@ -190,6 +214,7 @@ function yo() {
 			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
 		fi
 
+		# Add query and instructions based on mode
 		if [[ $mode == "one-off" ]]; then
 			prompt+="Your task is to answer the user's question directly. "
 			prompt+="Your answer will be concise, helpful, and actionable. "
@@ -200,30 +225,37 @@ function yo() {
 			prompt+="Your task is to assist the user in an interactive session, responding concisely and accurately."
 		fi
 
+		# Return prompt
 		echo "$prompt"
 	}
 
 	# Start a llama-cli session
 	function start_llama_session() {
+
+		# Parse arguments
 		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 verbose=$5
+
+		# Configure llama-cli arguments
 		local args=(
 			--threads "$(sysctl -n hw.logicalcpu_max)"
 			--hf-repo "$repo_name"
 			--hf-file "$model_name"
-			--temp 0.2
 			--prompt "$prompt"
+			--temp 0.2
 			--seed 42
 			--flash-attn
 			--prio 3
 			--mirostat 2
 		)
 
+		# Add conversation or reverse-prompt based on mode
 		if [[ $interactive == true ]]; then
 			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name")
 		else
 			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "/tmp/.yo_oneoff_prompt_cache_$repo_name_$model_name")
 		fi
 
+		# Start session
 		if [[ $verbose != true ]]; then
 			llama-cli "${args[@]}" --no-display-prompt 2>/dev/null
 		else
@@ -275,9 +307,9 @@ function yo() {
 	done
 
 	# Handle file reading
-	local content=""
+	local file_info=""
 	if [[ $read_mode == true && -n "$read_file" ]]; then
-		content=$(extract_content "$read_file" 10000) || return 1
+		file_info=$(extract_file_info "$read_file" 10000) || return 1
 	fi
 
 	# Handle search operations
@@ -313,7 +345,7 @@ function yo() {
 
 	# Generate and start appropriate session
 	local prompt
-	prompt=$(generate_prompt "$interaction_type" "$content" "$read_file" "$query" "$search_info" "$search_terms")
+	prompt=$(generate_prompt "$interaction_type" "$file_info" "$read_file" "$query" "$search_info" "$search_terms")
 	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose
 
 }
