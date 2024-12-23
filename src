@@ -21,6 +21,30 @@ function yo() {
 	# Symbol used to signal the end of one-off sessions
 	local STOP_SYMBOL="✌️"
 
+	# Define parameters for the task model
+	local TASK_MODEL_USERNAME="bartowski"
+	local TASK_MODEL_SERIES="Qwen2.5"
+	local TASK_MODEL_FINETUNING="Instruct"
+	local TASK_MODEL_SIZE="1.5B"
+	local TASK_MODEL_QUANT="Q4_K_M"
+	local TASK_MODEL_FILETYPE="gguf"
+
+	# Define parameters for the casual model
+	local CASUAL_MODEL_USERNAME="bartowski"
+	local CASUAL_MODEL_SERIES="Qwen2.5"
+	local CASUAL_MODEL_FINETUNING="Instruct"
+	local CASUAL_MODEL_SIZE="3B"
+	local CASUAL_MODEL_QUANT="Q4_K_M"
+	local CASUAL_MODEL_FILETYPE="gguf"
+
+	# Define the series model parameters
+	local SERIOUS_MODEL_USERNAME="bartowski"
+	local SERIOUS_MODEL_SERIES="Qwen2.5"
+	local SERIOUS_MODEL_FINETUNING="Instruct"
+	local SERIOUS_MODEL_SIZE="14B"
+	local SERIOUS_MODEL_QUANT="IQ4_XS"
+	local SERIOUS_MODEL_FILETYPE="gguf"
+
 	# Display version information
 	function show_version() {
 		echo "yo v$VERSION $STOP_SYMBOL"
@@ -84,6 +108,24 @@ function yo() {
 		EOF
 	}
 
+	function compose_repo_name() {
+		local username=$1
+		local series=$2
+		local size=$3
+		local finetuning=$4
+		local filetype=$5
+		echo "${username}/${series}-${size}-${finetuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
+	}
+
+	function compose_model_name() {
+		local series=$1
+		local size=$2
+		local finetuning=$3
+		local quant=$4
+		local filetype=$5
+		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
+	}
+
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
 	######################################################################################################################
@@ -128,13 +170,13 @@ function yo() {
 		prompt+="User Query: $query\n"
 		prompt+="Search Terms: "
 
+    # Generate response
+    repo_name="$(compose_repo_name $TASK_MODEL_USERNAME $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_FILETYPE)"
+    model_name="$(compose_model_name $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_QUANT $TASK_MODEL_FILETYPE)"
+
 		# Generate response
 		local terms
-		if [[ $verbose != true ]]; then
-			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
-		else
-			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt)
-		fi
+		terms=$(start_llama_session "$repo_name" "$model_name" "$prompt" false $verbose false 8)
 
 		# Only take the first line
 		terms=$(echo "$terms" | head -n 1)
@@ -206,9 +248,9 @@ function yo() {
 		# Generate basic prompt
 		local prompt=""
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
+		prompt+="It is currently $(date). "
 
 		if [[ $add_system_info == true ]]; then
-			prompt+="It is currently $(date). "
 			prompt+="You were invoked from the $(pwd) directory "
 			prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
 			prompt+="with $(sysctl -n hw.ncpu) cores, "
@@ -251,7 +293,7 @@ function yo() {
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 verbose=$5
+		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 squash_stderr=$5 display_prompt=$6 number_of_tokens_to_generate=$7
 
 		# Configure llama-cli arguments
 		local args=(
@@ -259,6 +301,8 @@ function yo() {
 			--hf-repo "$repo_name"
 			--hf-file "$model_name"
 			--prompt "$prompt"
+			--prompt-cache "/tmp/yo_prompt_cache_$repo_name_$model_name"
+			--predict "$number_of_tokens_to_generate"
 			--temp 0.2
 			--seed 42
 			--flash-attn
@@ -268,16 +312,23 @@ function yo() {
 
 		# Add conversation or reverse-prompt based on mode
 		if [[ $interactive == true ]]; then
-			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name")
+			args+=(--conversation)
 		else
-			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "/tmp/.yo_oneoff_prompt_cache_$repo_name_$model_name")
+			args+=(--reverse-prompt "$STOP_SYMBOL")
+		fi
+
+		# Display prompt
+		if [[ $display_prompt != true ]]; then
+			args+=(--no-display-prompt)
+		else
+			args+=(--verbose-prompt)
 		fi
 
 		# Start session
-		if [[ $verbose != true ]]; then
-			llama-cli "${args[@]}" --no-display-prompt 2>/dev/null
+		if [[ $squash_stderr != true ]]; then
+			llama-cli "${args[@]}" 2>/dev/null
 		else
-			llama-cli "${args[@]}" --verbose-prompt
+			llama-cli "${args[@]}"
 		fi
 	}
 
@@ -341,29 +392,31 @@ function yo() {
 		search_info=$(perform_search "$search_terms")
 	fi
 
-	# Configure model settings
-	local quant_provider="bartowski" # Hugging Face username
-	local model_series="Qwen2.5"     # Model series
-	local tuning="Instruct"          # Model tuning
-	local filetype="gguf"            # Model type
-
 	# Configure specific model based on one-off or interactive session
-	local quant size repo_name model_name
+	local quant size repo_name model_name hf_username finetuning filetype
 	if [[ -n "$query" ]]; then
-		size="3B"
-		quant="Q4_K_M"
+		size="$CASUAL_MODEL_SIZE"
+		quant="$CASUAL_MODEL_QUANT"
+		hf_username="$CASUAL_MODEL_USERNAME"
+		series="$CASUAL_MODEL_SERIES"
+		finetuning="$CASUAL_MODEL_FINETUNING"
+		filetype="$CASUAL_MODEL_FILETYPE"
 		interactive=false
 	else
-		size="14B"
-		quant="IQ4_XS"
+		size="$SERIOUS_MODEL_SIZE"
+		quant="$SERIOUS_MODEL_QUANT"
+		hf_username="$SERIOUS_MODEL_USERNAME"
+		series="$SERIOUS_MODEL_SERIES"
+		finetuning="$SERIOUS_MODEL_FINETUNING"
+		filetype="$SERIOUS_MODEL_FILETYPE"
 		interactive=true
 	fi
-	repo_name="${quant_provider}/${model_series}-${size}-${tuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
-	model_name="${model_series}-${size}-${tuning}-${quant}.${filetype}"
+	repo_name="$(compose_repo_name $hf_username $series $size $finetuning $filetype)"
+	model_name="$(compose_model_name $series $size $finetuning $quant $filetype)"
 
 	# Generate and start appropriate session
 	local prompt
 	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms" $add_system_info)
-	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose
+	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose $verbose 256
 
 }
