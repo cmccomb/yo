@@ -1,39 +1,39 @@
 #!/usr/bin/env zsh
 
 # Check to see if homebrew is installed and install it if it is not
-if ! command -v brew &> /dev/null; then
-  echo "Homebrew not found. Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  echo "Homebrew installation complete."
+if ! command -v brew &>/dev/null; then
+	echo "Homebrew not found. Installing Homebrew..."
+	NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+	echo "Homebrew installation complete."
 else
-  echo "Homebrew is already installed."
+	echo "Homebrew is already installed."
 fi
 
 # Check to see if llama-cli is installed and install it if it is not
-if ! command -v llama-cli &> /dev/null; then
-  echo "llama-cli not found. Installing llama.cpp..."
-  brew install llama.cpp
-  echo "llama.cpp installation complete."
+if ! command -v llama-cli &>/dev/null; then
+	echo "llama-cli not found. Installing llama.cpp..."
+	brew install llama.cpp
+	echo "llama.cpp installation complete."
 else
-  echo "llama-cli is already installed."
+	echo "llama-cli is already installed."
 fi
 
 # Check to see if pandoc is installed and install it if it is not
-if ! command -v pandoc &> /dev/null; then
-  echo "Pandoc not found. Installing Pandoc..."
-  brew install pandoc
-  echo "Pandoc installation complete."
+if ! command -v pandoc &>/dev/null; then
+	echo "Pandoc not found. Installing Pandoc..."
+	brew install pandoc
+	echo "Pandoc installation complete."
 else
-  echo "Pandoc is already installed."
+	echo "Pandoc is already installed."
 fi
 
 # Check to see if pdftotext is installed and install it if it is not
-if ! command -v pdftotext &> /dev/null; then
-  echo "pdftotext not found. Installing pdftotext..."
-  brew install poppler
-  echo "pdftotext installation complete."
+if ! command -v pdftotext &>/dev/null; then
+	echo "pdftotext not found. Installing pdftotext..."
+	brew install poppler
+	echo "pdftotext installation complete."
 else
-  echo "pdftotext is already installed."
+	echo "pdftotext is already installed."
 fi
 
 # Yo to the shell
@@ -50,5 +50,5 @@ echo "Yo introduction complete."
 # Yo to the ~/.zshrc
 echo "Updating ~/.zshrc to source the Yo script..."
 sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
-echo 'source <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc
+echo 'source <(curl -s https://cmccomb.com/yo/src)' >>~/.zshrc
 echo "Update to ~/.zshrc complete."
