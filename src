@@ -7,6 +7,42 @@ function yo() {
 	### UTILITIES AND CONSTANTS ##########################################################################################
 	######################################################################################################################
 
+	# Symbol used to signal the end of one-off sessions
+	local YO="✌️"
+
+	# Common model parameters
+	local MODEL_USERNAME="bartowski"
+	local MODEL_SERIES="Qwen2.5"
+	local MODEL_FINETUNING="Instruct"
+	local MODEL_FILETYPE="gguf"
+
+	# Define parameters for the task model
+	local TASK_MODEL_USERNAME=$MODEL_USERNAME
+	local TASK_MODEL_SERIES=$MODEL_SERIES
+	local TASK_MODEL_FINETUNING=$MODEL_FINETUNING
+	local TASK_MODEL_SIZE="1.5B"
+	local TASK_MODEL_QUANT="Q4_K_M"
+	local TASK_MODEL_FILETYPE=$MODEL_FILETYPE
+	local TASK_MODEL_NEW_TOKENS=8
+
+	# Define parameters for the casual model
+	local CASUAL_MODEL_USERNAME=$MODEL_USERNAME
+	local CASUAL_MODEL_SERIES=$MODEL_SERIES
+	local CASUAL_MODEL_FINETUNING=$MODEL_FINETUNING
+	local CASUAL_MODEL_SIZE="3B"
+	local CASUAL_MODEL_QUANT="Q4_K_M"
+	local CASUAL_MODEL_FILETYPE=$MODEL_FILETYPE
+	local CASUAL_MODEL_NEW_TOKENS=128
+
+	# Define the series model parameters
+	local SERIOUS_MODEL_USERNAME=$MODEL_USERNAME
+	local SERIOUS_MODEL_SERIES=$MODEL_SERIES
+	local SERIOUS_MODEL_FINETUNING=$MODEL_FINETUNING
+	local SERIOUS_MODEL_SIZE="14B"
+	local SERIOUS_MODEL_QUANT="IQ4_XS"
+	local SERIOUS_MODEL_FILETYPE=$MODEL_FILETYPE
+	local SERIOUS_MODEL_NEW_TOKENS=512
+
 	# Custom search API key
 	local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
 	local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
@@ -18,36 +54,9 @@ function yo() {
 	# Version
 	local VERSION="0.1.0"
 
-	# Symbol used to signal the end of one-off sessions
-	local STOP_SYMBOL="✌️"
-
-	# Define parameters for the task model
-	local TASK_MODEL_USERNAME="bartowski"
-	local TASK_MODEL_SERIES="Qwen2.5"
-	local TASK_MODEL_FINETUNING="Instruct"
-	local TASK_MODEL_SIZE="1.5B"
-	local TASK_MODEL_QUANT="Q4_K_M"
-	local TASK_MODEL_FILETYPE="gguf"
-
-	# Define parameters for the casual model
-	local CASUAL_MODEL_USERNAME="bartowski"
-	local CASUAL_MODEL_SERIES="Qwen2.5"
-	local CASUAL_MODEL_FINETUNING="Instruct"
-	local CASUAL_MODEL_SIZE="3B"
-	local CASUAL_MODEL_QUANT="Q4_K_M"
-	local CASUAL_MODEL_FILETYPE="gguf"
-
-	# Define the series model parameters
-	local SERIOUS_MODEL_USERNAME="bartowski"
-	local SERIOUS_MODEL_SERIES="Qwen2.5"
-	local SERIOUS_MODEL_FINETUNING="Instruct"
-	local SERIOUS_MODEL_SIZE="14B"
-	local SERIOUS_MODEL_QUANT="IQ4_XS"
-	local SERIOUS_MODEL_FILETYPE="gguf"
-
 	# Display version information
 	function show_version() {
-		echo "yo v$VERSION $STOP_SYMBOL"
+		echo "yo v$VERSION $YO"
 	}
 
 	# Display usage instructions
@@ -161,22 +170,22 @@ function yo() {
 		local prompt=""
 		prompt+="Your task is to extract the most relevant search terms from the following query for a web search.\n\n"
 		prompt+="Here is an example:\n"
-		prompt+="User Query: how large is the capital of france $STOP_SYMBOL\n"
+		prompt+="User Query: how large is the capital of france $YO\n"
 		prompt+="Search Terms: paris capital population area\n\n"
 		prompt+="Here is another:\n"
-		prompt+="User Query: what is the furthest planet from the sun $STOP_SYMBOL\n"
+		prompt+="User Query: what is the furthest planet from the sun $YO\n"
 		prompt+="Search Terms: solar system furthest planet distance\n\n"
 		prompt+="Here is the real one.\n"
 		prompt+="User Query: $query\n"
 		prompt+="Search Terms: "
 
-    # Generate response
-    repo_name="$(compose_repo_name $TASK_MODEL_USERNAME $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_FILETYPE)"
-    model_name="$(compose_model_name $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_QUANT $TASK_MODEL_FILETYPE)"
+		# Generate response
+		repo_name="$(compose_repo_name $TASK_MODEL_USERNAME $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_FILETYPE)"
+		model_name="$(compose_model_name $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_QUANT $TASK_MODEL_FILETYPE)"
 
 		# Generate response
 		local terms
-		terms=$(start_llama_session "$repo_name" "$model_name" "$prompt" false $verbose false 8)
+		terms=$(start_llama_session "$repo_name" "$model_name" "$prompt" false "$verbose" false $TASK_MODEL_NEW_TOKENS)
 
 		# Only take the first line
 		terms=$(echo "$terms" | head -n 1)
@@ -278,8 +287,8 @@ function yo() {
 		if [[ $interactive == false ]]; then
 			prompt+="Your task is to directly answer the user's question. "
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
-			prompt+="End your answer with the stop symbol $STOP_SYMBOL.\n\n"
-			prompt+="User Query: $query $STOP_SYMBOL\n"
+			prompt+="End your answer with the stop symbol $YO.\n\n"
+			prompt+="User Query: $query $YO\n"
 			prompt+="Your Super-Short Answer:"
 		else
 			prompt+="Your task is to assist the user in an interactive session, responding concisely and accurately."
@@ -305,16 +314,17 @@ function yo() {
 			--predict "$number_of_tokens_to_generate"
 			--temp 0.2
 			--seed 42
-			--flash-attn
 			--prio 3
 			--mirostat 2
+			--flash-attn
+			--no-warmup
 		)
 
 		# Add conversation or reverse-prompt based on mode
 		if [[ $interactive == true ]]; then
 			args+=(--conversation)
 		else
-			args+=(--reverse-prompt "$STOP_SYMBOL")
+			args+=(--reverse-prompt "$YO")
 		fi
 
 		# Display prompt
@@ -393,30 +403,23 @@ function yo() {
 	fi
 
 	# Configure specific model based on one-off or interactive session
-	local quant size repo_name model_name hf_username finetuning filetype
+	local quant size repo_name model_name new_tokens
 	if [[ -n "$query" ]]; then
-		size="$CASUAL_MODEL_SIZE"
-		quant="$CASUAL_MODEL_QUANT"
-		hf_username="$CASUAL_MODEL_USERNAME"
-		series="$CASUAL_MODEL_SERIES"
-		finetuning="$CASUAL_MODEL_FINETUNING"
-		filetype="$CASUAL_MODEL_FILETYPE"
+		# for casual model
+		repo_name="$(compose_repo_name $CASUAL_MODEL_USERNAME $CASUAL_MODEL_SERIES $CASUAL_MODEL_SIZE $CASUAL_MODEL_FINETUNING $CASUAL_MODEL_FILETYPE)"
+		model_name="$(compose_model_name $CASUAL_MODEL_SERIES $CASUAL_MODEL_SIZE $CASUAL_MODEL_FINETUNING $CASUAL_MODEL_QUANT $CASUAL_MODEL_FILETYPE)"
+		new_tokens="$CASUAL_MODEL_NEW_TOKENS"
 		interactive=false
 	else
-		size="$SERIOUS_MODEL_SIZE"
-		quant="$SERIOUS_MODEL_QUANT"
-		hf_username="$SERIOUS_MODEL_USERNAME"
-		series="$SERIOUS_MODEL_SERIES"
-		finetuning="$SERIOUS_MODEL_FINETUNING"
-		filetype="$SERIOUS_MODEL_FILETYPE"
+		repo_name="$(compose_repo_name $SERIOUS_MODEL_USERNAME $SERIOUS_MODEL_SERIES $SERIOUS_MODEL_SIZE $SERIOUS_MODEL_FINETUNING $SERIOUS_MODEL_FILETYPE)"
+		model_name="$(compose_model_name $SERIOUS_MODEL_SERIES $SERIOUS_MODEL_SIZE $SERIOUS_MODEL_FINETUNING $SERIOUS_MODEL_QUANT $SERIOUS_MODEL_FILETYPE)"
+		new_tokens="$SERIOUS_MODEL_NEW_TOKENS"
 		interactive=true
 	fi
-	repo_name="$(compose_repo_name $hf_username $series $size $finetuning $filetype)"
-	model_name="$(compose_model_name $series $size $finetuning $quant $filetype)"
 
 	# Generate and start appropriate session
 	local prompt
 	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms" $add_system_info)
-	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose $verbose 256
+	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose $verbose $new_tokens
 
 }
