@@ -31,103 +31,40 @@ function yo() {
 
 			Options:
 			  -h, --help              Show this help message and exit.
-			  -r, --read [file|url]   Integrate information from the specified file (supports plain text files, URLs, and PDFs).
-			  -s, --search            Integrate Google search results.
+			  -r, --read PATH         Inform the response by extracting information from the specified file or URL. Supports
+			                          text-based files (e.g., .txt, .md, .py, etc.), PDF files via pdftotext, and web pages via curl and pandoc.
+			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into the LLM's context.
+			                          Requires an active internet connection.
+			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results into the LLM's context.
+			                          Requires an active internet connection.
 			  -v, --verbose           Enable verbose mode for detailed output.
 			  -V, --version           Show the version and exit.
 
-      Examples:
-        1. Answer a question:
-          $ yo "What is the capital of France?"
-        2. Start an interactive session:
-          $ yo
-        3. Integrate information from a file:
-          $ yo --read src "How can I improve this source code?"
-        4. Integrate information from a URL:
-          $ yo --read https://www.wikipedia.org/wiki/Paris how big is paris
-        5. Integrate Google search results:
-          $ yo --search what is the capital of tobago
-
+			Examples:
+			  - Answer a question:
+			    $ yo "What is the capital of France?"
+        - For simple cases, you can omit the quotes:
+          $ yo what is the capital of france
+			  - Start an interactive session:
+			    $ yo
+			  - Integrate information from a file:
+			    $ yo --read src "How can I improve this source code?"
+			  - Integrate information from a URL:
+			    $ yo --read https://en.wikipedia.org/wiki/Paris "how big is paris"
+			  - Integrate Google search results:
+			    $ yo --search "what is the capital of Tobago"
+			  - Use LLM-selected search terms:
+			    $ yo --surf tell me about renewable energy trends.
+        - Add verbosity to any of these commands
+          $ yo what is the capital of france --verbose
 		EOF
 	}
 
-	# Generate a prompt for one-off or interactive sessions
-	function generate_prompt() {
-		local mode=$1 content=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
-		local prompt=""
-		prompt+="You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal. "
-		prompt+="It is currently $(date). "
-		prompt+="You were invoked from the $(pwd) directory "
-		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-		prompt+="with $(sysctl -n hw.ncpu) cores, "
-		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
-		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+  ######################################################################################################################
+  ### SEARCH ###########################################################################################################
+  ######################################################################################################################
 
-		if [[ -n "$content" ]]; then
-			prompt+="Relevant Information from file \"$filename\":\n"
-			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
-			prompt+="$content\n"
-			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
-		fi
-
-		if [[ -n "$search_terms" ]]; then
-			prompt+="Relevant Information from web search using terms \"$search_terms\":\n"
-			prompt+="================= BEGINNING OF SEARCH RESULTS =================\n"
-			prompt+="$search_info\n"
-			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
-		fi
-
-		if [[ $mode == "one-off" ]]; then
-			prompt+="Your task is to answer the user's question directly. "
-			prompt+="Your answer will be concise, helpful, and actionable. "
-			prompt+="End your answer with the stop symbol '$STOP_SYMBOL'.\n\n"
-			prompt+="User Query: $query $STOP_SYMBOL\n"
-			prompt+="Your Super-Short Answer:"
-		else
-			prompt+="Your task is to assist the user in an interactive session, responding concisely and accurately."
-		fi
-
-		echo "$prompt"
-	}
-
-	# Extract content from a file or URL (supports text and PDF files)
-	function extract_content() {
-		local source=$1 max_length=$2
-		local content
-
-		if [[ $source =~ ^https?:// ]]; then
-			# Fetch content from URL
-			content=$(curl -s "$source" | pandoc -f html -t plain --quiet)
-			if [[ $? -ne 0 ]]; then
-				echo "Error: Failed to fetch content from URL." >&2
-				return 1
-			fi
-		else
-			# Fetch content from file
-			[[ ! -f "$source" ]] && {
-				echo "Error: File not found." >&2
-				return 1
-			}
-
-			case $source in
-			*.pdf)
-				command -v pdftotext >/dev/null 2>&1 || {
-					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-					return 1
-				}
-				content=$(pdftotext "$source" - 2>/dev/null)
-				;;
-			*.txt | *)
-				content=$(cat "$source")
-				;;
-			esac
-		fi
-
-		[[ -n "$max_length" && "$max_length" -gt 0 ]] && content=${content:0:$max_length}
-		echo "$content"
-	}
-
-	# Perform a web search and extract plain text results
+	# Perform a web search with user-provided terms
 	function perform_search() {
 		local url result search_term_slug
 		search_term_slug=$(echo $1 | sed 's/ /+/g')
@@ -175,14 +112,93 @@ function yo() {
 		# Remove end of text if needed
 		terms=$(echo "$terms" | sed 's/\[end of text\]//g')
 
-		# Return results
-		echo "$terms"
+    # Return results
+    echo "$terms"
+  }
+
   ######################################################################################################################
   ### CONTENT EXTRACTION ###############################################################################################
   ######################################################################################################################
+
+
+	# Extract content from a file or URL (supports text and PDF files)
+	function extract_content() {
+		local source=$1 max_length=$2
+		local content
+
+		if [[ $source =~ ^https?:// ]]; then
+			# Fetch content from URL
+			content=$(curl -s "$source" | pandoc -f html -t plain --quiet)
+			if [[ $? -ne 0 ]]; then
+				echo "Error: Failed to fetch content from URL." >&2
+				return 1
+			fi
+		else
+			# Fetch content from file
+			[[ ! -f "$source" ]] && {
+				echo "Error: File not found." >&2
+				return 1
+			}
+
+			case $source in
+			*.pdf)
+				command -v pdftotext >/dev/null 2>&1 || {
+					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+					return 1
+				}
+				content=$(pdftotext "$source" - 2>/dev/null)
+				;;
+			*.txt | *)
+				content=$(cat "$source")
+				;;
+			esac
+		fi
+
+		[[ -n "$max_length" && "$max_length" -gt 0 ]] && content=${content:0:$max_length}
+		echo "$content"
+	}
+
   ######################################################################################################################
   ### LLMS AND PROMPTS #################################################################################################
   ######################################################################################################################
+
+	# Generate a prompt for one-off or interactive sessions
+	function generate_prompt() {
+		local mode=$1 content=$2 filename=$3 query=$4 search_info=$5 search_terms=$6
+		local prompt=""
+		prompt+="You are playing the role of Yo, a highly-capable AI assistant for the MacOS terminal. "
+		prompt+="It is currently $(date). "
+		prompt+="You were invoked from the $(pwd) directory "
+		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
+		prompt+="with $(sysctl -n hw.ncpu) cores, "
+		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
+		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+
+		if [[ -n "$content" ]]; then
+			prompt+="Relevant information from this file: $filename:\n"
+			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
+			prompt+="$content\n"
+			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
+		fi
+
+		if [[ -n "$search_terms" ]]; then
+			prompt+="Relevant information from web search using these terms: $search_terms:\n"
+			prompt+="================= BEGINNING OF SEARCH RESULTS =================\n"
+			prompt+="$search_info\n"
+			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
+		fi
+
+		if [[ $mode == "one-off" ]]; then
+			prompt+="Your task is to answer the user's question directly. "
+			prompt+="Your answer will be concise, helpful, and actionable. "
+			prompt+="End your answer with the stop symbol $STOP_SYMBOL.\n\n"
+			prompt+="User Query: $query $STOP_SYMBOL\n"
+			prompt+="Your Super-Short Answer:"
+		else
+			prompt+="Your task is to assist the user in an interactive session, responding concisely and accurately."
+		fi
+
+		echo "$prompt"
 	}
 
 	# Start a llama-cli session
