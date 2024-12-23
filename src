@@ -3,8 +3,16 @@
 # `yo` - A command-line AI assistant
 function yo() {
 
+	# Version
+	local VERSION="0.1.0"
+
 	# Symbol used to signal the end of one-off sessions
 	local STOP_SYMBOL="✌️"
+
+	# Display version information
+	function show_version() {
+		echo "yo v$VERSION"
+	}
 
 	# Display usage instructions
 	function show_help() {
@@ -22,6 +30,7 @@ function yo() {
 			  -r, --read [file|url]   Integrate information from the specified file (supports plain text files, URLs, and PDFs).
 			  -s, --search            Integrate Google search results.
 			  -v, --verbose           Enable verbose mode for detailed output.
+			  -V, --version           Show the version and exit.
 
       Examples:
         1. Answer a question:
