@@ -43,8 +43,8 @@ function yo() {
 			Examples:
 			  - Answer a question:
 			    $ yo "What is the capital of France?"
-			        - For simple cases, you can omit the quotes:
-			          $ yo what is the capital of france
+        - For simple cases, you can omit the quotes:
+          $ yo what is the capital of france
 			  - Start an interactive session:
 			    $ yo
 			  - Integrate information from a file:
@@ -55,8 +55,10 @@ function yo() {
 			    $ yo --search "what is the capital of Tobago"
 			  - Use LLM-selected search terms:
 			    $ yo --surf tell me about renewable energy trends.
-			        - Add verbosity to any of these commands
-			          $ yo what is the capital of france --verbose
+        - Combine context sources:
+          $ yo --read src --search "what is the capital of france"
+        - Add verbosity to any of these commands
+          $ yo what is the capital of france --verbose
 		EOF
 	}
 
