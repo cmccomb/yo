@@ -234,7 +234,7 @@ function yo() {
   ######################################################################################################################
 
 	# Parse arguments
-	local read_mode=false read_file="" query="" verbose=false search_mode=false
+	local read_mode=false read_file="" query="" verbose=false search_mode=false surf_mode=false search_terms=""
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 		-h | --help)
@@ -256,7 +256,17 @@ function yo() {
 			show_version
 			return 0
 			;;
-		-s | --search) search_mode=true ;;
+		-s | --search)
+			search_mode=true
+			[[ -n $2 && $2 =~ ^".*"$ ]] && {
+				search_terms=$2
+				shift
+			} || {
+				echo "Error: --search requires quoted terms." >&2
+				return 1
+			}
+			;;
+		-S | --surf) surf_mode=true ;;
 		*) query+="$1 " ;;
 		esac
 		shift
@@ -268,36 +278,40 @@ function yo() {
 		content=$(extract_content "$read_file" 10000) || return 1
 	fi
 
-	local search_info="" search_terms=""
-	if [[ $search_mode == true && -n "$query" ]]; then
-		search_terms=$(extract_search_terms "$query" $verbose)
+	# Handle search operations
+	local search_info=""
+	if [[ $search_mode == true ]]; then
+		search_info=$(perform_search "$search_terms")
+	elif [[ $surf_mode == true ]]; then
+    search_terms=$(extract_search_terms "$query" "$verbose")
 		search_info=$(perform_search "$search_terms")
 	fi
 
+  # Configure model settings
 	local quant_provider="bartowski" # Hugging Face username
 	local model_series="Qwen2.5"     # Model series
 	local tuning="Instruct"          # Model tuning
 	local filetype="gguf"            # Model type
 
-	# Configure model settings
-	local quant size repo_name model_name
+  # Configure specific model based on one-off or interactive session
+	local quant size repo_name model_name interaction_type
 	if [[ -n "$query" ]]; then
 		size="3B"
 		quant="Q4_K_M"
+		interaction_type="one-off"
+		interactive=false
 	else
 		size="14B"
 		quant="IQ4_XS"
+		interaction_type="interactive"
+		interactive=true
 	fi
 	repo_name="${quant_provider}/${model_series}-${size}-${tuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
 	model_name="${model_series}-${size}-${tuning}-${quant}.${filetype}"
 
 	# Generate and start appropriate session
 	local prompt
-	if [[ -n "$query" ]]; then
-		prompt=$(generate_prompt "one-off" "$content" "$read_file" "$query" "$search_info" "$search_terms")
-		start_llama_session "$repo_name" "$model_name" "$prompt" false $verbose
-	else
-		prompt=$(generate_prompt "interactive" "$content" "$read_file" "" "$search_info" "$search_terms")
-		start_llama_session "$repo_name" "$model_name" "$prompt" true $verbose
-	fi
+  prompt=$(generate_prompt "$interaction_type" "$content" "$read_file" "$query" "$search_info" "$search_terms")
+  start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose
+
 }
