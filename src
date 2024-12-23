@@ -218,7 +218,7 @@ function yo() {
 		)
 
 		if [[ $interactive == true ]]; then
-			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name")
+			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name" )
 		else
 			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "/tmp/.yo_oneoff_prompt_cache_$repo_name_$model_name")
 		fi
