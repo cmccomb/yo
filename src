@@ -37,15 +37,17 @@ function yo() {
 			Description:
 			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
-			Options:
-			  -h, --help              Show this help message and exit.
-			  -r, --read PATH         Inform the response by extracting information from the specified file or URL. Supports
+			LLM Context Options:
+			  -r, --read "PATH"       Inform the response by extracting information from the specified file or URL. Supports
 			                          text-based files (e.g., .txt, .md, .py, etc.), PDF files via pdftotext, and web pages
 			                          via curl and pandoc.
 			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 			                          the LLM's context. Requires an active internet connection.
 			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 			                          into the LLM's context. Requires an active internet connection.
+
+			General Purpose Options:
+			  -h, --help              Show this help message and exit.
 			  -v, --verbose           Enable verbose mode for detailed output.
 			  -V, --version           Show the version and exit.
 
