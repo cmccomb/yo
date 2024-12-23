@@ -125,8 +125,8 @@ function yo() {
 
 	# Perform a web search and extract plain text results
 	function perform_search() {
-	  local url result search_term_slug
-	  search_term_slug=$(echo $1 | sed 's/ /+/g')
+		local url result search_term_slug
+		search_term_slug=$(echo $1 | sed 's/ /+/g')
 		url="https://www.google.com/search?q=$search_term_slug"
 		result=$(curl -sL $url | pandoc -f html -t plain --quiet)
 		if [[ $? -ne 0 ]]; then
@@ -140,10 +140,10 @@ function yo() {
 		echo "$result"
 	}
 
-  # Extract optimized search terms using the 3B LLM
-  function extract_search_terms() {
-    local query=$1 verbose=$2
-    local prompt="Your task is to extract the most relevant search terms from the following query for a web search.
+	# Extract optimized search terms using the 3B LLM
+	function extract_search_terms() {
+		local query=$1 verbose=$2
+		local prompt="Your task is to extract the most relevant search terms from the following query for a web search.
 
     Here is an example:
     User Query: how large is the capital of france $STOP_SYMBOL
@@ -157,23 +157,23 @@ function yo() {
     User Query: $query
     Search Terms: "
 
-    # Generate
-    local terms
-    if [[ $verbose != true ]]; then
-      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
-    else
-      terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms"  -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt --verbose-prompt)
-    fi
+		# Generate
+		local terms
+		if [[ $verbose != true ]]; then
+			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt 2>/dev/null)
+		else
+			terms=$(llama-cli --threads "$(sysctl -n hw.logicalcpu_max)" --hf-repo "bartowski/Qwen2.5-1.5B-Instruct-GGUF" --hf-file "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf" --prompt-cache "/tmp/.yo_search_terms" -n 8 --no-warmup --prompt "$prompt" --temp 0.2 --seed 42 --flash-attn --prio 3 --mirostat 2 --no-display-prompt --verbose-prompt)
+		fi
 
-    # Only take the first line
-    terms=$(echo "$terms" | head -n 1)
+		# Only take the first line
+		terms=$(echo "$terms" | head -n 1)
 
-    # Remove end of text if needed
-    terms=$(echo "$terms" | sed 's/\[end of text\]//g')
+		# Remove end of text if needed
+		terms=$(echo "$terms" | sed 's/\[end of text\]//g')
 
-    # Return results
-    echo "$terms"
-  }
+		# Return results
+		echo "$terms"
+	}
 
 	# Start a llama-cli session
 	function start_llama_session() {
