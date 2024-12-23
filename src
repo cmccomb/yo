@@ -7,11 +7,10 @@ function yo() {
 	### UTILITIES AND CONSTANTS ##########################################################################################
 	######################################################################################################################
 
-  # Custom search API key
-  local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
-  local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
-  local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
-
+	# Custom search API key
+	local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
+	local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
+	local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
 
 	# Version
 	local VERSION="0.1.0"
@@ -50,20 +49,28 @@ function yo() {
 			Examples:
 			  1. Answer a question:
 			    $ yo "What is the capital of France?"
+
 			  2. For simple cases, you can omit the quotes:
 			    $ yo what is the capital of france
+
 			  3. Start an interactive session:
 			    $ yo
+
 			  4. Integrate information from a file:
 			    $ yo --read src "How can I improve this source code?"
+
 			  5. Integrate information from a URL:
 			    $ yo --read https://en.wikipedia.org/wiki/Paris "how big is paris"
+
 			  6. Integrate Google search results:
 			    $ yo --search "what is the capital of Tobago"
+
 			  7. Use LLM-selected search terms:
 			    $ yo --surf tell me about renewable energy trends.
+
 			  8. Combine context sources:
 			    $ yo --read src --search "what is the capital of france"
+
 			  9. Add verbosity to any of these commands
 			    $ yo what is the capital of france --verbose
 		EOF
@@ -73,26 +80,26 @@ function yo() {
 	### SEARCH ###########################################################################################################
 	######################################################################################################################
 
-# Perform a web search with user-provided terms
-function perform_search() {
-  # Parse arguments
-  local terms=$1
+	# Perform a web search with user-provided terms
+	function perform_search() {
+		# Parse arguments
+		local terms=$1
 
-  # Make variables
-  local url search_term_slug response
+		# Make variables
+		local url search_term_slug response
 
-  # Generate search URL
-  search_term_slug=$(echo "$terms" | sed 's/ /%20/g')
+		# Generate search URL
+		search_term_slug="${terms// /%20}"
 
-  # Example API call
-  url="$GOOGLE_CSE_BASE_URL?key=$GOOGLE_CSE_API_KEY&cx=$GOOGLE_CSE_ID&q=$search_term_slug"
+		# Example API call
+		url="$GOOGLE_CSE_BASE_URL?key=$GOOGLE_CSE_API_KEY&cx=$GOOGLE_CSE_ID&q=$search_term_slug"
 
-  # Perform search and extract relevant information
-  response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\"")
+		# Perform search and extract relevant information
+		response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\"")
 
-  # Return response
-  echo $response
-}
+		# Return response
+		echo $response
+	}
 
 	# Extract optimized search terms using a small model
 	function extract_search_terms() {
