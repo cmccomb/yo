@@ -32,33 +32,34 @@ function yo() {
 			Options:
 			  -h, --help              Show this help message and exit.
 			  -r, --read PATH         Inform the response by extracting information from the specified file or URL. Supports
-			                          text-based files (e.g., .txt, .md, .py, etc.), PDF files via pdftotext, and web pages via curl and pandoc.
-			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into the LLM's context.
-			                          Requires an active internet connection.
-			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results into the LLM's context.
-			                          Requires an active internet connection.
+			                          text-based files (e.g., .txt, .md, .py, etc.), PDF files via pdftotext, and web pages
+			                          via curl and pandoc.
+			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
+			                          the LLM's context. Requires an active internet connection.
+			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
+			                          into the LLM's context. Requires an active internet connection.
 			  -v, --verbose           Enable verbose mode for detailed output.
 			  -V, --version           Show the version and exit.
 
 			Examples:
-			  - Answer a question:
+			  1. Answer a question:
 			    $ yo "What is the capital of France?"
-        - For simple cases, you can omit the quotes:
-          $ yo what is the capital of france
-			  - Start an interactive session:
+			  2. For simple cases, you can omit the quotes:
+			    $ yo what is the capital of france
+			  3. Start an interactive session:
 			    $ yo
-			  - Integrate information from a file:
+			  4. Integrate information from a file:
 			    $ yo --read src "How can I improve this source code?"
-			  - Integrate information from a URL:
+			  5. Integrate information from a URL:
 			    $ yo --read https://en.wikipedia.org/wiki/Paris "how big is paris"
-			  - Integrate Google search results:
+			  6. Integrate Google search results:
 			    $ yo --search "what is the capital of Tobago"
-			  - Use LLM-selected search terms:
+			  7. Use LLM-selected search terms:
 			    $ yo --surf tell me about renewable energy trends.
-        - Combine context sources:
-          $ yo --read src --search "what is the capital of france"
-        - Add verbosity to any of these commands
-          $ yo what is the capital of france --verbose
+			  8. Combine context sources:
+			    $ yo --read src --search "what is the capital of france"
+			  9. Add verbosity to any of these commands
+			    $ yo what is the capital of france --verbose
 		EOF
 	}
 
@@ -218,7 +219,7 @@ function yo() {
 		)
 
 		if [[ $interactive == true ]]; then
-			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name" )
+			args+=(--conversation --prompt-cache "/tmp/.yo_interactive_prompt_cache_$repo_name_$model_name")
 		else
 			args+=(--reverse-prompt "$STOP_SYMBOL" --prompt-cache "/tmp/.yo_oneoff_prompt_cache_$repo_name_$model_name")
 		fi
