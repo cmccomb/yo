@@ -42,12 +42,12 @@ echo "Sourcing the Yo script..."
 source <(curl -s https://cmccomb.com/yo/src)
 echo "Yo script sourced."
 
-# Introduce
+# Yo to the user
 echo "Introducing Yo..."
 yo say hi
 echo "Yo introduction complete."
 
-# Yo to the ~/.zshrc only if it's not already there
+# Yo to the ~/.zshrc
 echo "Updating ~/.zshrc to source the Yo script..."
 sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
 echo 'source <(curl -s https://cmccomb.com/yo/src)' >> ~/.zshrc

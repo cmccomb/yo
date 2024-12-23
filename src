@@ -46,7 +46,7 @@ function yo() {
 		prompt+="It is currently $(date). "
 		prompt+="You were invoked from the $(pwd) directory "
 		prompt+="on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-		prompt+=" with: $(sysctl -n hw.ncpu) cores, "
+		prompt+="with $(sysctl -n hw.ncpu) cores, "
 		prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
 		prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
 
