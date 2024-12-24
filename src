@@ -8,7 +8,7 @@
 ####      `8bd8'  88    88     ####     If you are here, you are probably trying to fix or change something. If     ####
 ####        88    88    88     ####     you are here to fix something,  I am sorry it broke in the first place!     ####
 ####        88    `8b  d8'     ####     But either way, I hope that the documentation is helpful and I wish you     ####
-####.       YP     `Y88P'     .####.    the best of luck. If you need help, please email: <ccmcc2012@gmail.com>    .####
+####.       YP     `Y88P'     .####.     the best of luck. If you need help, please email: ccmcc2012@gmail.com     .####
 ######.                     .########.                                                                           .######
 ########################################################################################################################
 ########################################################################################################################
@@ -30,7 +30,6 @@ function yo() {
 
 	### Common model parameters ##########################################################################################
 	local MODEL_USERNAME="bartowski"
-	local MODEL_SERIES="Qwen2.5"
 	local MODEL_FINETUNING="Instruct"
 	local MODEL_FILETYPE="gguf"
 
@@ -46,7 +45,7 @@ function yo() {
 
 	### Define parameters for the casual model ###########################################################################
 	local CASUAL_MODEL_USERNAME=$MODEL_USERNAME
-	local CASUAL_MODEL_SERIES=$MODEL_SERIES
+	local CASUAL_MODEL_SERIES="Qwen2.5-Coder"
 	local CASUAL_MODEL_FINETUNING=$MODEL_FINETUNING
 	local CASUAL_MODEL_SIZE="3B"
 	local CASUAL_MODEL_QUANT="Q4_K_M"
@@ -56,7 +55,7 @@ function yo() {
 
 	### Define the series model parameters ###############################################################################
 	local SERIOUS_MODEL_USERNAME=$MODEL_USERNAME
-	local SERIOUS_MODEL_SERIES=$MODEL_SERIES
+	local SERIOUS_MODEL_SERIES="Qwen2.5"
 	local SERIOUS_MODEL_FINETUNING=$MODEL_FINETUNING
 	local SERIOUS_MODEL_SIZE="14B"
 	local SERIOUS_MODEL_QUANT="IQ4_XS"
@@ -86,14 +85,14 @@ function yo() {
 			Context Options:
 			  These options help you control the information that Yo uses to answer your question.
 			  -c, --clipboard         Copy the contents of the clipboard into Yo's context.
-			  -d, --directory         List the files of the current directory in Yo's context.
+			  -d, --directory         Include a list of the files in the current directory in Yo's context.
 			  -r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
 			                          (e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
 			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 			                          Yo's context. Requires an active internet connection.
 			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 			                          into Yo's context. Requires an active internet connection.
-			  -y, --system            Perform several system commands and integrate the information into Yo's context.
+			  -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			General Purpose Options:
 			  These options provide general functionality.
@@ -137,6 +136,12 @@ function yo() {
 		# Parse arguments
 		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
 
+		# Check that inputs are valid
+		[[ -z "$username" || -z "$series" || -z "$size" || -z "$finetuning" || -z "$filetype" ]] && {
+      echo "Error: Invalid arguments for compose_repo_name." >&2
+      return 1
+    }
+
 		# Return the repository name
 		echo "${username}/${series}-${size}-${finetuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
 	}
@@ -146,6 +151,12 @@ function yo() {
 
 		# Parse arguments
 		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
+
+		# Check that inputs are valid
+    [[ -z "$series" || -z "$size" || -z "$finetuning" || -z "$quant" || -z "$filetype" ]] && {
+      echo "Error: Invalid arguments for compose_model_name." >&2
+      return 1
+    }
 
 		# Return the model name
 		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
@@ -160,6 +171,12 @@ function yo() {
 
 		# Parse arguments
 		local terms=$1
+
+		# Check that inputs are valid
+    [[ -z "$terms" ]] && {
+      echo "Error: Invalid arguments for perform_search." >&2
+      return 1
+    }
 
 		# Make variables
 		local url search_term_slug response
@@ -183,8 +200,22 @@ function yo() {
 		# Parse arguments
 		local query=$1 verbose=$2
 
+		# Check that inputs are valid
+    [[ -z "$query" ]] && {
+      echo "Error: Invalid query arguments for extract_search_terms." >&2
+      return 1
+    }
+
+    # Check that verbose is a bool
+    [[ $verbose != true && $verbose != false ]] && {
+      echo "Error: Invalid verbose argument for extract_search_terms." >&2
+      return 1
+    }
+
+		# Make variables
+		local prompt="" repo_name model_name terms
+
 		# Generate prompt
-		local prompt=""
 		prompt+="Your task is to extract the most relevant search terms from the following query for a web search.\n\n"
 		prompt+="Here is an example:\n"
 		prompt+="User Query: how large is the capital of france $YO\n"
@@ -217,18 +248,17 @@ function yo() {
 		)"
 
 		# Generate response
-		local terms
-		terms=$( \
-		  start_llama_session \
-		    "$repo_name" \
-		    "$model_name" \
-		    "$prompt" \
-		    false \
-		    "$verbose" \
-		    false \
-		    $TASK_MODEL_NEW_TOKENS \
-		    $TASK_MODEL_TEMP\
-    )
+		terms=$(
+			start_llama_session \
+				"$repo_name" \
+				"$model_name" \
+				"$prompt" \
+				false \
+				"$verbose" \
+				false \
+				$TASK_MODEL_NEW_TOKENS \
+				$TASK_MODEL_TEMP
+		)
 
 		# Only take the first line
 		terms=$(echo "$terms" | head -n 1)
@@ -249,6 +279,12 @@ function yo() {
 
 		# Parse arguments
 		local source=$1 max_length=$2
+
+		# Check that inputs are valid
+    [[ -z "$source" ]] && {
+      echo "Error: Invalid source argument for extract_file_info." >&2
+      return 1
+    }
 
 		# Make variables
 		local file_info
@@ -298,8 +334,10 @@ function yo() {
 		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6 add_system_info=$7 \
 			add_directory_info=$8 add_clipboard_info=$9
 
-		# Generate basic prompt
+		# Make variables
 		local prompt=""
+
+		# Generate basic prompt
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
 		prompt+="It is currently $(date).\n\n"
 
@@ -330,7 +368,7 @@ function yo() {
 
 		# Add file file_info if available
 		if [[ -n "$file_info" ]]; then
-			prompt+="Relevant information from $()$filename$():\n"
+			prompt+="Relevant information from $filename:\n"
 			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
 			prompt+="$file_info\n"
 			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
@@ -338,7 +376,7 @@ function yo() {
 
 		# Add search information if available
 		if [[ -n "$search_terms" ]]; then
-			prompt+="Relevant information from web search using $()$search_terms$():\n"
+			prompt+="Relevant information from web search using $search_terms$:\n"
 			prompt+="================= BEGINNING OF SEARCH RESULTS =================\n"
 			prompt+="$search_info\n"
 			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
@@ -411,10 +449,11 @@ function yo() {
 	### Parse arguments ##################################################################################################
 
 	# Define variables
-	local query="" verbose=false
-	local read_file="" read_mode=false
-	local search_mode=false search_terms="" surf_mode=false
+	local verbose=false query=""
+	local read_mode=false read_file="" file_info=""
+	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
+	local quant size repo_name model_name new_tokens temp prompt
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -478,13 +517,11 @@ function yo() {
 	done
 
 	### Read in files if needed ##########################################################################################
-	local file_info=""
 	if [[ $read_mode == true && -n "$read_file" ]]; then
 		file_info=$(extract_file_info "$read_file" $MAX_FILE_CONTENT_LENGTH) || return 1
 	fi
 
 	### Bring in search information if needed ############################################################################
-	local search_info=""
 	if [[ $search_mode == true ]]; then
 		search_info=$(perform_search "$search_terms")
 	elif [[ $surf_mode == true ]]; then
@@ -493,7 +530,6 @@ function yo() {
 	fi
 
 	### Configure the model based on whether its a one-off or interactive session ########################################
-	local quant size repo_name model_name new_tokens temp
 	if [[ -n "$query" ]]; then
 		repo_name="$(
 			compose_repo_name \
@@ -537,7 +573,6 @@ function yo() {
 	fi
 
 	### Generate the prompt ##############################################################################################
-	local prompt
 	prompt=$(
 		generate_prompt \
 			$interactive \
