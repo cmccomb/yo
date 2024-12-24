@@ -187,7 +187,7 @@ function yo() {
 	)"
 	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
 
-  # Generation parameters
+	# Generation parameters
 	local SERIOUS_MODEL_NEW_TOKENS=512
 	local SERIOUS_MODEL_TEMP=0.2
 
