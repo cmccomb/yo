@@ -399,16 +399,30 @@ function yo() {
 	######################################################################################################################
 
 	### Parse arguments ##################################################################################################
+
+	# Define variables
 	local query="" verbose=false
 	local read_file="" read_mode=false
 	local search_mode=false search_terms="" surf_mode=false
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
+
+  # Start parsing arguments
 	while [[ $# -gt 0 ]]; do
 		case $1 in
+
+		# Early exit with help message
 		-h | --help)
 			show_help
 			return 0
 			;;
+
+	  # Early exit with version information
+		-V | --version)
+			show_version
+			return 0
+			;;
+
+	  # Read in a file
 		-r | --read)
 			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
@@ -419,11 +433,8 @@ function yo() {
 				return 1
 			fi
 			;;
-		-v | --verbose) verbose=true ;;
-		-V | --version)
-			show_version
-			return 0
-			;;
+
+    # Do some searching
 		-s | --search)
 			search_mode=true
 			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
@@ -434,10 +445,23 @@ function yo() {
 				return 1
 			fi
 			;;
+
+	  # Make the output verbose
+    -v | --verbose) verbose=true ;;
+
+    # Surf the web with LLM-defined search terms
 		-S | --surf) surf_mode=true ;;
+
+    # Add system information to the context
 		-y | --system) add_system_info=true ;;
+
+    # Add directory information to the context
 		-d | --directory) add_directory_info=true ;;
+
+    # Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
+
+    # If its not a flag, add it to the general query
 		*) query+="$1 " ;;
 		esac
 		shift
