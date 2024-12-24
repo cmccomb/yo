@@ -218,7 +218,17 @@ function yo() {
 
 		# Generate response
 		local terms
-		terms=$(start_llama_session "$repo_name" "$model_name" "$prompt" false "$verbose" false $TASK_MODEL_NEW_TOKENS $TASK_MODEL_TEMP)
+		terms=$( \
+		  start_llama_session \
+		    "$repo_name" \
+		    "$model_name" \
+		    "$prompt" \
+		    false \
+		    "$verbose" \
+		    false \
+		    $TASK_MODEL_NEW_TOKENS \
+		    $TASK_MODEL_TEMP\
+    )
 
 		# Only take the first line
 		terms=$(echo "$terms" | head -n 1)
@@ -295,7 +305,7 @@ function yo() {
 
 		# Add system information if requested
 		if [[ $add_system_info == true ]]; then
-			prompt+="You were invoked on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
+			prompt+="You are on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
 			prompt+="with $(sysctl -n hw.ncpu) cores, "
 			prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
 			prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
@@ -334,7 +344,7 @@ function yo() {
 			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
 		fi
 
-		# Add query and instructions based on interactive ################################################################
+		# Add query and instructions based on interactive ##################################################################
 		if [[ $interactive == false ]]; then
 			prompt+="Your task is to directly answer the user's question. "
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
@@ -406,7 +416,7 @@ function yo() {
 	local search_mode=false search_terms="" surf_mode=false
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
 
-  # Start parsing arguments
+	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 
@@ -416,13 +426,13 @@ function yo() {
 			return 0
 			;;
 
-	  # Early exit with version information
+		# Early exit with version information
 		-V | --version)
 			show_version
 			return 0
 			;;
 
-	  # Read in a file
+		# Read in a file
 		-r | --read)
 			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
@@ -434,7 +444,7 @@ function yo() {
 			fi
 			;;
 
-    # Do some searching
+		# Do some searching
 		-s | --search)
 			search_mode=true
 			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
@@ -446,22 +456,22 @@ function yo() {
 			fi
 			;;
 
-	  # Make the output verbose
-    -v | --verbose) verbose=true ;;
+		# Make the output verbose
+		-v | --verbose) verbose=true ;;
 
-    # Surf the web with LLM-defined search terms
+		# Surf the web with LLM-defined search terms
 		-S | --surf) surf_mode=true ;;
 
-    # Add system information to the context
+		# Add system information to the context
 		-y | --system) add_system_info=true ;;
 
-    # Add directory information to the context
+		# Add directory information to the context
 		-d | --directory) add_directory_info=true ;;
 
-    # Add clipboard information to the context
+		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
 
-    # If its not a flag, add it to the general query
+		# If its not a flag, add it to the general query
 		*) query+="$1 " ;;
 		esac
 		shift
@@ -541,7 +551,7 @@ function yo() {
 			$add_clipboard_info
 	)
 
-	### Kick off the LLM ##############################################################################################
+	### Kick off the LLM #################################################################################################
 	start_llama_session \
 		"$repo_name" \
 		"$model_name" \
@@ -552,6 +562,6 @@ function yo() {
 		$new_tokens \
 		$temp
 
-  ### Return success ###################################################################################################
-  return 0
+	### Return success ###################################################################################################
+	return 0
 }
