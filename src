@@ -41,28 +41,6 @@ function yo() {
 	### CONSTANTS AND SETTINGS ##########################################################################################
 	######################################################################################################################
 
-  ### Utilities for working with model names ###########################################################################
-#
-#	# Compose the repository name based on the model parameters
-#	function compose_repo_name() {
-#		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
-#		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]')"
-#		return 0
-#	}
-#
-#	# Compose the model name based on the model parameters
-#	function compose_model_name() {
-#		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
-#		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
-#		return 0
-#	}
-
-  function compose_repo_and_model_name() {
-    local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
-    echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
-	}
-
-	### Common model parameters ##########################################################################################
 	local GENERAL_USERNAME="bartowski"
 	local GENERAL_FINETUNING_STYLE="Instruct"
 	local GENERAL_MODEL_FILETYPE="gguf"
@@ -76,18 +54,6 @@ function yo() {
 	local TASK_MODEL_SIZE="1B"
 	local TASK_MODEL_QUANT="Q4_K_M"
 	local TASK_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
-
-	# Set the repository and model names
-	local TASK_MODEL_REPO_NAME TASK_MODEL_NAME
-  read -r TASK_MODEL_REPO_NAME TASK_MODEL_NAME <<< "$(compose_repo_and_model_name \
-    ${TASK_USERNAME} \
-    ${TASK_MODEL_SERIES} \
-    ${TASK_MODEL_SIZE} \
-    ${TASK_MODEL_FINETUNING_STYLE} \
-    ${TASK_MODEL_FILETYPE} \
-    ${TASK_MODEL_QUANT}
-  )"
-  readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
 
 	# Generation parameters
 	local TASK_MODEL_NEW_TOKENS=16
@@ -103,19 +69,6 @@ function yo() {
 	local CASUAL_MODEL_QUANT="Q4_K_M"
 	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
-	# Set the repository and model names
-	local CASUAL_MODEL_NAME CASUAL_MODEL_REPO_NAME
-  read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME <<< "$(compose_repo_and_model_name \
-    ${CASUAL_GENERAL_USERNAME} \
-    ${CASUAL_MODEL_SERIES} \
-    ${CASUAL_MODEL_SIZE} \
-    ${CASUAL_MODEL_FINETUNING_STYLE} \
-    ${CASUAL_MODEL_FILETYPE} \
-    ${CASUAL_MODEL_QUANT}
-  )"
-
-	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME
-
 	# Generation parameters
 	local CASUAL_MODEL_NEW_TOKENS=128
 	local CASUAL_MODEL_TEMP=0.2
@@ -128,18 +81,6 @@ function yo() {
 	local BALANCED_MODEL_QUANT="Q4_K_M"
 	local BALANCED_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
-	# Set the repository and model names
-	local BALANCED_MODEL_NAME BALANCED_MODEL_REPO_NAME
-	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME <<< "$(compose_repo_and_model_name \
-    ${BALANCED_GENERAL_USERNAME} \
-    ${BALANCED_MODEL_SERIES} \
-    ${BALANCED_MODEL_SIZE} \
-    ${BALANCED_MODEL_FINETUNING_STYLE} \
-    ${BALANCED_MODEL_FILETYPE} \
-    ${BALANCED_MODEL_QUANT}
-  )"
-	readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME
-
 	# Generation parameters
 	local BALANCED_MODEL_TEMP=0.2
 
@@ -150,18 +91,6 @@ function yo() {
 	local SERIOUS_MODEL_SIZE="14B"
 	local SERIOUS_MODEL_QUANT="IQ4_XS"
 	local SERIOUS_GENERAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
-
-	# Set the repository and model names
-	local SERIOUS_MODEL_NAME SERIOUS_MODEL_REPO_NAME
-	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME <<< "$(compose_repo_and_model_name \
-    ${SERIOUS_GENERAL_USERNAME} \
-    ${SERIOUS_MODEL_SERIES} \
-    ${SERIOUS_MODEL_SIZE} \
-    ${SERIOUS_GENERAL_FINETUNING_STYLE} \
-    ${SERIOUS_GENERAL_MODEL_FILETYPE} \
-    ${SERIOUS_MODEL_QUANT}
-  )"
-	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
 
 	# Generation parameters
 	local SERIOUS_MODEL_NEW_TOKENS=512
@@ -175,6 +104,63 @@ function yo() {
 
 	### Maximum length of file content to extract ########################################################################
 	local MAX_FILE_CONTENT_LENGTH=10000
+
+
+  ### Set the repository and file names ################################################################################
+  function compose_repo_and_model_name() {
+    local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
+    echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
+	}
+
+
+	# Set the repository and model names
+	local TASK_MODEL_REPO_NAME TASK_MODEL_NAME
+  read -r TASK_MODEL_REPO_NAME TASK_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${TASK_USERNAME} \
+    ${TASK_MODEL_SERIES} \
+    ${TASK_MODEL_SIZE} \
+    ${TASK_MODEL_FINETUNING_STYLE} \
+    ${TASK_MODEL_FILETYPE} \
+    ${TASK_MODEL_QUANT}
+  )"
+  readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
+
+	# Set the repository and model names
+	local CASUAL_MODEL_NAME CASUAL_MODEL_REPO_NAME
+  read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${CASUAL_GENERAL_USERNAME} \
+    ${CASUAL_MODEL_SERIES} \
+    ${CASUAL_MODEL_SIZE} \
+    ${CASUAL_MODEL_FINETUNING_STYLE} \
+    ${CASUAL_MODEL_FILETYPE} \
+    ${CASUAL_MODEL_QUANT}
+  )"
+	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME
+
+	# Set the repository and model names for the balanced model
+	local BALANCED_MODEL_NAME BALANCED_MODEL_REPO_NAME
+	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${BALANCED_GENERAL_USERNAME} \
+    ${BALANCED_MODEL_SERIES} \
+    ${BALANCED_MODEL_SIZE} \
+    ${BALANCED_MODEL_FINETUNING_STYLE} \
+    ${BALANCED_MODEL_FILETYPE} \
+    ${BALANCED_MODEL_QUANT}
+  )"
+	readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME
+
+
+	# Set the repository and model names for the serious model
+	local SERIOUS_MODEL_NAME SERIOUS_MODEL_REPO_NAME
+	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${SERIOUS_GENERAL_USERNAME} \
+    ${SERIOUS_MODEL_SERIES} \
+    ${SERIOUS_MODEL_SIZE} \
+    ${SERIOUS_GENERAL_FINETUNING_STYLE} \
+    ${SERIOUS_GENERAL_MODEL_FILETYPE} \
+    ${SERIOUS_MODEL_QUANT}
+  )"
+	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
 
 	######################################################################################################################
 	### UTILITY FUNCTIONS ################################################################################################
@@ -283,7 +269,7 @@ function yo() {
 
 		# Check if the input is an integer
 		if [[ ! "${variable_value}" =~ ^[0-9]+$ ]]; then
-			echo "Error: Invalid input ${variable_name}=\"${variable_value}\", expected an integer." >&2
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected an integer." >&2
 			return 1
 		else
 			return 0
@@ -303,12 +289,13 @@ function yo() {
 
 		# Check if the input is Boolean
 		if [[ "${variable_value}" != true && "${variable_value}" != false ]]; then
-			echo "Error: Invalid input ${variable_name}=\"${variable_value}\", expected a boolean." >&2
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a boolean." >&2
 			return 1
 		else
 			return 0
 		fi
 	}
+
 
 	# Check if the input is a float
 	function check_float() {
@@ -323,7 +310,7 @@ function yo() {
 
 		# Check if the input is a float
 		if [[ ! $variable_value =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-			echo "Error: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
 			return 1
 		else
 			return 0
@@ -333,21 +320,27 @@ function yo() {
 	# Function that checks to see if a model exists and download it if not
 	function check_model_download() {
 		# Parse arguments
-		local repo_name=$1 model_name=$2
+		local repo_name=$1 model_name=$2 verbose=$3
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
 		check_nonempty "model_name" "${model_name}" || return 1
 
-		# Check if the model exists
-		local model_path="/Users/mccomb/Library/Caches/llama.cpp/${repo_name//\//_}_${model_name}"
-		if [[ ! -f "${model_path}" ]]; then
-			echo "Downloading ${repo_name}/${model_name}..."
-			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${model_name}" -p "hi" -n 1; then
-				echo "Error: Failed to download ${repo_name}/${model_name}." >&2
-				return 1
-			fi
-		fi
+    # Check if the model exists
+    local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${model_name}"
+    if [[ ! -f "${model_path}" ]]; then
+      if [[ "${verbose}" == true ]]; then
+        if ! llama-cli --hf-repo "${repo_name}" --hf-file "${model_name}" -p "hi" -n 0; then
+          echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${model_name}." >&2
+          return 1
+        fi
+      else
+        if ! llama-cli --hf-repo "${repo_name}" --hf-file "${model_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
+          echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${model_name}." >&2
+          return 1
+        fi
+      fi
+    fi
 	}
 
 	######################################################################################################################
@@ -364,23 +357,20 @@ function yo() {
 		check_nonempty "terms" "${terms}" || return 1
 
 		# Make variables
-		local url search_term_slug response
-
-		# Generate search URL
-		search_term_slug="${terms// /%20}"
+		local url response
 
 		# Example API call
-		url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${search_term_slug}"
+		url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /%20}"
 
 		# Perform search and extract relevant information
-		if ! response=$(curl -s "${url}" | grep -E "^      \"title\"|^      \"snippet\""); then
+		if ! response=$( \curl -s "${url}" | grep -E "^      \"title\"|^      \"snippet\""); then
 			echo "Error: Failed to perform web search." >&2
 			return 1
-		fi
-
-		# Return response
-		echo "${response}"
-		return 0
+		else
+      # Return response
+      echo "${response}"
+      return 0
+    fi
 	}
 
 	### Extract optimized search terms using a small model ###############################################################
@@ -394,7 +384,7 @@ function yo() {
 		check_boolean "verbose" "${verbose}" || return 1
 
 		# Make variables
-		local prompt="" repo_name model_name terms
+		local prompt="" terms
 
 		# Generate prompt
 		prompt+="Your task is to extract the most relevant search terms from the following query for a web search.\n\n"
@@ -488,6 +478,35 @@ function yo() {
 	### LLMs AND PROMPTS #################################################################################################
 	######################################################################################################################
 
+	function generate_system_info_context() {
+	  local model cores ram free_storage
+	  model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}')
+	  cores=$(sysctl -n hw.ncpu)
+	  ram=$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')
+	  free_storage=$(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')
+	  echo "You are on a ${model} with ${cores} cores, ${ram}GB RAM, and ${free_storage}GB free disk space."
+	}
+
+	function generate_directory_info_context() {
+	  	echo "================= BEGINNING OF CURRENT DIRECTORY CONTENTS =================\n"
+			prompt+="You were invoked from the $(pwd) directory. "
+			prompt+="Here are the contents (truncated at 50, sorted by file size:\n"
+			prompt+="$(ls -lahpSR | head -n 50)\n\n"
+			prompt+="Here is a preview of the contents of the largest readable files:\n"
+			prompt+="$( \
+			  find . -maxdepth 1 -type f -exec file --mime {} + \
+          | grep 'text/' \
+          | cut -d: -f1 \
+          | xargs du -h \
+          | sort -rh \
+          | head -n 5 \
+          | awk '{print $2}' \
+          | xargs -I {} sh -c 'echo "\n\nFile: {}"; echo ---\\n$(head -n 10 "{}")\\n---'
+      )\n"
+			prompt+="==================== END OF CURRENT DIRECTORY CONTENTS ====================\n\n"
+
+	}
+
 	### Generate a prompt for one-off or interactive sessions ############################################################
 	function generate_prompt() {
 
@@ -510,10 +529,7 @@ function yo() {
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
-			prompt+="You are on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
-			prompt+="with $(sysctl -n hw.ncpu) cores, "
-			prompt+="$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')GB RAM, "
-			prompt+="and $(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')GB free disk space.\n\n"
+			prompt+=$(generate_system_info_context)
 		fi
 
 		# Add directory information if requested
@@ -601,7 +617,7 @@ function yo() {
 		check_float "temp" "${temp}" || return 1
 
 		# Check if the model exists and download it if not
-		check_model_download "${repo_name}" "${model_name}" || return 1
+		check_model_download "${repo_name}" "${model_name}" "${squash_stderr}" || return 1
 
 		# Configure llama-cli arguments
 		local args=(
