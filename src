@@ -221,7 +221,7 @@ function yo() {
 					-d, --directory         Include a list of the files in the current directory in Yo's context.
 					-r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
 																	(e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
-					-s, --search "TERMS"		Perform a web search using the specified quoted terms and integrate the results into
+					-s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 																	Yo's context. Requires an active internet connection.
 					-S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 																	into Yo's context. Requires an active internet connection.
