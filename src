@@ -1,22 +1,40 @@
 #!/usr/bin/env zsh
 
-# `yo` - A command-line AI assistant
+########################################################################################################################
+########################################################################################################################
+######'                     `########'                                                                            `#####
+####'    db    db  .d88b.     `####'                      Your AI Assistant in the Command Line                    `####
+####     `8b  d8' .8P  Y8.     ####                                                                                 ####
+####      `8bd8'  88    88     ####     If you are here, you are probably trying to fix or change something. If     ####
+####        88    88    88     ####     you are here to fix something,  I am sorry it broke in the first place!     ####
+####        88    `8b  d8'     ####     But either way, I hope that the documentation is helpful and I wish you     ####
+####.       YP     `Y88P'     .####.    the best of luck. If you need help, please email: <ccmcc2012@gmail.com>    .####
+######.                     .########.                                                                           .######
+########################################################################################################################
+########################################################################################################################
+
 function yo() {
 
 	######################################################################################################################
 	### UTILITIES AND CONSTANTS ##########################################################################################
 	######################################################################################################################
 
-	# Symbol used to signal the end of one-off sessions
+	### Display version information ######################################################################################
+	local VERSION="0.1.0"
+	function show_version() {
+		echo "yo v$VERSION $YO"
+	}
+
+	### Symbol used to signal the end of one-off sessions ################################################################
 	local YO="✌️"
 
-	# Common model parameters
+	### Common model parameters ##########################################################################################
 	local MODEL_USERNAME="bartowski"
 	local MODEL_SERIES="Qwen2.5"
 	local MODEL_FINETUNING="Instruct"
 	local MODEL_FILETYPE="gguf"
 
-	# Define parameters for the task model
+	### Define parameters for the task model #############################################################################
 	local TASK_MODEL_USERNAME=$MODEL_USERNAME
 	local TASK_MODEL_SERIES="Llama-3.2"
 	local TASK_MODEL_FINETUNING=$MODEL_FINETUNING
@@ -26,7 +44,7 @@ function yo() {
 	local TASK_MODEL_NEW_TOKENS=16
 	local TASK_MODEL_TEMP=0.2
 
-	# Define parameters for the casual model
+	### Define parameters for the casual model ###########################################################################
 	local CASUAL_MODEL_USERNAME=$MODEL_USERNAME
 	local CASUAL_MODEL_SERIES=$MODEL_SERIES
 	local CASUAL_MODEL_FINETUNING=$MODEL_FINETUNING
@@ -36,7 +54,7 @@ function yo() {
 	local CASUAL_MODEL_NEW_TOKENS=128
 	local CASUAL_MODEL_TEMP=0.2
 
-	# Define the series model parameters
+	### Define the series model parameters ###############################################################################
 	local SERIOUS_MODEL_USERNAME=$MODEL_USERNAME
 	local SERIOUS_MODEL_SERIES=$MODEL_SERIES
 	local SERIOUS_MODEL_FINETUNING=$MODEL_FINETUNING
@@ -46,23 +64,15 @@ function yo() {
 	local SERIOUS_MODEL_NEW_TOKENS=512
 	local SERIOUS_MODEL_TEMP=0.2
 
-	# Custom search API key
+	### Custom search API key ############################################################################################
 	local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
 	local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
 	local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
 
-	# Maximum length of file content to extract
+	### Maximum length of file content to extract ########################################################################
 	local MAX_FILE_CONTENT_LENGTH=10000
 
-	# Version
-	local VERSION="0.1.0"
-
-	# Display version information
-	function show_version() {
-		echo "yo v$VERSION $YO"
-	}
-
-	# Display usage instructions
+	### Display usage instructions #######################################################################################
 	function show_help() {
 		cat <<-EOF
 			yo - A command-line AI assistant.
@@ -75,10 +85,10 @@ function yo() {
 
 			Context Options:
 			  These options help you control the information that Yo uses to answer your question.
-			  -d, --directory         Extract information from the current directory and integrate it into Yo's context.
-			  -r, --read "PATH"       Extract information from the specified file or URL and integrate the results into Yo's
-			                          context. Supports text-based files (e.g., .txt, .md, .py, etc.), PDF files via
-			                          pdftotext, and web pages via curl and pandoc.
+			  -c, --clipboard         Copy the contents of the clipboard into Yo's context.
+			  -d, --directory         List the files of the current directory in Yo's context.
+			  -r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
+			                          (e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
 			  -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 			                          Yo's context. Requires an active internet connection.
 			  -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
@@ -121,21 +131,23 @@ function yo() {
 		EOF
 	}
 
+	### Compose the repository name based on the model parameters ########################################################
 	function compose_repo_name() {
-		local username=$1
-		local series=$2
-		local size=$3
-		local finetuning=$4
-		local filetype=$5
+
+		# Parse arguments
+		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
+
+		# Return the repository name
 		echo "${username}/${series}-${size}-${finetuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
 	}
 
+	### Compose the model name based on the model parameters #############################################################
 	function compose_model_name() {
-		local series=$1
-		local size=$2
-		local finetuning=$3
-		local quant=$4
-		local filetype=$5
+
+		# Parse arguments
+		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
+
+		# Return the model name
 		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
 	}
 
@@ -143,8 +155,9 @@ function yo() {
 	### SEARCH ###########################################################################################################
 	######################################################################################################################
 
-	# Perform a web search with user-provided terms
+	### Perform a web search with user-provided terms ####################################################################
 	function perform_search() {
+
 		# Parse arguments
 		local terms=$1
 
@@ -164,7 +177,7 @@ function yo() {
 		echo "$response"
 	}
 
-	# Extract optimized search terms using a small model
+	### Extract optimized search terms using a small model ###############################################################
 	function extract_search_terms() {
 
 		# Parse arguments
@@ -183,9 +196,25 @@ function yo() {
 		prompt+="User Query: $query\n"
 		prompt+="Search Terms: "
 
-		# Generate response
-		repo_name="$(compose_repo_name $TASK_MODEL_USERNAME $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_FILETYPE)"
-		model_name="$(compose_model_name $TASK_MODEL_SERIES $TASK_MODEL_SIZE $TASK_MODEL_FINETUNING $TASK_MODEL_QUANT $TASK_MODEL_FILETYPE)"
+		# Generate the repo name for the task model
+		repo_name="$(
+			compose_repo_name \
+				$TASK_MODEL_USERNAME \
+				$TASK_MODEL_SERIES \
+				$TASK_MODEL_SIZE \
+				$TASK_MODEL_FINETUNING \
+				$TASK_MODEL_FILETYPE
+		)"
+
+		# Generate the model name for the task model
+		model_name="$(
+			compose_model_name \
+				$TASK_MODEL_SERIES \
+				$TASK_MODEL_SIZE \
+				$TASK_MODEL_FINETUNING \
+				$TASK_MODEL_QUANT \
+				$TASK_MODEL_FILETYPE
+		)"
 
 		# Generate response
 		local terms
@@ -194,7 +223,7 @@ function yo() {
 		# Only take the first line
 		terms=$(echo "$terms" | head -n 1)
 
-		# Remove end of text if needed
+		# Remove [end of text] marker if needed
 		terms="${terms//\[end of text\]/}"
 
 		# Return results
@@ -205,7 +234,7 @@ function yo() {
 	### CONTENT EXTRACTION ###############################################################################################
 	######################################################################################################################
 
-	# Extract file_info from a file or URL (supports text and PDF files)
+	### Extract file_info from a file or URL (supports text and PDF files) ###############################################
 	function extract_file_info() {
 
 		# Parse arguments
@@ -249,23 +278,22 @@ function yo() {
 	}
 
 	######################################################################################################################
-	### LLMS AND PROMPTS #################################################################################################
+	### LLMs AND PROMPTS #################################################################################################
 	######################################################################################################################
 
-	# Generate a prompt for one-off or interactive sessions
+	### Generate a prompt for one-off or interactive sessions ############################################################
 	function generate_prompt() {
 
 		# Parse arguments
-		local interactive=$1 file_info=$2 filename=$3
-		local query=$4 search_info=$5 search_terms=$6
-		local add_system_info=$7 add_directory_info=$8
+		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6 add_system_info=$7 \
+			add_directory_info=$8 add_clipboard_info=$9
 
 		# Generate basic prompt
 		local prompt=""
 		prompt+="You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. "
 		prompt+="It is currently $(date).\n\n"
 
-    # Add system information if requested
+		# Add system information if requested
 		if [[ $add_system_info == true ]]; then
 			prompt+="You were invoked on a $(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') "
 			prompt+="with $(sysctl -n hw.ncpu) cores, "
@@ -280,12 +308,19 @@ function yo() {
 			prompt+="Here are the contents (truncated at 50, sorted by file size:\n"
 			prompt+="$(ls -lahpS | head -n 50)\n\n"
 			prompt+="==================== END OF CURRENT DIRECTORY CONTENTS ====================\n\n"
+		fi
 
+		# Add clipboard information if requested
+		if [[ $add_clipboard_info == true ]]; then
+			prompt+="================= BEGINNING OF CLIPBOARD CONTENTS =================\n"
+			prompt+="Here is the contents of the clipboard:\n"
+			prompt+="$(pbpaste)\n"
+			prompt+="==================== END OF CLIPBOARD CONTENTS ====================\n\n"
 		fi
 
 		# Add file file_info if available
 		if [[ -n "$file_info" ]]; then
-			prompt+="Relevant information from ``$filename``:\n"
+			prompt+="Relevant information from $()$filename$():\n"
 			prompt+="================= BEGINNING OF FILE CONTENTS =================\n"
 			prompt+="$file_info\n"
 			prompt+="==================== END OF FILE CONTENTS ====================\n\n"
@@ -293,13 +328,13 @@ function yo() {
 
 		# Add search information if available
 		if [[ -n "$search_terms" ]]; then
-			prompt+="Relevant information from web search using ``$search_terms``:\n"
+			prompt+="Relevant information from web search using $()$search_terms$():\n"
 			prompt+="================= BEGINNING OF SEARCH RESULTS =================\n"
 			prompt+="$search_info\n"
 			prompt+="==================== END OF SEARCH RESULTS ====================\n\n"
 		fi
 
-		# Add query and instructions based on interactive
+		# Add query and instructions based on interactive ################################################################
 		if [[ $interactive == false ]]; then
 			prompt+="Your task is to directly answer the user's question. "
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
@@ -314,13 +349,12 @@ function yo() {
 		echo "$prompt"
 	}
 
-	# Start a llama-cli session
+	### Start a llama-cli session ########################################################################################
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 model_name=$2 prompt=$3
-		local interactive=$4 squash_stderr=$5 display_prompt=$6
-		local number_of_tokens_to_generate=$7 temp=$8
+		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 squash_stderr=$5 display_prompt=$6 \
+			number_of_tokens_to_generate=$7 temp=$8
 
 		# Configure llama-cli arguments
 		local args=(
@@ -364,10 +398,11 @@ function yo() {
 	### MAIN FUNCTION ####################################################################################################
 	######################################################################################################################
 
-	# Parse arguments
-	local read_file="" query="" search_terms=""
-	local read_mode=false search_mode=false surf_mode=false verbose=false
-	local add_directory_info=false add_system_info=false
+	### Parse arguments ##################################################################################################
+	local query="" verbose=false
+	local read_file="" read_mode=false
+	local search_mode=false search_terms="" surf_mode=false
+	local add_directory_info=false add_system_info=false add_clipboard_info=false
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 		-h | --help)
@@ -402,18 +437,19 @@ function yo() {
 		-S | --surf) surf_mode=true ;;
 		-y | --system) add_system_info=true ;;
 		-d | --directory) add_directory_info=true ;;
+		-c | --clipboard) add_clipboard_info=true ;;
 		*) query+="$1 " ;;
 		esac
 		shift
 	done
 
-	# Handle file reading
+	### Read in files if needed ##########################################################################################
 	local file_info=""
 	if [[ $read_mode == true && -n "$read_file" ]]; then
 		file_info=$(extract_file_info "$read_file" $MAX_FILE_CONTENT_LENGTH) || return 1
 	fi
 
-	# Handle search operations
+	### Bring in search information if needed ############################################################################
 	local search_info=""
 	if [[ $search_mode == true ]]; then
 		search_info=$(perform_search "$search_terms")
@@ -422,26 +458,74 @@ function yo() {
 		search_info=$(perform_search "$search_terms")
 	fi
 
-	# Configure specific model based on one-off or interactive session
+	### Configure the model based on whether its a one-off or interactive session ########################################
 	local quant size repo_name model_name new_tokens temp
 	if [[ -n "$query" ]]; then
-		# for casual model
-		repo_name="$(compose_repo_name $CASUAL_MODEL_USERNAME $CASUAL_MODEL_SERIES $CASUAL_MODEL_SIZE $CASUAL_MODEL_FINETUNING $CASUAL_MODEL_FILETYPE)"
-		model_name="$(compose_model_name $CASUAL_MODEL_SERIES $CASUAL_MODEL_SIZE $CASUAL_MODEL_FINETUNING $CASUAL_MODEL_QUANT $CASUAL_MODEL_FILETYPE)"
+		repo_name="$(
+			compose_repo_name \
+				$CASUAL_MODEL_USERNAME \
+				$CASUAL_MODEL_SERIES \
+				$CASUAL_MODEL_SIZE \
+				$CASUAL_MODEL_FINETUNING \
+				$CASUAL_MODEL_FILETYPE
+		)"
+		model_name="$(
+			compose_model_name \
+				$CASUAL_MODEL_SERIES \
+				$CASUAL_MODEL_SIZE \
+				$CASUAL_MODEL_FINETUNING \
+				$CASUAL_MODEL_QUANT \
+				$CASUAL_MODEL_FILETYPE
+		)"
 		new_tokens="$CASUAL_MODEL_NEW_TOKENS"
-    temp=$CASUAL_MODEL_TEMP
+		temp=$CASUAL_MODEL_TEMP
 		interactive=false
 	else
-		repo_name="$(compose_repo_name $SERIOUS_MODEL_USERNAME $SERIOUS_MODEL_SERIES $SERIOUS_MODEL_SIZE $SERIOUS_MODEL_FINETUNING $SERIOUS_MODEL_FILETYPE)"
-		model_name="$(compose_model_name $SERIOUS_MODEL_SERIES $SERIOUS_MODEL_SIZE $SERIOUS_MODEL_FINETUNING $SERIOUS_MODEL_QUANT $SERIOUS_MODEL_FILETYPE)"
+		repo_name="$(
+			compose_repo_name \
+				$SERIOUS_MODEL_USERNAME \
+				$SERIOUS_MODEL_SERIES \
+				$SERIOUS_MODEL_SIZE \
+				$SERIOUS_MODEL_FINETUNING \
+				$SERIOUS_MODEL_FILETYPE
+		)"
+		model_name="$(
+			compose_model_name \
+				$SERIOUS_MODEL_SERIES \
+				$SERIOUS_MODEL_SIZE \
+				$SERIOUS_MODEL_FINETUNING \
+				$SERIOUS_MODEL_QUANT \
+				$SERIOUS_MODEL_FILETYPE
+		)"
 		new_tokens="$SERIOUS_MODEL_NEW_TOKENS"
 		temp=$SERIOUS_MODEL_TEMP
 		interactive=true
 	fi
 
-	# Generate and start appropriate session
+	### Generate the prompt ##############################################################################################
 	local prompt
-	prompt=$(generate_prompt $interactive "$file_info" "$read_file" "$query" "$search_info" "$search_terms" $add_system_info $add_directory_info)
-	start_llama_session "$repo_name" "$model_name" "$prompt" $interactive $verbose $verbose $new_tokens $temp
+	prompt=$(
+		generate_prompt \
+			$interactive \
+			"$file_info" \
+			"$read_file" \
+			"$query" \
+			"$search_info" \
+			"$search_terms" \
+			$add_system_info \
+			$add_directory_info \
+			$add_clipboard_info
+	)
+
+	### Kick off the LLM ##############################################################################################
+	start_llama_session \
+		"$repo_name" \
+		"$model_name" \
+		"$prompt" \
+		$interactive \
+		$verbose \
+		$verbose \
+		$new_tokens \
+		$temp
 
 }
