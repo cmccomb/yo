@@ -565,7 +565,18 @@ function yo() {
 			prompt+="================= BEGINNING OF CURRENT DIRECTORY CONTENTS =================\n"
 			prompt+="You were invoked from the $(pwd) directory. "
 			prompt+="Here are the contents (truncated at 50, sorted by file size:\n"
-			prompt+="$(ls -lahpS | head -n 50)\n\n"
+			prompt+="$(ls -lahpSR | head -n 50)\n\n"
+			prompt+="Here is a preview of the contents of the largest readable files:\n"
+			prompt+="$( \
+			  find . -maxdepth 1 -type f -exec file --mime {} + \
+          | grep 'text/' \
+          | cut -d: -f1 \
+          | xargs du -h \
+          | sort -rh \
+          | head -n 5 \
+          | awk '{print $2}' \
+          | xargs -I {} sh -c 'echo "\n\nFile: {}"; echo ---\\n$(head -n 10 "{}")\\n---'
+      )\n"
 			prompt+="==================== END OF CURRENT DIRECTORY CONTENTS ====================\n\n"
 		fi
 
@@ -597,7 +608,7 @@ function yo() {
 		if [[ "${interactive}" == false ]]; then
 			prompt+="Your task is to directly answer the user's question. "
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
-			prompt+="End your answer with the stop symbol ${YO}.\n\n"
+			prompt+="End your answer with the symbol ${YO}.\n\n"
 			prompt+="Here is an example:\n"
 			prompt+="User Query: how large is the capital of france ${YO}\n"
 			prompt+="Your Super-Short Answer: 41 square miles (105 square km) ${YO}\n\n"
