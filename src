@@ -88,9 +88,9 @@ function yo() {
 			${TASK_MODEL_QUANT} \
 			${TASK_MODEL_FILETYPE}
 	)"
-  readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
+	readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
 
-  # Generation parameters
+	# Generation parameters
 	local TASK_MODEL_NEW_TOKENS=16
 	local TASK_MODEL_TEMP=0.2
 
@@ -122,7 +122,7 @@ function yo() {
 			${CASUAL_MODEL_QUANT} \
 			${CASUAL_MODEL_FILETYPE}
 	)"
-  readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME
+	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME
 
 	# Generation parameters
 	local CASUAL_MODEL_NEW_TOKENS=128
@@ -170,22 +170,22 @@ function yo() {
 	# Set the repository and model names
 	local SERIOUS_MODEL_NAME SERIOUS_MODEL_REPO_NAME
 	SERIOUS_MODEL_REPO_NAME="$(
-    compose_repo_name \
-      ${SERIOUS_MODEL_USERNAME} \
-      ${SERIOUS_MODEL_SERIES} \
-      ${SERIOUS_MODEL_SIZE} \
-      ${SERIOUS_MODEL_FINETUNING} \
-      ${SERIOUS_MODEL_FILETYPE}
-  )"
-  SERIOUS_MODEL_NAME="$(
-    compose_model_name \
-      ${SERIOUS_MODEL_SERIES} \
-      ${SERIOUS_MODEL_SIZE} \
-      ${SERIOUS_MODEL_FINETUNING} \
-      ${SERIOUS_MODEL_QUANT} \
-      ${SERIOUS_MODEL_FILETYPE}
-  )"
-    readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
+		compose_repo_name \
+			${SERIOUS_MODEL_USERNAME} \
+			${SERIOUS_MODEL_SERIES} \
+			${SERIOUS_MODEL_SIZE} \
+			${SERIOUS_MODEL_FINETUNING} \
+			${SERIOUS_MODEL_FILETYPE}
+	)"
+	SERIOUS_MODEL_NAME="$(
+		compose_model_name \
+			${SERIOUS_MODEL_SERIES} \
+			${SERIOUS_MODEL_SIZE} \
+			${SERIOUS_MODEL_FINETUNING} \
+			${SERIOUS_MODEL_QUANT} \
+			${SERIOUS_MODEL_FILETYPE}
+	)"
+	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
 
   # Generation parameters
 	local SERIOUS_MODEL_NEW_TOKENS=512
@@ -354,40 +354,24 @@ function yo() {
 		fi
 	}
 
-	### Compose the repository name based on the model parameters ########################################################
-	function compose_repo_name() {
-
+	# Function that checks to see if a model exists and download it if not
+	function check_model_download() {
 		# Parse arguments
-		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
+		local repo_name=$1 model_name=$2
 
 		# Check that inputs are valid
-		check_nonempty "username" "${username}" || return 1
-		check_nonempty "series" "${series}" || return 1
-		check_nonempty "size" "${size}" || return 1
-		check_nonempty "finetuning" "${finetuning}" || return 1
-		check_nonempty "filetype" "${filetype}" || return 1
+		check_nonempty "repo_name" "${repo_name}" || return 1
+		check_nonempty "model_name" "${model_name}" || return 1
 
-		# Return the repository name
-		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]')"
-		return 0
-	}
-
-	### Compose the model name based on the model parameters #############################################################
-	function compose_model_name() {
-
-		# Parse arguments
-		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
-
-		# Check that inputs are valid
-		check_nonempty "series" "${series}" || return 1
-		check_nonempty "size" "${size}" || return 1
-		check_nonempty "finetuning" "${finetuning}" || return 1
-		check_nonempty "quant" "${quant}" || return 1
-		check_nonempty "filetype" "${filetype}" || return 1
-
-		# Return the model name
-		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
-		return 0
+		# Check if the model exists
+		local model_path="/Users/mccomb/Library/Caches/llama.cpp/${repo_name//\//_}_${model_name}"
+		if [[ ! -f "${model_path}" ]]; then
+			echo "Downloading ${repo_name}/${model_name}..."
+			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${model_name}" -p "hi" -n 1; then
+				echo "Error: Failed to download ${repo_name}/${model_name}." >&2
+				return 1
+			fi
+		fi
 	}
 
 	######################################################################################################################
@@ -615,12 +599,12 @@ function yo() {
 			prompt+="Your answer will be concise, helpful, and immediately usable. "
 			prompt+="End your answer with the stop symbol ${YO}.\n\n"
 			prompt+="Here is an example:\n"
-      prompt+="User Query: how large is the capital of france ${YO}\n"
-      prompt+="Your Super-Short Answer: 41 square miles (105 square km) ${YO}\n\n"
-      prompt+="Here is another example:\n"
-      prompt+="User Query: what is the furthest planet from the sun ${YO}\n"
-      prompt+="Search Terms:  Neptune is the furthest planet from the Sun. ${YO}\n\n"
-      prompt+="Here is the real user query.\n"
+			prompt+="User Query: how large is the capital of france ${YO}\n"
+			prompt+="Your Super-Short Answer: 41 square miles (105 square km) ${YO}\n\n"
+			prompt+="Here is another example:\n"
+			prompt+="User Query: what is the furthest planet from the sun ${YO}\n"
+			prompt+="Search Terms:  Neptune is the furthest planet from the Sun. ${YO}\n\n"
+			prompt+="Here is the real user query.\n"
 			prompt+="User Query: ${query} ${YO}\n"
 			prompt+="Your Super-Short Answer:"
 		else
@@ -648,6 +632,9 @@ function yo() {
 		check_boolean "display_prompt" "${display_prompt}" || return 1
 		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
 		check_float "temp" "${temp}" || return 1
+
+		# Check if the model exists and download it if not
+		check_model_download "${repo_name}" "${model_name}" || return 1
 
 		# Configure llama-cli arguments
 		local args=(
@@ -704,6 +691,8 @@ function yo() {
 	local read_mode=false read_file="" file_info=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
+	local task_model_override=false casual_model_override=false balanced_model_override=false
+	local serious_model_override=false
 	local quant size repo_name model_name new_tokens temp prompt
 
 	# Start parsing arguments
