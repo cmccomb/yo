@@ -227,19 +227,19 @@ function yo() {
                                   into Yo's context. Requires an active internet connection.
           -y, --system            Run a few system commands and integrate the information into Yo's context.
 
-        Model Size Options:
-          Yo uses the following models:
-            * Task model (${TASK_MODEL_NAME})
-            * Casual model (${CASUAL_MODEL_NAME})
-            * Balanced model (${BALANCED_MODEL_NAME})
-            * Serious model (${SERIOUS_MODEL_NAME})
-          By default, Yo uses the task model for summarization and other small tasks, the casual model for one-off
-          questions, and the serious model for interactive sessions. You can override the default model by using the
-          following options:
-            -tm, --task-model       Use the task model
-            -cm, --casual-model     Use the casual model
-            -bm, --balanced-model   Use the balanced model
-            -sm, --serious-model    Use the serious model
+      Model Size Options:
+        Yo uses the following models:
+          * Task model (${TASK_MODEL_NAME})
+          * Casual model (${CASUAL_MODEL_NAME})
+          * Balanced model (${BALANCED_MODEL_NAME})
+          * Serious model (${SERIOUS_MODEL_NAME})
+        By default, Yo uses the task model for summarization and other small tasks, the casual model for one-off
+        questions, and the serious model for interactive sessions. You can override the default model by using the
+        following options:
+          -tm, --task-model       Use the task model
+          -cm, --casual-model     Use the casual model
+          -bm, --balanced-model   Use the balanced model
+          -sm, --serious-model    Use the serious model
 
 			General Purpose Options:
 			  These options provide general functionality.
