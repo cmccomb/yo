@@ -65,7 +65,7 @@ function yo() {
 	local CASUAL_GENERAL_USERNAME=$GENERAL_USERNAME
 	local CASUAL_MODEL_SERIES="Qwen2.5"
 	local CASUAL_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
-	local CASUAL_MODEL_SIZE="1.5B"
+	local CASUAL_MODEL_SIZE="3B"
 	local CASUAL_MODEL_QUANT="Q4_K_M"
 	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
@@ -685,7 +685,6 @@ function yo() {
 		fi
 
 		# Add query and instructions based on interactive ##################################################################
-		echo "Adding instructions to prompt..." >&2
 	  if [[ "${interactive}" == false ]]; then
 			prompt+=$(generate_oneoff_instructions "${query}")
 		else
