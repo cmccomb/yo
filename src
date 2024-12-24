@@ -16,17 +16,28 @@
 function yo() {
 
 	######################################################################################################################
-	### UTILITIES AND CONSTANTS ##########################################################################################
+	### THE YO ###########################################################################################################
 	######################################################################################################################
 
-	### Display version information ######################################################################################
+	local YO="✌️"
+	readonly YO
+
+	######################################################################################################################
+	### THE VERSION ######################################################################################################
+	######################################################################################################################
+
+	### Define the version of the script #################################################################################
+	# All versioning follows semver as defined at https://semver.org/
 	local VERSION="0.1.0"
+
+	### Display version information ######################################################################################
 	function show_version() {
 		echo "yo v$VERSION $YO"
 	}
 
-	### Symbol used to signal the end of one-off sessions ################################################################
-	local YO="✌️"
+	######################################################################################################################
+	### CONSTANTS AND SETTINGS ##########################################################################################
+	######################################################################################################################
 
 	### Common model parameters ##########################################################################################
 	local MODEL_USERNAME="bartowski"
@@ -70,6 +81,10 @@ function yo() {
 
 	### Maximum length of file content to extract ########################################################################
 	local MAX_FILE_CONTENT_LENGTH=10000
+
+	######################################################################################################################
+	### UTILITY FUNCTIONS ################################################################################################
+	######################################################################################################################
 
 	### Display usage instructions #######################################################################################
 	function show_help() {
@@ -128,6 +143,84 @@ function yo() {
 			  9. Add verbosity to any of these commands
 			    $ yo what is the capital of france --verbose
 		EOF
+		return 0
+	}
+
+
+	# Check if the input is empty
+	function check_nonempty() {
+
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
+
+		# Check if the input is empty
+		if [[ -z "$variable_value" ]]; then
+			echo "Error: Invalid input $variable_name=\"$variable_value\", expected a non-empty string." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
+
+	# Check if the input is an integer and print an error message with the name of the variable if not
+	function check_integer() {
+
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
+
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "$variable_name" || return 1
+		check_nonempty "variable_value" "$variable_value" || return 1
+
+		# Check if the input is an integer
+		if [[ ! $variable_value =~ ^[0-9]+$ ]]; then
+			echo "Error: Invalid input $variable_name=\"$variable_value\", expected an integer." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
+
+	# Check if the input is Boolean
+	function check_boolean() {
+
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
+
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "$variable_name" || return 1
+		check_nonempty "variable_value" "$variable_value" || return 1
+
+		# Check if the input is Boolean
+		if [[ $variable_value != true && $variable_value != false ]]; then
+			echo "Error: Invalid input $variable_name=\"$variable_value\", expected a boolean." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
+
+	# Check if the input is a float
+	function check_float() {
+
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
+
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "$variable_name" || return 1
+		check_nonempty "variable_value" "$variable_value" || return 1
+
+		# Check if the input is a float
+		if [[ ! $variable_value =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+			echo "Error: Invalid input $variable_name=\"$variable_value\", expected a float." >&2
+			return 1
+		else
+			return 0
+		fi
 	}
 
 	### Compose the repository name based on the model parameters ########################################################
@@ -137,13 +230,15 @@ function yo() {
 		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
 
 		# Check that inputs are valid
-		[[ -z "$username" || -z "$series" || -z "$size" || -z "$finetuning" || -z "$filetype" ]] && {
-      echo "Error: Invalid arguments for compose_repo_name." >&2
-      return 1
-    }
+		check_nonempty "username" "$username" || return 1
+		check_nonempty "series" "$series" || return 1
+		check_nonempty "size" "$size" || return 1
+		check_nonempty "finetuning" "$finetuning" || return 1
+		check_nonempty "filetype" "$filetype" || return 1
 
 		# Return the repository name
 		echo "${username}/${series}-${size}-${finetuning}-$(echo $filetype | tr '[:lower:]' '[:upper:]')"
+		return 0
 	}
 
 	### Compose the model name based on the model parameters #############################################################
@@ -153,13 +248,15 @@ function yo() {
 		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
 
 		# Check that inputs are valid
-    [[ -z "$series" || -z "$size" || -z "$finetuning" || -z "$quant" || -z "$filetype" ]] && {
-      echo "Error: Invalid arguments for compose_model_name." >&2
-      return 1
-    }
+		check_nonempty "series" "$series" || return 1
+		check_nonempty "size" "$size" || return 1
+		check_nonempty "finetuning" "$finetuning" || return 1
+		check_nonempty "quant" "$quant" || return 1
+		check_nonempty "filetype" "$filetype" || return 1
 
 		# Return the model name
 		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
+		return 0
 	}
 
 	######################################################################################################################
@@ -173,10 +270,7 @@ function yo() {
 		local terms=$1
 
 		# Check that inputs are valid
-    [[ -z "$terms" ]] && {
-      echo "Error: Invalid arguments for perform_search." >&2
-      return 1
-    }
+		check_nonempty "terms" "$terms" || return 1
 
 		# Make variables
 		local url search_term_slug response
@@ -188,10 +282,14 @@ function yo() {
 		url="$GOOGLE_CSE_BASE_URL?key=$GOOGLE_CSE_API_KEY&cx=$GOOGLE_CSE_ID&q=$search_term_slug"
 
 		# Perform search and extract relevant information
-		response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\"")
+    if ! response=$(curl -s "$url" | grep -E "^      \"title\"|^      \"snippet\""); then
+        echo "Error: Failed to perform web search." >&2
+        return 1
+    fi
 
 		# Return response
 		echo "$response"
+		return 0
 	}
 
 	### Extract optimized search terms using a small model ###############################################################
@@ -201,16 +299,8 @@ function yo() {
 		local query=$1 verbose=$2
 
 		# Check that inputs are valid
-    [[ -z "$query" ]] && {
-      echo "Error: Invalid query arguments for extract_search_terms." >&2
-      return 1
-    }
-
-    # Check that verbose is a bool
-    [[ $verbose != true && $verbose != false ]] && {
-      echo "Error: Invalid verbose argument for extract_search_terms." >&2
-      return 1
-    }
+		check_nonempty "query" "$query" || return 1
+		check_boolean "verbose" "$verbose" || return 1
 
 		# Make variables
 		local prompt="" repo_name model_name terms
@@ -268,6 +358,7 @@ function yo() {
 
 		# Return results
 		echo "$terms"
+		return 0
 	}
 
 	######################################################################################################################
@@ -281,10 +372,8 @@ function yo() {
 		local source=$1 max_length=$2
 
 		# Check that inputs are valid
-    [[ -z "$source" ]] && {
-      echo "Error: Invalid source argument for extract_file_info." >&2
-      return 1
-    }
+		check_nonempty "source" "$source" || return 1
+		check_integer "max_length" "$max_length" || return 1
 
 		# Make variables
 		local file_info
@@ -321,6 +410,7 @@ function yo() {
 
 		# Return file_info
 		echo "$file_info"
+		return 0
 	}
 
 	######################################################################################################################
@@ -333,6 +423,12 @@ function yo() {
 		# Parse arguments
 		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6 add_system_info=$7 \
 			add_directory_info=$8 add_clipboard_info=$9
+
+		# Check that inputs are valid
+		check_boolean "interactive" "$interactive" || return 1
+		check_boolean "add_system_info" "$add_system_info" || return 1
+		check_boolean "add_directory_info" "$add_directory_info" || return 1
+		check_boolean "add_clipboard_info" "$add_clipboard_info" || return 1
 
 		# Make variables
 		local prompt=""
@@ -395,6 +491,7 @@ function yo() {
 
 		# Return prompt
 		echo "$prompt"
+		return 0
 	}
 
 	### Start a llama-cli session ########################################################################################
@@ -403,6 +500,16 @@ function yo() {
 		# Parse arguments
 		local repo_name=$1 model_name=$2 prompt=$3 interactive=$4 squash_stderr=$5 display_prompt=$6 \
 			number_of_tokens_to_generate=$7 temp=$8
+
+		# Check that inputs are valid
+		check_nonempty "repo_name" "$repo_name" || return 1
+		check_nonempty "model_name" "$model_name" || return 1
+		check_nonempty "prompt" "$prompt" || return 1
+		check_boolean "interactive" "$interactive" || return 1
+		check_boolean "squash_stderr" "$squash_stderr" || return 1
+		check_boolean "display_prompt" "$display_prompt" || return 1
+		check_integer "number_of_tokens_to_generate" "$number_of_tokens_to_generate" || return 1
+		check_float "temp" "$temp" || return 1
 
 		# Configure llama-cli arguments
 		local args=(
@@ -436,9 +543,15 @@ function yo() {
 
 		# Start session
 		if [[ $squash_stderr != true ]]; then
-			llama-cli "${args[@]}" 2>/dev/null
+			if ! llama-cli "${args[@]}" 2>/dev/null; then
+				echo "Error: llama-cli command failed." >&2
+				return 1
+			fi
 		else
-			llama-cli "${args[@]}"
+			if ! llama-cli "${args[@]}"; then
+				echo "Error: llama-cli command failed." >&2
+				return 1
+			fi
 		fi
 	}
 
@@ -510,8 +623,11 @@ function yo() {
 		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
 
-    # If its something that looks like a flag but isn't one of the above, show an error
-    -*) echo "Error: Unknown flag: $1" >&2 ; return 1 ;;
+		# If its something that looks like a flag but isn't one of the above, show an error
+		-*)
+			echo "Error: Unknown flag: $1" >&2
+			return 1
+			;;
 
 		# If its not a flag, add it to the general query
 		*) query+="$1 " ;;
