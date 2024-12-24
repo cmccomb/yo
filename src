@@ -217,62 +217,62 @@ function yo() {
 
 			Context Options:
 			  These options help you control the information that Yo uses to answer your question.
-					-c, --clipboard         Copy the contents of the clipboard into Yo's context.
-					-d, --directory         Include a list of the files in the current directory in Yo's context.
-					-r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
-																	(e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
-					-s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
-																	Yo's context. Requires an active internet connection.
-					-S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
-																	into Yo's context. Requires an active internet connection.
-					-y, --system            Run a few system commands and integrate the information into Yo's context.
+			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
+			    -d, --directory         Include a list of the files in the current directory in Yo's context.
+			    -r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
+			                            (e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
+			    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
+			                            Yo's context. Requires an active internet connection.
+			    -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
+			                            into Yo's context. Requires an active internet connection.
+			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			Model Size Options:
-				Yo uses the following models:
-					* Task model (${TASK_MODEL_NAME})
-					* Casual model (${CASUAL_MODEL_NAME})
-					* Balanced model (${BALANCED_MODEL_NAME})
-					* Serious model (${SERIOUS_MODEL_NAME})
-				By default, Yo uses the task model for summarization and other small tasks, the casual model for one-off
-				questions, and the serious model for interactive sessions. You can override the default model by using the
-				following options:
-					-tm, --task-model       Use the task model
-					-cm, --casual-model     Use the casual model
-					-bm, --balanced-model   Use the balanced model
-					-sm, --serious-model    Use the serious model
+			  Yo uses the following models:
+			    * Task model (${TASK_MODEL_NAME})
+			    * Casual model (${CASUAL_MODEL_NAME})
+			    * Balanced model (${BALANCED_MODEL_NAME})
+			    * Serious model (${SERIOUS_MODEL_NAME})
+			  By default, Yo uses the task model for summarization and other small tasks, the casual model for one-off
+			  questions, and the serious model for interactive sessions. You can override the default model by using the
+			  following options:
+			    -tm, --task-model       Use the task model
+			    -cm, --casual-model     Use the casual model
+			    -bm, --balanced-model   Use the balanced model
+			    -sm, --serious-model    Use the serious model
 
 			General Purpose Options:
 			  These options provide general functionality.
-					-h, --help              Show this help message and exit.
-					-v, --verbose           Enable verbose mode for detailed output.
-					-V, --version           Show the version and exit.
+			    -h, --help              Show this help message and exit.
+			    -v, --verbose           Enable verbose mode for detailed output.
+			    -V, --version           Show the version and exit.
 
 			Examples:
-			  1. Answer a question:
+			  * Answer a question:
 			    $ yo "What is the capital of France?"
 
-			  2. For simple cases, you can omit the quotes:
+			  * For simple cases, you can omit the quotes:
 			    $ yo what is the capital of france
 
-			  3. Start an interactive session:
+			  * Start an interactive session:
 			    $ yo
 
-			  4. Integrate information from a file:
+			  * Integrate information from a file:
 			    $ yo --read src "How can I improve this source code?"
 
-			  5. Integrate information from a URL:
+			  * Integrate information from a URL:
 			    $ yo --read https://en.wikipedia.org/wiki/Paris "how big is paris"
 
-			  6. Integrate Google search results:
+			  * Integrate Google search results:
 			    $ yo --search "what is the capital of Tobago"
 
-			  7. Use LLM-selected search terms:
+			  * Use LLM-selected search terms:
 			    $ yo --surf tell me about renewable energy trends.
 
-			  8. Combine context sources:
+			  * Combine context sources:
 			    $ yo --read src --search "what is the capital of france"
 
-			  9. Add verbosity to any of these commands
+			  * Add verbosity to any of these commands
 			    $ yo what is the capital of france --verbose
 		EOF
 		return 0
