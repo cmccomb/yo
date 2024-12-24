@@ -41,54 +41,53 @@ function yo() {
 	### CONSTANTS AND SETTINGS ##########################################################################################
 	######################################################################################################################
 
+  ### Utilities for working with model names ###########################################################################
+#
+#	# Compose the repository name based on the model parameters
+#	function compose_repo_name() {
+#		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
+#		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]')"
+#		return 0
+#	}
+#
+#	# Compose the model name based on the model parameters
+#	function compose_model_name() {
+#		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
+#		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
+#		return 0
+#	}
+
+  function compose_repo_and_model_name() {
+    local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
+    echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
+	}
+
 	### Common model parameters ##########################################################################################
-	local MODEL_USERNAME="bartowski"
-	local MODEL_FINETUNING="Instruct"
-	local MODEL_FILETYPE="gguf"
-
-	# Compose the repository name based on the model parameters
-	function compose_repo_name() {
-		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5
-		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" | tr '[:lower:]' '[:upper:]')"
-		return 0
-	}
-
-	# Compose the model name based on the model parameters
-	function compose_model_name() {
-		local series=$1 size=$2 finetuning=$3 quant=$4 filetype=$5
-		echo "${series}-${size}-${finetuning}-${quant}.${filetype}"
-		return 0
-	}
+	local GENERAL_USERNAME="bartowski"
+	local GENERAL_FINETUNING_STYLE="Instruct"
+	local GENERAL_MODEL_FILETYPE="gguf"
 
 	### Define parameters for the task model #############################################################################
 
 	# Model parameters
-	local TASK_MODEL_USERNAME=$MODEL_USERNAME
+	local TASK_USERNAME=$GENERAL_USERNAME
 	local TASK_MODEL_SERIES="Llama-3.2"
-	local TASK_MODEL_FINETUNING=$MODEL_FINETUNING
+	local TASK_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
 	local TASK_MODEL_SIZE="1B"
 	local TASK_MODEL_QUANT="Q4_K_M"
-	local TASK_MODEL_FILETYPE=$MODEL_FILETYPE
+	local TASK_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Set the repository and model names
 	local TASK_MODEL_REPO_NAME TASK_MODEL_NAME
-	TASK_MODEL_REPO_NAME="$(
-		compose_repo_name \
-			${TASK_MODEL_USERNAME} \
-			${TASK_MODEL_SERIES} \
-			${TASK_MODEL_SIZE} \
-			${TASK_MODEL_FINETUNING} \
-			${TASK_MODEL_FILETYPE}
-	)"
-	TASK_MODEL_NAME="$(
-		compose_model_name \
-			${TASK_MODEL_SERIES} \
-			${TASK_MODEL_SIZE} \
-			${TASK_MODEL_FINETUNING} \
-			${TASK_MODEL_QUANT} \
-			${TASK_MODEL_FILETYPE}
-	)"
-	readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
+  read -r TASK_MODEL_REPO_NAME TASK_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${TASK_USERNAME} \
+    ${TASK_MODEL_SERIES} \
+    ${TASK_MODEL_SIZE} \
+    ${TASK_MODEL_FINETUNING_STYLE} \
+    ${TASK_MODEL_FILETYPE} \
+    ${TASK_MODEL_QUANT}
+  )"
+  readonly TASK_MODEL_REPO_NAME TASK_MODEL_NAME
 
 	# Generation parameters
 	local TASK_MODEL_NEW_TOKENS=16
@@ -97,31 +96,24 @@ function yo() {
 	### Define parameters for the casual model ###########################################################################
 
 	# Model parameters
-	local CASUAL_MODEL_USERNAME=$MODEL_USERNAME
+	local CASUAL_GENERAL_USERNAME=$GENERAL_USERNAME
 	local CASUAL_MODEL_SERIES="Qwen2.5-Coder"
-	local CASUAL_MODEL_FINETUNING=$MODEL_FINETUNING
+	local CASUAL_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
 	local CASUAL_MODEL_SIZE="3B"
 	local CASUAL_MODEL_QUANT="Q4_K_M"
-	local CASUAL_MODEL_FILETYPE=$MODEL_FILETYPE
+	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Set the repository and model names
 	local CASUAL_MODEL_NAME CASUAL_MODEL_REPO_NAME
-	CASUAL_MODEL_REPO_NAME="$(
-		compose_repo_name \
-			${CASUAL_MODEL_USERNAME} \
-			${CASUAL_MODEL_SERIES} \
-			${CASUAL_MODEL_SIZE} \
-			${CASUAL_MODEL_FINETUNING} \
-			${CASUAL_MODEL_FILETYPE}
-	)"
-	CASUAL_MODEL_NAME="$(
-		compose_model_name \
-			${CASUAL_MODEL_SERIES} \
-			${CASUAL_MODEL_SIZE} \
-			${CASUAL_MODEL_FINETUNING} \
-			${CASUAL_MODEL_QUANT} \
-			${CASUAL_MODEL_FILETYPE}
-	)"
+  read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${CASUAL_GENERAL_USERNAME} \
+    ${CASUAL_MODEL_SERIES} \
+    ${CASUAL_MODEL_SIZE} \
+    ${CASUAL_MODEL_FINETUNING_STYLE} \
+    ${CASUAL_MODEL_FILETYPE} \
+    ${CASUAL_MODEL_QUANT}
+  )"
+
 	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_NAME
 
 	# Generation parameters
@@ -129,62 +121,46 @@ function yo() {
 	local CASUAL_MODEL_TEMP=0.2
 
 	### Define parameters for the balanced model ###########################################################################
-	local BALANCED_MODEL_USERNAME=$MODEL_USERNAME
+	local BALANCED_GENERAL_USERNAME=$GENERAL_USERNAME
 	local BALANCED_MODEL_SERIES="Qwen2.5-Coder"
-	local BALANCED_MODEL_FINETUNING=$MODEL_FINETUNING
+	local BALANCED_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
 	local BALANCED_MODEL_SIZE="7B"
 	local BALANCED_MODEL_QUANT="Q4_K_M"
-	local BALANCED_MODEL_FILETYPE=$MODEL_FILETYPE
+	local BALANCED_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Set the repository and model names
 	local BALANCED_MODEL_NAME BALANCED_MODEL_REPO_NAME
-	BALANCED_MODEL_REPO_NAME="$(
-		compose_repo_name \
-			${BALANCED_MODEL_USERNAME} \
-			${BALANCED_MODEL_SERIES} \
-			${BALANCED_MODEL_SIZE} \
-			${BALANCED_MODEL_FINETUNING} \
-			${BALANCED_MODEL_FILETYPE}
-	)"
-	BALANCED_MODEL_NAME="$(
-		compose_model_name \
-			${BALANCED_MODEL_SERIES} \
-			${BALANCED_MODEL_SIZE} \
-			${BALANCED_MODEL_FINETUNING} \
-			${BALANCED_MODEL_QUANT} \
-			${BALANCED_MODEL_FILETYPE}
-	)"
+	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${BALANCED_GENERAL_USERNAME} \
+    ${BALANCED_MODEL_SERIES} \
+    ${BALANCED_MODEL_SIZE} \
+    ${BALANCED_MODEL_FINETUNING_STYLE} \
+    ${BALANCED_MODEL_FILETYPE} \
+    ${BALANCED_MODEL_QUANT}
+  )"
 	readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_NAME
 
 	# Generation parameters
 	local BALANCED_MODEL_TEMP=0.2
 
 	### Define the series model parameters ###############################################################################
-	local SERIOUS_MODEL_USERNAME=$MODEL_USERNAME
+	local SERIOUS_GENERAL_USERNAME=$GENERAL_USERNAME
 	local SERIOUS_MODEL_SERIES="Qwen2.5-Coder"
-	local SERIOUS_MODEL_FINETUNING=$MODEL_FINETUNING
+	local SERIOUS_GENERAL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
 	local SERIOUS_MODEL_SIZE="14B"
 	local SERIOUS_MODEL_QUANT="IQ4_XS"
-	local SERIOUS_MODEL_FILETYPE=$MODEL_FILETYPE
+	local SERIOUS_GENERAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Set the repository and model names
 	local SERIOUS_MODEL_NAME SERIOUS_MODEL_REPO_NAME
-	SERIOUS_MODEL_REPO_NAME="$(
-		compose_repo_name \
-			${SERIOUS_MODEL_USERNAME} \
-			${SERIOUS_MODEL_SERIES} \
-			${SERIOUS_MODEL_SIZE} \
-			${SERIOUS_MODEL_FINETUNING} \
-			${SERIOUS_MODEL_FILETYPE}
-	)"
-	SERIOUS_MODEL_NAME="$(
-		compose_model_name \
-			${SERIOUS_MODEL_SERIES} \
-			${SERIOUS_MODEL_SIZE} \
-			${SERIOUS_MODEL_FINETUNING} \
-			${SERIOUS_MODEL_QUANT} \
-			${SERIOUS_MODEL_FILETYPE}
-	)"
+	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME <<< "$(compose_repo_and_model_name \
+    ${SERIOUS_GENERAL_USERNAME} \
+    ${SERIOUS_MODEL_SERIES} \
+    ${SERIOUS_MODEL_SIZE} \
+    ${SERIOUS_GENERAL_FINETUNING_STYLE} \
+    ${SERIOUS_GENERAL_MODEL_FILETYPE} \
+    ${SERIOUS_MODEL_QUANT}
+  )"
 	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_NAME
 
 	# Generation parameters
@@ -432,31 +408,11 @@ function yo() {
 		prompt+="User Query: ${query}\n"
 		prompt+="Search Terms: "
 
-		# Generate the repo name for the task model
-		repo_name="$(
-			compose_repo_name \
-				"${TASK_MODEL_USERNAME}" \
-				"${TASK_MODEL_SERIES}" \
-				"${TASK_MODEL_SIZE}" \
-				"${TASK_MODEL_FINETUNING}" \
-				"${TASK_MODEL_FILETYPE}"
-		)"
-
-		# Generate the model name for the task model
-		model_name="$(
-			compose_model_name \
-				"${TASK_MODEL_SERIES}" \
-				"${TASK_MODEL_SIZE}" \
-				"${TASK_MODEL_FINETUNING}" \
-				"${TASK_MODEL_QUANT}" \
-				"${TASK_MODEL_FILETYPE}"
-		)"
-
 		# Generate response
 		terms=$(
 			start_llama_session \
-				"${repo_name}" \
-				"${model_name}" \
+				"${TASK_MODEL_REPO_NAME}" \
+				"${TASK_MODEL_NAME}" \
 				"${prompt}" \
 				false \
 				"${verbose}" \
