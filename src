@@ -63,9 +63,9 @@ function yo() {
 
 	# Model parameters
 	local CASUAL_GENERAL_USERNAME=$GENERAL_USERNAME
-	local CASUAL_MODEL_SERIES="Qwen2.5-Coder"
+	local CASUAL_MODEL_SERIES="Qwen2.5"
 	local CASUAL_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
-	local CASUAL_MODEL_SIZE="3B"
+	local CASUAL_MODEL_SIZE="1.5B"
 	local CASUAL_MODEL_QUANT="Q4_K_M"
 	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
@@ -75,7 +75,7 @@ function yo() {
 
 	### Define parameters for the balanced model #########################################################################
 	local BALANCED_GENERAL_USERNAME=$GENERAL_USERNAME
-	local BALANCED_MODEL_SERIES="Qwen2.5-Coder"
+	local BALANCED_MODEL_SERIES="Qwen2.5"
 	local BALANCED_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
 	local BALANCED_MODEL_SIZE="7B"
 	local BALANCED_MODEL_QUANT="Q4_K_M"
@@ -320,6 +320,10 @@ function yo() {
 		fi
 	}
 
+	function erase_a_line() {
+	  tput cuu1 && tput el
+	}
+
 	# Function that checks to see if a model exists and download it if not
 	function check_model_download() {
 		# Parse arguments
@@ -332,15 +336,33 @@ function yo() {
 		# Check if the model exists
 		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
 		if [[ ! -f "${model_path}" ]]; then
+      echo "Downloading ${repo_name}/${file_name}..." >&2
 			if [[ "${verbose}" == true ]]; then
+			  # Print message about downloading model to stderr
 				if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
 					echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
 					return 1
+        else
+          # Erase the last echoed line and replace it with a completion message
+          erase_a_line
+          erase_a_line
+          erase_a_line
+          erase_a_line
+          echo "Downloaded ${repo_name}/${file_name}."
+          return 0
 				fi
 			else
 				if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
 					echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
 					return 1
+        else
+          # Erase the last echoed line and replace it with a completion message
+          erase_a_line
+          erase_a_line
+          erase_a_line
+          erase_a_line
+          echo "Downloaded ${repo_name}/${file_name}."
+          return 0
 				fi
 			fi
 		fi
@@ -492,6 +514,7 @@ function yo() {
 
 	# Generate system information
 	function generate_system_info_context() {
+
 		# Make variables
 		local model cores ram free_storage
 
@@ -544,16 +567,18 @@ function yo() {
 
 	# Generate clipboard information
 	function generate_clipboard_info_context() {
+
 		cat <<-EOF
 			Here are the contents from the clipboard:
 			================= BEGINNING OF CURRENT CLIPBOARD CONTENTS =================
-			$(pb_paste)
+			$(pbpaste)
 			==================== END OF CURRENT CLIPBOARD CONTENTS ====================
 		EOF
 	}
 
 	# Generate file contents context
 	function generate_file_context() {
+
 		# Parse arguments
 		local file=$1 file_info=$2
 
@@ -568,6 +593,7 @@ function yo() {
 
 	# Generate search context
 	function generate_search_context() {
+
 		# Parse arguments
 		local search_terms=$1 search_info=$2
 
@@ -582,6 +608,7 @@ function yo() {
 
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
+
 		# Parse arguments
 		local query=$1
 
@@ -589,21 +616,22 @@ function yo() {
 			Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
 
 			Here is an example:
-			User Query: how large is the capital of france ${YO}
-			Your Super-Short Answer: 41 square miles (105 square km) ${YO}
+			User Query:how large is the capital of france ${YO}
+			Your Super-Short Answer:41 square miles (105 square km) ${YO}
 
 			Here is another example:
-			User Query: what is the furthest planet from the sun ${YO}
-			Search Terms:  Neptune is the furthest planet from the Sun. ${YO}
+			User Query:what is the furthest planet from the sun ${YO}
+			Search Terms:Neptune is the furthest planet from the Sun. ${YO}
 
 			Here is the real user query.
-			User Query: ${query} ${YO}
+			User Query:${query} ${YO}
 			Your Super-Short Answer:
 		EOF
 	}
 
 	# Generate interactive instructions
 	function generate_interactive_instructions() {
+
 		cat <<-EOF
 			Your task is to assist the user in an interactive session, responding concisely and accurately.
 		EOF
@@ -628,31 +656,37 @@ function yo() {
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
+      echo "Adding system context to prompt..." >&2
 			prompt+=$(generate_system_info_context)+"\n\n"
 		fi
 
 		# Add directory information if requested
 		if [[ "${add_directory_info}" == true ]]; then
+		  echo "Adding directory context to prompt..." >&2
 			prompt+=$(generate_directory_info_context)+"\n\n"
 		fi
 
 		# Add clipboard information if requested
 		if [[ "${add_clipboard_info}" == true ]]; then
+		echo "Adding clipboard context to prompt..." >&2
 			prompt+=$(generate_clipboard_info_context)+"\n\n"
 		fi
 
 		# Add file file_info if available
 		if [[ -n "${file_info}" ]]; then
+		echo "Adding file context to prompt..." >&2
 			prompt+=$(generate_file_context "${filename}" "${file_info}")+"\n\n"
 		fi
 
 		# Add search information if available
 		if [[ -n "${search_terms}" ]]; then
+		echo "Adding search context to prompt..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
 
 		# Add query and instructions based on interactive ##################################################################
-		if [[ "${interactive}" == false ]]; then
+		echo "Adding instructions to prompt..." >&2
+	  if [[ "${interactive}" == false ]]; then
 			prompt+=$(generate_oneoff_instructions "${query}")
 		else
 			prompt+=$(generate_interactive_instructions)
@@ -701,8 +735,10 @@ function yo() {
 
 		# Add conversation or reverse-prompt based on mode
 		if [[ "${interactive}" == true ]]; then
+		  echo "Starting the model in interactive mode..." >&2
 			args+=(--conversation)
 		else
+	    echo "Thinking about the question..." >&2
 			args+=(--reverse-prompt "${YO}")
 		fi
 
@@ -823,13 +859,16 @@ function yo() {
 
 	### Read in files if needed ##########################################################################################
 	if [[ "${read_mode}" == true && -n "${read_file}" ]]; then
+	  echo "Reading in file..." >&2
 		file_info=$(extract_file_info "${read_file}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 	fi
 
 	### Bring in search information if needed ############################################################################
 	if [[ "${search_mode}" == true ]]; then
+	  echo "Performing search with user-supplied terms..." >&2
 		search_info=$(perform_search "${search_terms}")
 	elif [[ "${surf_mode}" == true ]]; then
+	  echo "Performing search with LLM-chosen terms..." >&2
 		search_terms=$(extract_search_terms "${query}" "${verbose}")
 		search_info=$(perform_search "${search_terms}")
 	fi
@@ -851,24 +890,29 @@ function yo() {
 
 	### Override the model if needed ######################################################################################
 	if [[ "${task_model_override}" == true ]]; then
+	  echo "Overriding with task model..." >&2
 		repo_name="${TASK_MODEL_REPO_NAME}"
 		file_name="${TASK_MODEL_FILE_NAME}"
 		temp="${TASK_MODEL_TEMP}"
 	elif [[ "${casual_model_override}" == true ]]; then
+	  echo "Overriding with casual model..." >&2
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
 	elif [[ "${balanced_model_override}" == true ]]; then
+	  echo "Overriding with balanced model..." >&2
 		repo_name="${BALANCED_MODEL_REPO_NAME}"
 		file_name="${BALANCED_MODEL_FILE_NAME}"
 		temp="${BALANCED_MODEL_TEMP}"
 	elif [[ "${serious_model_override}" == true ]]; then
+	  echo "Overriding with serious model..." >&2
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp="${SERIOUS_MODEL_TEMP}"
 	fi
 
 	### Generate the prompt ##############################################################################################
+  echo "Generating prompt..." >&2
 	prompt=$(
 		generate_prompt \
 			"${interactive}" \
@@ -883,7 +927,7 @@ function yo() {
 	)
 
 	### Kick off the LLM #################################################################################################
-	start_llama_session \
+  start_llama_session \
 		"${repo_name}" \
 		"${file_name}" \
 		"${prompt}" \
