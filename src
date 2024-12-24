@@ -747,6 +747,18 @@ function yo() {
 		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
 
+		# Use the task model
+		-tm | --task-model) task_model_override=true ;;
+
+		# Use the casual model
+		-cm | --casual-model) casual_model_override=true ;;
+
+		# Use the balanced model
+		-bm | --balanced-model) balanced_model_override=true ;;
+
+		# Use the serious model
+		-sm | --serious-model) serious_model_override=true ;;
+
 		# If its something that looks like a flag but isn't one of the above, show an error
 		-*)
 			echo "Error: Unknown flag: $1" >&2
@@ -774,45 +786,36 @@ function yo() {
 
 	### Configure the model based on whether its a one-off or interactive session ########################################
 	if [[ -n "${query}" ]]; then
-		repo_name="$(
-			compose_repo_name \
-				${CASUAL_MODEL_USERNAME} \
-				${CASUAL_MODEL_SERIES} \
-				${CASUAL_MODEL_SIZE} \
-				${CASUAL_MODEL_FINETUNING} \
-				${CASUAL_MODEL_FILETYPE}
-		)"
-		model_name="$(
-			compose_model_name \
-				${CASUAL_MODEL_SERIES} \
-				${CASUAL_MODEL_SIZE} \
-				${CASUAL_MODEL_FINETUNING} \
-				${CASUAL_MODEL_QUANT} \
-				${CASUAL_MODEL_FILETYPE}
-		)"
+		repo_name="${CASUAL_MODEL_REPO_NAME}"
+		model_name="${CASUAL_MODEL_NAME}"
 		new_tokens="${CASUAL_MODEL_NEW_TOKENS}"
 		temp="${CASUAL_MODEL_TEMP}"
 		interactive=false
 	else
-		repo_name="$(
-			compose_repo_name \
-				${SERIOUS_MODEL_USERNAME} \
-				${SERIOUS_MODEL_SERIES} \
-				${SERIOUS_MODEL_SIZE} \
-				${SERIOUS_MODEL_FINETUNING} \
-				${SERIOUS_MODEL_FILETYPE}
-		)"
-		model_name="$(
-			compose_model_name \
-				${SERIOUS_MODEL_SERIES} \
-				${SERIOUS_MODEL_SIZE} \
-				${SERIOUS_MODEL_FINETUNING} \
-				${SERIOUS_MODEL_QUANT} \
-				${SERIOUS_MODEL_FILETYPE}
-		)"
+		repo_name="${SERIOUS_MODEL_REPO_NAME}"
+		model_name="${SERIOUS_MODEL_NAME}"
 		new_tokens="${SERIOUS_MODEL_NEW_TOKENS}"
 		temp=${SERIOUS_MODEL_TEMP}
 		interactive=true
+	fi
+
+	### Override the model if needed ######################################################################################
+	if [[ "${task_model_override}" == true ]]; then
+		repo_name="${TASK_MODEL_REPO_NAME}"
+		model_name="${TASK_MODEL_NAME}"
+		temp="${TASK_MODEL_TEMP}"
+	elif [[ "${casual_model_override}" == true ]]; then
+		repo_name="${CASUAL_MODEL_REPO_NAME}"
+		model_name="${CASUAL_MODEL_NAME}"
+		temp="${CASUAL_MODEL_TEMP}"
+	elif [[ "${balanced_model_override}" == true ]]; then
+		repo_name="${BALANCED_MODEL_REPO_NAME}"
+		model_name="${BALANCED_MODEL_NAME}"
+		temp="${BALANCED_MODEL_TEMP}"
+	elif [[ "${serious_model_override}" == true ]]; then
+		repo_name="${SERIOUS_MODEL_REPO_NAME}"
+		model_name="${SERIOUS_MODEL_NAME}"
+		temp="${SERIOUS_MODEL_TEMP}"
 	fi
 
 	### Generate the prompt ##############################################################################################
