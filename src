@@ -510,6 +510,9 @@ function yo() {
 		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
 
+    # If its something that looks like a flag but isn't one of the above, show an error
+    -*) echo "Error: Unknown flag: $1" >&2 ; return 1 ;;
+
 		# If its not a flag, add it to the general query
 		*) query+="$1 " ;;
 		esac
