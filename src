@@ -187,6 +187,7 @@ function yo() {
 			    -d, --directory         Include a list of the files in the current directory in Yo's context.
 			    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
 			                            including .pdf, .docx, .txt, .md, .py, .zsh.
+			    -u, --usage             Load this help message into Yo's context.
 			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			  Next, we have several option that require an internet connection:
@@ -226,7 +227,7 @@ function yo() {
 			    $ yo --file src "How can I improve this source code?"
 
 			  * Integrate information from a URL:
-			    $ yo --file https://en.wikipedia.org/wiki/Paris "how big is paris"
+			    $ yo --website "https://en.wikipedia.org/wiki/Paris" how big is paris
 
 			  * Integrate Google search results:
 			    $ yo --search "what is the capital of Tobago"
@@ -724,7 +725,8 @@ function yo() {
 
 		# Parse arguments
 		local interactive=$1 read_mode=$2 filename=$3 query=$4 search_mode=$5 search_terms=$6 add_system_info=$7 \
-			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10} website_mode=${11} website_url=${12}
+			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10} website_mode=${11} website_url=${12} \
+			add_usage_info=${13}
 
 		# Check that inputs are valid
 		check_boolean "interactive" "${interactive}" || return 1
@@ -779,6 +781,12 @@ function yo() {
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
+
+		# Add self context if available
+		if [[ "${add_usage_info}" == true ]]; then
+      timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
+      prompt+=$(generate_self_context)+"\n\n"
+    fi
 
 		# If any content was added, add an instruction about relying on the content
 		if [[ "${add_system_info}" == true \
@@ -883,7 +891,7 @@ function yo() {
 	local read_mode=false read_file="" file_info=""
 	local website_mode=false website_url=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
-	local add_directory_info=false add_system_info=false add_clipboard_info=false
+	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false
 	local serious_model_override=false
 	local quant size repo_name file_name new_tokens temp prompt model_name
@@ -958,6 +966,9 @@ function yo() {
 
 		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
+
+    # Add the usage information to the context
+    -u | --usage) add_usage_info=true;;
 
 		# Use the task model
 		-tm | --task-model) task_model_override=true ;;
@@ -1046,7 +1057,8 @@ function yo() {
 			"${add_clipboard_info}" \
 			"${surf_mode}" \
 			"${website_mode}" \
-			"${website_url}"
+			"${website_url}" \
+			"${add_usage_info}"
 	)
 
 	### Kick off the LLM #################################################################################################
