@@ -185,8 +185,8 @@ function yo() {
 			  First, we have local options - the options that don't require an internet connection:
 			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 			    -d, --directory         Include a list of the files in the current directory in Yo's context.
-			    -r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
-			                            (e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
+			    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
+			                            including .pdf, .docx, .txt, .md, .py, .zsh.
 			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			  Next, we have several option that require an internet connection:
@@ -194,6 +194,7 @@ function yo() {
 			                            Yo's context. Requires an active internet connection.
 			    -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 			                            into Yo's context. Requires an active internet connection.
+			    -w, --website "URL"     Extract the specified website into Yo's context.
 
 			Model Size Options:
 			  Yo uses four distinct models: a task model (${TASK_MODEL_FILE_NAME}), a casual model (${CASUAL_MODEL_FILE_NAME}),
@@ -222,10 +223,10 @@ function yo() {
 			    $ yo
 
 			  * Integrate information from a file:
-			    $ yo --read src "How can I improve this source code?"
+			    $ yo --file src "How can I improve this source code?"
 
 			  * Integrate information from a URL:
-			    $ yo --read https://en.wikipedia.org/wiki/Paris "how big is paris"
+			    $ yo --file https://en.wikipedia.org/wiki/Paris "how big is paris"
 
 			  * Integrate Google search results:
 			    $ yo --search "what is the capital of Tobago"
@@ -234,7 +235,7 @@ function yo() {
 			    $ yo --surf tell me about renewable energy trends.
 
 			  * Combine context sources:
-			    $ yo --read src --search "what is the capital of france"
+			    $ yo --file src --search "what is the capital of france"
 
 			  * Add verbosity to any of these commands
 			    $ yo what is the capital of france --verbose
@@ -308,6 +309,44 @@ function yo() {
 			return 0
 		fi
 	}
+
+	# Check if the input is a filepath
+	function check_path() {
+
+      # Parse arguments
+      local variable_name=$1
+      local variable_value=$2
+
+      # Check that inputs are non-empty
+      check_nonempty "variable_name" "${variable_name}" || return 1
+
+      # Check if the input is a valid path
+      if [[ ! -f "${variable_value}" ]]; then
+        echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid path." >&2
+        return 1
+      else
+        return 0
+      fi
+	}
+
+	# Check if hte input is a url
+	function check_url() {
+
+    # Parse arguments
+    local variable_name=$1
+    local variable_value=$2
+
+    # Check that inputs are non-empty
+    check_nonempty "variable_name" "${variable_name}" || return 1
+
+    # Check if the input is a valid URL
+    if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
+      echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
+      return 1
+    else
+      return 0
+    fi
+  }
 
 	### Function to log the time taken for a process #####################################################################
 	function timestamp_log_to_stderr() {
@@ -435,38 +474,51 @@ function yo() {
 		local source=$1 max_length=$2
 
 		# Check that inputs are valid
-		check_nonempty "source" "${source}" || return 1
+		check_path "source" "${source}" || return 1
 		check_integer "max_length" "${max_length}" || return 1
 
 		# Make variables
 		local file_info=""
 
-		if [[ "${source}" =~ ^https?:// ]]; then
-			# Fetch file_info from URL
-			if ! file_info=$(curl -s "${source}" | pandoc -f html -t plain --quiet); then
-				echo "Error: Failed to fetch file_info from URL." >&2
-				return 1
-			fi
-		else
-			# Fetch file_info from file
-			[[ ! -f "${source}" ]] && {
-				echo "Error: File not found." >&2
-				return 1
-			}
+    case $source in
+    *.pdf)
+      command -v pdftotext >/dev/null 2>&1 || {
+        echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+        return 1
+      }
+      file_info=$(pdftotext "${source}" - 2>/dev/null)
+      ;;
+    *.txt | *)
+      file_info=$(cat "${source}")
+      ;;
+    esac
 
-			case $source in
-			*.pdf)
-				command -v pdftotext >/dev/null 2>&1 || {
-					echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-					return 1
-				}
-				file_info=$(pdftotext "${source}" - 2>/dev/null)
-				;;
-			*.txt | *)
-				file_info=$(cat "${source}")
-				;;
-			esac
-		fi
+		# Trim to max length if needed
+		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
+
+		# Return file_info
+		echo "${file_info}"
+		return 0
+	}
+
+	### Extract file_info from a file or URL (supports text and PDF files) ###############################################
+	function extract_url_info() {
+
+		# Parse arguments
+		local source=$1 max_length=$2
+
+		# Check that inputs are valid
+		check_url "source" "${source}" || return 1
+		check_integer "max_length" "${max_length}" || return 1
+
+		# Make variables
+		local file_info=""
+
+    # Fetch file_info from URL
+    if ! file_info=$(curl -s "${source}" | pandoc -f html -t plain --quiet); then
+      echo "Error: Failed to fetch information from ${source}." >&2
+      return 1
+    fi
 
 		# Trim to max length if needed
 		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
@@ -577,6 +629,30 @@ function yo() {
 		EOF
 	}
 
+	# Generate website contents
+	function generate_website_context() {
+
+		# Parse arguments
+		local url=$1
+
+		# Check that inputs are valid
+		check_nonempty "url" "${url}" || return 1
+
+		# Make variables
+		website_info=""
+
+		# Check that inputs are valid
+		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
+
+		# Return file information
+		cat <<-EOF
+			Relevant information from ${url}:
+			================= BEGINNING OF WEBSITE CONTENTS =================
+			${website_info}
+			===================== END OF WEBSITE CONTENTS ===================
+		EOF
+	}
+
 	# Generate search context
 	function generate_search_context() {
 
@@ -648,7 +724,7 @@ function yo() {
 
 		# Parse arguments
 		local interactive=$1 read_mode=$2 filename=$3 query=$4 search_mode=$5 search_terms=$6 add_system_info=$7 \
-			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10}
+			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10} website_mode=${11} website_url=${12}
 
 		# Check that inputs are valid
 		check_boolean "interactive" "${interactive}" || return 1
@@ -658,7 +734,7 @@ function yo() {
 
 		# Make the base prompt
 		local prompt
-		prompt=$(generate_base_prompt)
+		prompt=$(generate_base_prompt)+"\n\n"
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
@@ -679,24 +755,41 @@ function yo() {
 		fi
 
 		# Add file file_info if available
-		if [[ "${read_mode}" == true && -n "${filename}" ]]; then
+		if [[ "${read_mode}" == true ]]; then
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt+=$(generate_file_context "${filename}")+"\n\n"
 		fi
 
+		# Add website information if available
+		if [[ "${website_mode}" == true ]]; then
+      timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
+      prompt+=$(generate_website_context "${website_url}")+"\n\n"
+    fi
+
 		# Add search information if available
-		if [[ -n "${search_terms}" && "${search_mode}" == true ]]; then
+		if [[ "${search_mode}" == true ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}")+"\n\n"
 		fi
 
 		# Add search information if available
-		if [[ "${surf_mode}" == true && -n "${query}" ]]; then
+		if [[ "${surf_mode}" == true ]]; then
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
+
+		# If any content was added, add an instruction about relying on the content
+		if [[ "${add_system_info}" == true \
+       || "${add_directory_info}" == true \
+       || "${add_clipboard_info}" == true \
+       || "${read_mode}" == true \
+       || "${website_mode}" == true \
+       || "${search_mode}" == true \
+       || "${surf_mode}" == true ]]; then
+      prompt+="You can use the information above to help answer the user's question.\n\n"
+    fi
 
 		# Add query and instructions based on interactive ##################################################################
 		if [[ "${interactive}" == false ]]; then
@@ -788,6 +881,7 @@ function yo() {
 	# Define variables
 	local query=""
 	local read_mode=false read_file="" file_info=""
+	local website_mode=false website_url=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false
@@ -815,13 +909,25 @@ function yo() {
 			;;
 
 		# Read in a file
-		-r | --read)
+		-f | --file)
 			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				read_file=$2 # TODO make this add files to a list
 				shift        # TODO distinguish explicitly between local reading and web reading
 			else
-				echo "Error: --read requires a file." >&2
+				echo "Error: --file requires a file." >&2
+				return 1
+			fi
+			;;
+
+		# Read in a file
+		-w | --website)
+			website_mode=true
+			if [[ -n $2 && ! $2 =~ ^- ]]; then
+				website_url=$2 # TODO make this add files to a list
+				shift        # TODO distinguish explicitly between local reading and web reading
+			else
+				echo "Error: --website requires a url." >&2
 				return 1
 			fi
 			;;
@@ -938,7 +1044,9 @@ function yo() {
 			"${add_system_info}" \
 			"${add_directory_info}" \
 			"${add_clipboard_info}" \
-			"${surf_mode}"
+			"${surf_mode}" \
+			"${website_mode}" \
+			"${website_url}"
 	)
 
 	### Kick off the LLM #################################################################################################
