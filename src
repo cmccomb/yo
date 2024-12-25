@@ -600,30 +600,6 @@ function yo() {
 		EOF
 	}
 
-	#  # Generate surf context
-	#	function generate_surf_context() {
-	#
-	#		# Parse arguments
-	#		local query=$1
-	#
-	#		# Check that inputs are valid
-	#		check_nonempty "query" "${query}" || return 1
-	#
-	#		# Make variables
-	#		local search_terms search_info
-	#
-	#		# Extract search terms
-	#		search_terms=$(extract_search_terms "${query}" "${verbose}")
-	#
-	#		# Return search information
-	#		cat <<-EOF
-	#			Relevant information from web search using ${search_terms}:
-	#			================= BEGINNING OF SEARCH RESULTS =================
-	#			${search_info}
-	#			===================== END OF SEARCH RESULTS ====================
-	#		EOF
-	#	}
-
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
 
@@ -801,7 +777,7 @@ function yo() {
 	### Parse arguments ##################################################################################################
 
 	# Define variables
-	query="" # TODO make verbose take on multiple possible values
+	local query=""
 	local read_mode=false read_file="" file_info=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
@@ -810,7 +786,8 @@ function yo() {
 	local quant size repo_name file_name new_tokens temp prompt model_name
 
 	# Make verbose a global variable
-	typeset -g verbose=false
+	typeset -g verbose=false # TODO make verbose take on multiple possible values
+	# TODO Finish extricating verbose passdowns, and other ones for that matter.
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -894,7 +871,7 @@ function yo() {
 	### Print the starting time ###########################################################################################
 
 	# Print a detailed timestamp
-	timestamp_log_to_stderr "⏳ " "Starting..." >&2
+	timestamp_log_to_stderr "⏳" "Starting..." >&2
 
 	# Save starting time to calculate elapsed time later one
 	local start_time
@@ -923,7 +900,7 @@ function yo() {
 		file_name="${TASK_MODEL_FILE_NAME}"
 		temp="${TASK_MODEL_TEMP}"
 		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
-	elif [[ "${casual_model_override}" == true ]] && [[ "${model_name}" != "casual" ]]; then
+	elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
@@ -933,7 +910,7 @@ function yo() {
 		file_name="${BALANCED_MODEL_FILE_NAME}"
 		temp="${BALANCED_MODEL_TEMP}"
 		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
-	elif [[ "${serious_model_override}" == true ]] && [[ "${model_name}" != "serious" ]]; then
+	elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp="${SERIOUS_MODEL_TEMP}"
