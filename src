@@ -22,13 +22,6 @@ function yo() {
 	local YO="✌️"
 	readonly YO
 
-	# Print a detailed timestamp, down to the decimal seconds
-	echo "[$(gdate "+%H:%M:%S.%2N")] ⏳️" >&2
-
-	# Save starting time to calculate elapsed time later one
-	local start_time
-	start_time=$(gdate +%s.%N)
-
 	######################################################################################################################
 	### THE VERSION ######################################################################################################
 	######################################################################################################################
@@ -189,16 +182,20 @@ function yo() {
 			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
 			Context Options:
-			  These options help you control the information that Yo uses to answer your question.
+			  These options allow you to control the information that Yo uses to answer your question.
+
+			  First, we have local options - the options that don't require an internet connection:
 			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 			    -d, --directory         Include a list of the files in the current directory in Yo's context.
 			    -r, --read "PATH"       Extract the specified file or URL and into Yo's context. Supports text-based files
 			                            (e.g., .txt, .md, .py), PDF files via pdftotext, and web pages via curl and pandoc.
+			    -y, --system            Run a few system commands and integrate the information into Yo's context.
+
+			  Next, we have several option that require an internet connection:
 			    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 			                            Yo's context. Requires an active internet connection.
 			    -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
 			                            into Yo's context. Requires an active internet connection.
-			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			Model Size Options:
 			  Yo uses four distinct models: a task model (${TASK_MODEL_FILE_NAME}), a casual model (${CASUAL_MODEL_FILE_NAME}),
@@ -753,7 +750,7 @@ function yo() {
 	### Parse arguments ##################################################################################################
 
 	# Define variables
-	local verbose=false query=""
+	local verbose=false query="" # TODO make verbose take on multiple possible values
 	local read_mode=false read_file="" file_info=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
@@ -782,7 +779,7 @@ function yo() {
 			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				read_file=$2 # TODO make this add files to a list
-				shift
+				shift # TODO distinguish explicitly between local reading and web reading
 			else
 				echo "Error: --read requires a file." >&2
 				return 1
@@ -839,6 +836,15 @@ function yo() {
 		esac
 		shift
 	done
+
+	### Print the starting time ###########################################################################################
+
+	# Print a detailed timestamp, down to the decimal seconds
+	echo "[$(gdate "+%H:%M:%S.%2N")] ⏳️ Starting..." >&2
+
+	# Save starting time to calculate elapsed time later one
+	local start_time
+	start_time=$(gdate +%s.%N)
 
 	### Read in files if needed ##########################################################################################
 	if [[ "${read_mode}" == true && -n "${read_file}" ]]; then
