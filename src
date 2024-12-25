@@ -253,7 +253,7 @@ function yo() {
 
 		# Check if the input is empty
 		if [[ -z "${variable_value}" ]]; then
-			echo "Error: Invalid input ${variable_name}=\"${variable_value}\", expected a non-empty string." >&2
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a non-empty string." >&2
 			return 1
 		else
 			return 0
@@ -266,10 +266,6 @@ function yo() {
 		# Parse arguments
 		local variable_name=$1
 		local variable_value=$2
-
-		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
-		check_nonempty "variable_value" "${variable_value}" || return 1
 
 		# Check if the input is an integer
 		if [[ ! "${variable_value}" =~ ^[0-9]+$ ]]; then
@@ -286,10 +282,6 @@ function yo() {
 		# Parse arguments
 		local variable_name=$1
 		local variable_value=$2
-
-		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
-		check_nonempty "variable_value" "${variable_value}" || return 1
 
 		# Check if the input is Boolean
 		if [[ "${variable_value}" != true && "${variable_value}" != false ]]; then
@@ -309,7 +301,6 @@ function yo() {
 
 		# Check that inputs are non-empty
 		check_nonempty "variable_name" "${variable_name}" || return 1
-		check_nonempty "variable_value" "${variable_value}" || return 1
 
 		# Check if the input is a float
 		if [[ ! $variable_value =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
@@ -390,11 +381,10 @@ function yo() {
 	function extract_search_terms() {
 
 		# Parse arguments
-		local query=$1 verbose=$2
+		local query=$1
 
 		# Check that inputs are valid
 		check_nonempty "query" "${query}" || return 1
-		check_boolean "verbose" "${verbose}" || return 1
 
 		# Make variables
 		local prompt="" terms
@@ -421,7 +411,8 @@ function yo() {
 				"${verbose}" \
 				false \
 				"${TASK_MODEL_NEW_TOKENS}" \
-				"${TASK_MODEL_TEMP}"
+				"${TASK_MODEL_TEMP}" \
+				true
 		)
 
 		# Only take the first line
@@ -568,11 +559,20 @@ function yo() {
 	function generate_file_context() {
 
 		# Parse arguments
-		local file=$1 file_info=$2
+		local filename=$1
+
+		# Check that inputs are valid
+		check_nonempty "filename" "${filename}" || return 1
+
+		# Make variables
+		file_info=""
+
+    # Check that inputs are valid
+    file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 
 		# Return file information
 		cat <<-EOF
-			Relevant information from ${file}:
+			Relevant information from ${filename}:
 			================= BEGINNING OF FILE CONTENTS =================
 			${file_info}
 			===================== END OF FILE CONTENTS ===================
@@ -583,7 +583,13 @@ function yo() {
 	function generate_search_context() {
 
 		# Parse arguments
-		local search_terms=$1 search_info=$2
+		local search_terms=$1
+
+		# Check that inputs are valid
+		check_nonempty "search_terms" "${search_terms}" || return 1
+
+    # Perform the search
+    search_info=$(perform_search "${search_terms}")
 
 		# Return search information
 		cat <<-EOF
@@ -594,11 +600,38 @@ function yo() {
 		EOF
 	}
 
+#  # Generate surf context
+#	function generate_surf_context() {
+#
+#		# Parse arguments
+#		local query=$1
+#
+#		# Check that inputs are valid
+#		check_nonempty "query" "${query}" || return 1
+#
+#		# Make variables
+#		local search_terms search_info
+#
+#		# Extract search terms
+#		search_terms=$(extract_search_terms "${query}" "${verbose}")
+#
+#		# Return search information
+#		cat <<-EOF
+#			Relevant information from web search using ${search_terms}:
+#			================= BEGINNING OF SEARCH RESULTS =================
+#			${search_info}
+#			===================== END OF SEARCH RESULTS ====================
+#		EOF
+#	}
+
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
 
 		# Parse arguments
 		local query=$1
+
+		# Check that inputs are valid
+		check_nonempty "query" "${query}" || return 1
 
 		cat <<-EOF
 			Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
@@ -629,8 +662,8 @@ function yo() {
 	function generate_prompt() {
 
 		# Parse arguments
-		local interactive=$1 file_info=$2 filename=$3 query=$4 search_info=$5 search_terms=$6 add_system_info=$7 \
-			add_directory_info=$8 add_clipboard_info=$9
+		local interactive=$1 read_mode=$2 filename=$3 query=$4 search_mode=$5 search_terms=$6 add_system_info=$7 \
+			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10}
 
 		# Check that inputs are valid
 		check_boolean "interactive" "${interactive}" || return 1
@@ -661,14 +694,22 @@ function yo() {
 		fi
 
 		# Add file file_info if available
-		if [[ -n "${file_info}" ]]; then
-			etimestamp_log_to_stderr "📚" "Reviewing ${filename}..." >&2
-			prompt+=$(generate_file_context "${filename}" "${file_info}")+"\n\n"
+		if [[ "${read_mode}" == true && -n "${filename}" ]]; then
+			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
+			prompt+=$(generate_file_context "${filename}")+"\n\n"
 		fi
 
 		# Add search information if available
-		if [[ -n "${search_terms}" ]]; then
-			timestamp_log_to_stderr "🔎" "Searching for ${search_terms}..." >&2
+		if [[ -n "${search_terms}"  && "${search_mode}" == true ]]; then
+			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
+			prompt+=$(generate_search_context "${search_terms}")+"\n\n"
+		fi
+
+		# Add search information if available
+		if [[ "${surf_mode}" == true && -n "${query}" ]]; then
+			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
+      search_terms=$(extract_search_terms "${query}")
+			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
 
@@ -689,7 +730,7 @@ function yo() {
 
 		# Parse arguments
 		local repo_name=$1 file_name=$2 prompt=$3 interactive=$4 squash_stderr=$5 display_prompt=$6 \
-			number_of_tokens_to_generate=$7 temp=$8
+			number_of_tokens_to_generate=$7 temp=$8 task=$9
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
@@ -699,6 +740,7 @@ function yo() {
 		check_boolean "squash_stderr" "${squash_stderr}" || return 1
 		check_boolean "display_prompt" "${display_prompt}" || return 1
 		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
+		check_boolean "task" "${task}" || return 1
 		check_float "temp" "${temp}" || return 1
 
 		# Check if the model exists and download it if not
@@ -721,13 +763,15 @@ function yo() {
 		)
 
 		# Add conversation or reverse-prompt based on mode
-		if [[ "${interactive}" == true ]]; then
-		  timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-			args+=(--conversation)
-		else
-      timestamp_log_to_stderr "💭" "Thinking about the question..." >&2 # TODO This is triggered for the task model but shouldn't be
-			args+=(--reverse-prompt "${YO}")
-		fi
+		if [[ "${task}" == false ]]; then
+      if [[ "${interactive}" == true ]]; then
+        timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
+        args+=(--conversation)
+      else
+        timestamp_log_to_stderr "💭" "Thinking about the question..." >&2 # TODO This is triggered for the task model but shouldn't be
+        args+=(--reverse-prompt "${YO}")
+      fi
+    fi
 
 		# Display prompt
 		if [[ "${display_prompt}" != true ]]; then
@@ -737,7 +781,7 @@ function yo() {
 		fi
 
 		# Start session
-		if [[ "${squash_stderr}" != true ]]; then
+		if [[ "${verbose}" != true ]]; then
 			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
 				return 1
@@ -757,13 +801,16 @@ function yo() {
 	### Parse arguments ##################################################################################################
 
 	# Define variables
-	local verbose=false query="" # TODO make verbose take on multiple possible values
+	query="" # TODO make verbose take on multiple possible values
 	local read_mode=false read_file="" file_info=""
 	local surf_mode=false search_mode=false search_terms="" search_info=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false
 	local serious_model_override=false
 	local quant size repo_name file_name new_tokens temp prompt model_name
+
+	# Make verbose a global variable
+  typeset -g verbose=false
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -847,27 +894,11 @@ function yo() {
 	### Print the starting time ###########################################################################################
 
 	# Print a detailed timestamp
-	timestamp_log_to_stderr "⏳" "Starting..." >&2
+	timestamp_log_to_stderr "⏳ " "Starting..." >&2
 
 	# Save starting time to calculate elapsed time later one
 	local start_time
 	start_time=$(gdate +%s.%N)
-
-	### Read in files if needed ##########################################################################################
-	if [[ "${read_mode}" == true && -n "${read_file}" ]]; then
-		echo "Reading in file..." >&2 # TODO move this inside the context generator
-		file_info=$(extract_file_info "${read_file}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
-	fi
-
-	### Bring in search information if needed ############################################################################
-	if [[ "${search_mode}" == true ]]; then                   # TODO move this inside the context generator
-		echo "Performing search with user-supplied terms..." >&2 # TODO separate this out so we can have specific contexts AND surfing
-		search_info=$(perform_search "${search_terms}")
-	elif [[ "${surf_mode}" == true ]]; then
-		echo "Performing search with LLM-chosen terms..." >&2
-		search_terms=$(extract_search_terms "${query}" "${verbose}")
-		search_info=$(perform_search "${search_terms}")
-	fi
 
 	### Configure the model based on whether its a one-off or interactive session ########################################
 	if [[ -n "${query}" ]]; then
@@ -913,14 +944,15 @@ function yo() {
 	prompt=$(
 		generate_prompt \
 			"${interactive}" \
-			"${file_info}" \
+			"${read_mode}" \
 			"${read_file}" \
 			"${query}" \
-			"${search_info}" \
+			"${search_mode}" \
 			"${search_terms}" \
 			"${add_system_info}" \
 			"${add_directory_info}" \
-			"${add_clipboard_info}"
+			"${add_clipboard_info}" \
+			"${surf_mode}"
 	)
 
 	### Kick off the LLM #################################################################################################
@@ -932,13 +964,15 @@ function yo() {
 		"${verbose}" \
 		"${verbose}" \
 		"${new_tokens}" \
-		"${temp}"
+		"${temp}" \
+		false
 
 	### Print the elapsed time ###########################################################################################
 	tput cuu1 && tput el;
-	local end_time
+	local end_time elapsed_time
 	end_time=$(gdate +%s.%N)
-	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" "$(echo "${end_time} - ${start_time}" | bc)") seconds." >&2
+	elapsed_time=$(printf "%.2f" "$(echo "${end_time} - ${start_time}" | bc)")
+	timestamp_log_to_stderr "⌛️" "Elapsed time: ${elapsed_time} seconds." >&2
 
 	### Return success ###################################################################################################
 	return 0
