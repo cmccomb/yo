@@ -313,10 +313,10 @@ function yo() {
 
 	### Function to log the time taken for a process #####################################################################
 	function timestamp_log_to_stderr() {
-    local emoji=$1
-    local message=$2
-    echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
-  }
+		local emoji=$1
+		local message=$2
+		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+	}
 
 	# Function that checks to see if a model exists and download it if not
 	function check_model_download() {
@@ -567,8 +567,8 @@ function yo() {
 		# Make variables
 		file_info=""
 
-    # Check that inputs are valid
-    file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
+		# Check that inputs are valid
+		file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 
 		# Return file information
 		cat <<-EOF
@@ -588,8 +588,8 @@ function yo() {
 		# Check that inputs are valid
 		check_nonempty "search_terms" "${search_terms}" || return 1
 
-    # Perform the search
-    search_info=$(perform_search "${search_terms}")
+		# Perform the search
+		search_info=$(perform_search "${search_terms}")
 
 		# Return search information
 		cat <<-EOF
@@ -600,29 +600,29 @@ function yo() {
 		EOF
 	}
 
-#  # Generate surf context
-#	function generate_surf_context() {
-#
-#		# Parse arguments
-#		local query=$1
-#
-#		# Check that inputs are valid
-#		check_nonempty "query" "${query}" || return 1
-#
-#		# Make variables
-#		local search_terms search_info
-#
-#		# Extract search terms
-#		search_terms=$(extract_search_terms "${query}" "${verbose}")
-#
-#		# Return search information
-#		cat <<-EOF
-#			Relevant information from web search using ${search_terms}:
-#			================= BEGINNING OF SEARCH RESULTS =================
-#			${search_info}
-#			===================== END OF SEARCH RESULTS ====================
-#		EOF
-#	}
+	#  # Generate surf context
+	#	function generate_surf_context() {
+	#
+	#		# Parse arguments
+	#		local query=$1
+	#
+	#		# Check that inputs are valid
+	#		check_nonempty "query" "${query}" || return 1
+	#
+	#		# Make variables
+	#		local search_terms search_info
+	#
+	#		# Extract search terms
+	#		search_terms=$(extract_search_terms "${query}" "${verbose}")
+	#
+	#		# Return search information
+	#		cat <<-EOF
+	#			Relevant information from web search using ${search_terms}:
+	#			================= BEGINNING OF SEARCH RESULTS =================
+	#			${search_info}
+	#			===================== END OF SEARCH RESULTS ====================
+	#		EOF
+	#	}
 
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
@@ -700,7 +700,7 @@ function yo() {
 		fi
 
 		# Add search information if available
-		if [[ -n "${search_terms}"  && "${search_mode}" == true ]]; then
+		if [[ -n "${search_terms}" && "${search_mode}" == true ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}")+"\n\n"
 		fi
@@ -708,7 +708,7 @@ function yo() {
 		# Add search information if available
 		if [[ "${surf_mode}" == true && -n "${query}" ]]; then
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
-      search_terms=$(extract_search_terms "${query}")
+			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
@@ -764,14 +764,14 @@ function yo() {
 
 		# Add conversation or reverse-prompt based on mode
 		if [[ "${task}" == false ]]; then
-      if [[ "${interactive}" == true ]]; then
-        timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-        args+=(--conversation)
-      else
-        timestamp_log_to_stderr "💭" "Thinking about the question..." >&2 # TODO This is triggered for the task model but shouldn't be
-        args+=(--reverse-prompt "${YO}")
-      fi
-    fi
+			if [[ "${interactive}" == true ]]; then
+				timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
+				args+=(--conversation)
+			else
+				timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
+				args+=(--reverse-prompt "${YO}")
+			fi
+		fi
 
 		# Display prompt
 		if [[ "${display_prompt}" != true ]]; then
@@ -810,7 +810,7 @@ function yo() {
 	local quant size repo_name file_name new_tokens temp prompt model_name
 
 	# Make verbose a global variable
-  typeset -g verbose=false
+	typeset -g verbose=false
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -833,7 +833,7 @@ function yo() {
 			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				read_file=$2 # TODO make this add files to a list
-				shift # TODO distinguish explicitly between local reading and web reading
+				shift        # TODO distinguish explicitly between local reading and web reading
 			else
 				echo "Error: --read requires a file." >&2
 				return 1
@@ -968,7 +968,7 @@ function yo() {
 		false
 
 	### Print the elapsed time ###########################################################################################
-	tput cuu1 && tput el;
+	tput cuu1 && tput el
 	local end_time elapsed_time
 	end_time=$(gdate +%s.%N)
 	elapsed_time=$(printf "%.2f" "$(echo "${end_time} - ${start_time}" | bc)")
