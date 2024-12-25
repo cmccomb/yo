@@ -19,14 +19,9 @@ function yo() {
 	### THE YO ###########################################################################################################
 	######################################################################################################################
 
+  ### Define the Yo ####################################################################################################
 	local YO="✌️"
 	readonly YO
-
-	######################################################################################################################
-	### THE VERSION ######################################################################################################
-	######################################################################################################################
-
-	### Define the version of the script #################################################################################
 
 	### All versioning follows semver as defined at https://semver.org/ ##################################################
 	local VERSION="0.1.0"
@@ -34,16 +29,22 @@ function yo() {
 
 	### Display version information ######################################################################################
 	function show_version() {
-		echo "yo v${VERSION} ${YO}"
+		echo "yo v${VERSION}"
 	}
 
 	######################################################################################################################
 	### CONSTANTS AND SETTINGS ##########################################################################################
 	######################################################################################################################
 
+  # Common paramters
 	local GENERAL_USERNAME="bartowski"
 	local GENERAL_FINETUNING_STYLE="Instruct"
 	local GENERAL_MODEL_FILETYPE="gguf"
+
+	# Generation lengths
+	local SEARCH_TERM_GENERATION_LENGTH=16
+	local ONEOFF_GENERATION_LENGTH=128
+	local INTERACTIVE_GENERATION_LENGTH=512
 
 	### Define parameters for the task model #############################################################################
 
@@ -56,7 +57,6 @@ function yo() {
 	local TASK_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Generation parameters
-	local TASK_MODEL_NEW_TOKENS=16
 	local TASK_MODEL_TEMP=0.2
 
 	### Define parameters for the casual model ###########################################################################
@@ -70,7 +70,6 @@ function yo() {
 	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Generation parameters
-	local CASUAL_MODEL_NEW_TOKENS=128
 	local CASUAL_MODEL_TEMP=0.2
 
 	### Define parameters for the balanced model #########################################################################
@@ -93,7 +92,6 @@ function yo() {
 	local SERIOUS_GENERAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
 
 	# Generation parameters
-	local SERIOUS_MODEL_NEW_TOKENS=512
 	local SERIOUS_MODEL_TEMP=0.2
 
 	### Custom search API key ############################################################################################
@@ -410,7 +408,7 @@ function yo() {
 				false \
 				"${verbose}" \
 				false \
-				"${TASK_MODEL_NEW_TOKENS}" \
+				"${SEARCH_TERM_GENERATION_LENGTH}" \
 				"${TASK_MODEL_TEMP}" \
 				true
 		)
@@ -879,19 +877,19 @@ function yo() {
 
 	### Configure the model based on whether its a one-off or interactive session ########################################
 	if [[ -n "${query}" ]]; then
+		model_name="casual"
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
-		new_tokens="${CASUAL_MODEL_NEW_TOKENS}"
 		temp="${CASUAL_MODEL_TEMP}"
 		interactive=false
-		model_name="casual"
+		new_tokens="${ONEOFF_GENERATION_LENGTH}"
 	else
+		model_name="serious"
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
-		new_tokens="${SERIOUS_MODEL_NEW_TOKENS}"
 		temp=${SERIOUS_MODEL_TEMP}
 		interactive=true
-		model_name="serious"
+		new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
 	fi
 
 	### Override the model if needed ######################################################################################
@@ -899,22 +897,22 @@ function yo() {
 		repo_name="${TASK_MODEL_REPO_NAME}"
 		file_name="${TASK_MODEL_FILE_NAME}"
 		temp="${TASK_MODEL_TEMP}"
-		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
+		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
 	elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
-		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
+		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
 	elif [[ "${balanced_model_override}" == true ]]; then
 		repo_name="${BALANCED_MODEL_REPO_NAME}"
 		file_name="${BALANCED_MODEL_FILE_NAME}"
 		temp="${BALANCED_MODEL_TEMP}"
-		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
+		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
 	elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp="${SERIOUS_MODEL_TEMP}"
-		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
+		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
 	fi
 
 	### Generate the prompt ##############################################################################################
