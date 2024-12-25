@@ -598,6 +598,17 @@ function yo() {
 		EOF
 	}
 
+	# Generate self context using help
+	function generate_self_context() {
+	  cat <<-EOF
+	    A help message explaining how to use your command line interface
+			================= BEGINNING OF HELP MESSAGE =================
+			$(show_help)
+			===================== END OF HELP MESSAGE ====================
+		EOF
+	}
+
+
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
 
