@@ -320,6 +320,13 @@ function yo() {
 		fi
 	}
 
+	### Function to log the time taken for a process #####################################################################
+	function timestamp_log_to_stderr() {
+    local emoji=$1
+    local message=$2
+    echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+  }
+
 	# Function that checks to see if a model exists and download it if not
 	function check_model_download() {
 		# Parse arguments
@@ -333,7 +340,7 @@ function yo() {
 		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
 		if [[ ! -f "${model_path}" ]]; then
 			# Print a detailed timestamp, down to the decimal seconds
-			echo "[$(gdate "+%H:%M:%S.%2N")] 🌐 Downloading ${repo_name}/${file_name}..." >&2
+			timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
 			if [[ "${verbose}" == true ]]; then
 				# Print message about downloading model to stderr
 				if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
@@ -637,31 +644,31 @@ function yo() {
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 💻 Querying system info..." >&2
+			timestamp_log_to_stderr "💻" "Querying system info..." >&2
 			prompt+=$(generate_system_info_context)+"\n\n"
 		fi
 
 		# Add directory information if requested
 		if [[ "${add_directory_info}" == true ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 📂 Scraping the local directory..." >&2
+			timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
 			prompt+=$(generate_directory_info_context)+"\n\n"
 		fi
 
 		# Add clipboard information if requested
 		if [[ "${add_clipboard_info}" == true ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 📋 Checking out the clipboard..." >&2
+			timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
 			prompt+=$(generate_clipboard_info_context)+"\n\n"
 		fi
 
 		# Add file file_info if available
 		if [[ -n "${file_info}" ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 📚 Reviewing ${filename}..." >&2
+			etimestamp_log_to_stderr "📚" "Reviewing ${filename}..." >&2
 			prompt+=$(generate_file_context "${filename}" "${file_info}")+"\n\n"
 		fi
 
 		# Add search information if available
 		if [[ -n "${search_terms}" ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 🔎 Searching for ${search_terms}..." >&2
+			timestamp_log_to_stderr "🔎" "Searching for ${search_terms}..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
 		fi
 
@@ -715,10 +722,10 @@ function yo() {
 
 		# Add conversation or reverse-prompt based on mode
 		if [[ "${interactive}" == true ]]; then
-			echo "[$(gdate "+%H:%M:%S.%2N")] 💭 Getting ready for our conversation..." >&2
+		  timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
 			args+=(--conversation)
 		else
-			echo "[$(gdate "+%H:%M:%S.%2N")] 💭 Thinking about the question..." >&2 # TODO This is triggered for the task model but shouldn't be
+      timestamp_log_to_stderr "💭" "Thinking about the question..." >&2 # TODO This is triggered for the task model but shouldn't be
 			args+=(--reverse-prompt "${YO}")
 		fi
 
@@ -756,7 +763,7 @@ function yo() {
 	local add_directory_info=false add_system_info=false add_clipboard_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false
 	local serious_model_override=false
-	local quant size repo_name file_name new_tokens temp prompt
+	local quant size repo_name file_name new_tokens temp prompt model_name
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -839,8 +846,8 @@ function yo() {
 
 	### Print the starting time ###########################################################################################
 
-	# Print a detailed timestamp, down to the decimal seconds
-	echo "[$(gdate "+%H:%M:%S.%2N")] ⏳️ Starting..." >&2
+	# Print a detailed timestamp
+	timestamp_log_to_stderr "⏳" "Starting..." >&2
 
 	# Save starting time to calculate elapsed time later one
 	local start_time
@@ -869,12 +876,14 @@ function yo() {
 		new_tokens="${CASUAL_MODEL_NEW_TOKENS}"
 		temp="${CASUAL_MODEL_TEMP}"
 		interactive=false
+		model_name="casual"
 	else
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		new_tokens="${SERIOUS_MODEL_NEW_TOKENS}"
 		temp=${SERIOUS_MODEL_TEMP}
 		interactive=true
+		model_name="serious"
 	fi
 
 	### Override the model if needed ######################################################################################
@@ -882,22 +891,22 @@ function yo() {
 		repo_name="${TASK_MODEL_REPO_NAME}"
 		file_name="${TASK_MODEL_FILE_NAME}"
 		temp="${TASK_MODEL_TEMP}"
-		echo "[$(gdate "+%H:%M:%S.%2N")] 🔄 Overriding with ${repo_name}/${file_name}..." >&2
-	elif [[ "${casual_model_override}" == true ]]; then
+		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
+	elif [[ "${casual_model_override}" == true ]] && [[ "${model_name}" != "casual" ]]; then
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
-		echo "[$(gdate "+%H:%M:%S.%2N")] 🔄 Overriding with ${repo_name}/${file_name}..." >&2
+		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
 	elif [[ "${balanced_model_override}" == true ]]; then
 		repo_name="${BALANCED_MODEL_REPO_NAME}"
 		file_name="${BALANCED_MODEL_FILE_NAME}"
 		temp="${BALANCED_MODEL_TEMP}"
-		echo "[$(gdate "+%H:%M:%S.%2N")] 🔄 Overriding with ${repo_name}/${file_name}..." >&2
-	elif [[ "${serious_model_override}" == true ]]; then
+		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
+	elif [[ "${serious_model_override}" == true ]] && [[ "${model_name}" != "serious" ]]; then
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp="${SERIOUS_MODEL_TEMP}"
-		echo "[$(gdate "+%H:%M:%S.%2N")] 🔄 Overriding with ${repo_name}/${file_name}..." >&2
+		timestamp_log_to_stderr "🔄" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
 	fi
 
 	### Generate the prompt ##############################################################################################
@@ -929,8 +938,7 @@ function yo() {
 	tput cuu1 && tput el;
 	local end_time
 	end_time=$(gdate +%s.%N)
-	echo "[$(gdate "+%H:%M:%S.%2N")] ⌛️ Elapsed time: $(printf \
-		"%.2f" "$(echo "${end_time} - ${start_time}" | bc)") seconds." >&2
+	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" "$(echo "${end_time} - ${start_time}" | bc)") seconds." >&2
 
 	### Return success ###################################################################################################
 	return 0
