@@ -43,12 +43,14 @@ function yo() {
 
 	# Generation lengths
 	local SEARCH_TERM_GENERATION_LENGTH=16
+	local COMPRESSION_GENERATION_LENGTH=128
+	local COMPRESSION_CHUNK_LENGTH=4096
 	local ONEOFF_GENERATION_LENGTH=128
 	local INTERACTIVE_GENERATION_LENGTH=512
 
 	# Context lengths
-	local SEARCH_TERM_CONTEXT_LENGTH=$((8 * SEARCH_TERM_GENERATION_LENGTH))
-	local ONEOFF_CONTEXT_LENGTH=$((8 * ONEOFF_GENERATION_LENGTH))
+	local SEARCH_TERM_CONTEXT_LENGTH=-1
+	local ONEOFF_CONTEXT_LENGTH=-1
 	local INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
 
 	### Define parameters for the task model #############################################################################
@@ -106,7 +108,7 @@ function yo() {
 	readonly GOOGLE_CSE_API_KEY GOOGLE_CSE_ID GOOGLE_CSE_BASE_URL
 
 	### Maximum length of file content to extract ########################################################################
-	local MAX_FILE_CONTENT_LENGTH=20000
+	local MAX_FILE_CONTENT_LENGTH=300000
 
 	### Set the repository and file names ################################################################################
 
@@ -273,7 +275,7 @@ function yo() {
 		local variable_value=$2
 
 		# Check if the input is an integer
-		if [[ ! "${variable_value}" =~ ^[0-9]+$ ]]; then
+		if [[ ! "${variable_value}" =~ ^-?[0-9]+$ ]]; then
 			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected an integer." >&2
 			return 1
 		else
@@ -308,7 +310,7 @@ function yo() {
 		check_nonempty "variable_name" "${variable_name}" || return 1
 
 		# Check if the input is a float
-		if [[ ! $variable_value =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+		if [[ ! $variable_value =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
 			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
 			return 1
 		else
@@ -390,48 +392,36 @@ function yo() {
 		fi
 	}
 
+  local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+
 	# Function to calculate the approximate number of tokens
 	function estimate_number_of_tokens() {
 		# Parse arguments
 		local text=$1 estimate
 
-		# Calculate the number of characters adn divide by four
+		# Calculate the number of characters and divide by four
 		estimate=$(((${#text} + 3) / 4))
 
 		# Apply a correction factor
-		local CORRECTION_FACTOR=1.5
-		estimate=$((estimate * CORRECTION_FACTOR))
+		estimate=$((estimate * TOKEN_ESTIMATION_CORRECTION_FACTOR))
+		int_estimate=$(printf "%.0f" "$estimate")
 
-		# Return result
-		echo "${estimate}"
+		# Return result as an integer without decimal point
+		echo "${int_estimate}"
 	}
 
-	# Check estimated lenght in tokens
-	function check_estimated_length_in_tokens() {
+	# Write a function to convert tokens to characters
+	function tokens_to_characters() {
+    # Parse arguments
+    local tokens=$1 characters int_characters
 
-		# Parse arguments
-		local variable_name=$1
-		local variable_value=$2
-		local max_length=$3
+    # Calculate the number of characters and divide by four
+    characters=$(((tokens * 4)/TOKEN_ESTIMATION_CORRECTION_FACTOR))
+		int_characters=$(printf "%.0f" "$characters")
 
-		# Make variables
-		local number_of_tokens
-
-		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
-		check_integer "max_length" "${max_length}" || return 1
-
-		# Calculate the number of tokens
-		number_of_tokens=$(estimate_number_of_tokens "${text}")
-
-		# Check if the number of tokens is less than the max length
-		if [[ "${number_of_tokens}" -gt "${max_length}" ]]; then
-			echo "Error in ${funcstack[2]}: The estimated number of ${variable_name} (${number_of_tokens}) exceeds the maximum length (${max_length})." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+    # Return result
+    echo "${int_characters}"
+  }
 
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
@@ -589,32 +579,47 @@ function yo() {
 		# Parse arguments
 		local text=$1
 
+		# Make variables
+		local compressed="" chunk_length_in_chars number_of_chunks
+
 		# Check that inputs are valid
 		check_nonempty "text" "${text}" || return 1
 
 		# Compress text
-		local new_text
-		new_text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
-
-		#		echo "${new_text}"
+		text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
 
 		# Echo number of tokens
-		estimated_length_in_tokens=$(estimate_number_of_tokens "${new_text}")
+		chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
 
-		# Split the new_text into chunks of 512 tokens
-		generation_length=256
-		context_length=$(printf "%.0f" $((estimated_length_in_tokens + generation_length)))
+		# Estimate how the length of text divided by chunk_length_in_chars
+	  number_of_chunks=$(((${#text}/chunk_length_in_chars)+1))
+	  number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
 
-		compressed+=$(start_llama_session \
-			"${TASK_MODEL_REPO_NAME}" \
-			"${TASK_MODEL_FILE_NAME}" \
-			"${new_text}\n\n=============== END OF TEXT===============\n\n Based on the text given above, provide a list of key facts. " \
-			false \
-			false \
-			"${generation_length}" \
-			"${context_length}" \
-			0.2 \
-			true)
+		local counter=0
+
+    # While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
+    while [[ -n "${text}" ]]; do
+
+      # Increment counter
+      counter=$((counter + 1))
+
+      # Update the user on what's happening
+      timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
+
+      chunk="${text:0:${chunk_length_in_chars}}"
+  		context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
+      text="${text:${chunk_length_in_chars}}"
+      compressed+=$(start_llama_session \
+        "${TASK_MODEL_REPO_NAME}" \
+        "${TASK_MODEL_FILE_NAME}" \
+        "${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+        false \
+        false \
+        "${COMPRESSION_GENERATION_LENGTH}" \
+        "${context_length}" \
+        0.2 \
+        true)
+    done
 
 		# Echo number of tokens
 		echo "${compressed}"
@@ -753,6 +758,8 @@ function yo() {
 
 		# Perform the search
 		search_info=$(perform_search "${search_terms}")
+
+		search_info=$(compress_text "${search_info}")
 
 		# Return search information
 		cat <<-EOF
@@ -919,13 +926,18 @@ function yo() {
 		# Check if the model exists and download it if not
 		check_model_download "${repo_name}" "${file_name}" || return 1
 
+		# If context size is -1, estimate it
+		if [[ "${context_length}" == -1 ]]; then
+      context_length=$(($(estimate_number_of_tokens "${prompt}")+number_of_tokens_to_generate))
+    fi
+
 		# Configure llama-cli arguments
 		local args=(
 			--threads "$(sysctl -n hw.logicalcpu_max)"
 			--hf-repo "$repo_name"
 			--hf-file "$file_name"
 			--prompt "$prompt"
-			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
+#			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
 			--predict "${number_of_tokens_to_generate}"
 			--temp "${temp}"
 			--ctx-size "${context_length}"
@@ -958,11 +970,13 @@ function yo() {
 		if [[ "${verbose}" != true ]]; then
 			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+				exit 1
 				return 1
 			fi
 		else
 			if ! llama-cli "${args[@]}"; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+				exit 1
 				return 1
 			fi
 		fi
