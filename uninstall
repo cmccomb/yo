@@ -1,4 +1,4 @@
 #!/usr/bin/env zsh
 
-# Remove from .zshrc
-sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
+# Remove yo from the ~/.zshrc
+sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc

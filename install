@@ -48,7 +48,7 @@ yo say hi
 echo "Yo introduction complete."
 
 # Yo to the ~/.zshrc
-echo "Updating ~/.zshrc to source the Yo script..."
-sed -i '' '/source <(curl -s https:\/\/cmccomb.com\/yo\/src)/d' ~/.zshrc
-echo 'source <(curl -s https://cmccomb.com/yo/src)' >>~/.zshrc
+echo "Saving the Yo function to ~/.zshrc..."
+sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc
+declare -f yo >>~/.zshrc
 echo "Update to ~/.zshrc complete."
