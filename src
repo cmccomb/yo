@@ -19,7 +19,7 @@ function yo() {
 	### THE YO ###########################################################################################################
 	######################################################################################################################
 
-  ### Define the Yo ####################################################################################################
+	### Define the Yo ####################################################################################################
 	local YO="✌️"
 	readonly YO
 
@@ -36,7 +36,7 @@ function yo() {
 	### CONSTANTS AND SETTINGS ##########################################################################################
 	######################################################################################################################
 
-  # Common parameters
+	# Common parameters
 	local GENERAL_USERNAME="bartowski"
 	local GENERAL_FINETUNING_STYLE="Instruct"
 	local GENERAL_MODEL_FILETYPE="gguf"
@@ -47,9 +47,9 @@ function yo() {
 	local INTERACTIVE_GENERATION_LENGTH=512
 
 	# Context lengths
-	local SEARCH_TERM_CONTEXT_LENGTH=$((8*SEARCH_TERM_GENERATION_LENGTH))
-	local ONEOFF_CONTEXT_LENGTH=$((8*ONEOFF_GENERATION_LENGTH))
-	local INTERACTIVE_CONTEXT_LENGTH=$((8*INTERACTIVE_GENERATION_LENGTH))
+	local SEARCH_TERM_CONTEXT_LENGTH=$((8 * SEARCH_TERM_GENERATION_LENGTH))
+	local ONEOFF_CONTEXT_LENGTH=$((8 * ONEOFF_GENERATION_LENGTH))
+	local INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
 
 	### Define parameters for the task model #############################################################################
 
@@ -106,7 +106,7 @@ function yo() {
 	readonly GOOGLE_CSE_API_KEY GOOGLE_CSE_ID GOOGLE_CSE_BASE_URL
 
 	### Maximum length of file content to extract ########################################################################
-	local MAX_FILE_CONTENT_LENGTH=10000
+	local MAX_FILE_CONTENT_LENGTH=20000
 
 	### Set the repository and file names ################################################################################
 
@@ -319,40 +319,40 @@ function yo() {
 	# Check if the input is a filepath
 	function check_path() {
 
-      # Parse arguments
-      local variable_name=$1
-      local variable_value=$2
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
 
-      # Check that inputs are non-empty
-      check_nonempty "variable_name" "${variable_name}" || return 1
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "${variable_name}" || return 1
 
-      # Check if the input is a valid path
-      if [[ ! -f "${variable_value}" ]]; then
-        echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid path." >&2
-        return 1
-      else
-        return 0
-      fi
+		# Check if the input is a valid path
+		if [[ ! -f "${variable_value}" ]]; then
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid path." >&2
+			return 1
+		else
+			return 0
+		fi
 	}
 
 	# Check if hte input is a url
 	function check_url() {
 
-    # Parse arguments
-    local variable_name=$1
-    local variable_value=$2
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
 
-    # Check that inputs are non-empty
-    check_nonempty "variable_name" "${variable_name}" || return 1
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "${variable_name}" || return 1
 
-    # Check if the input is a valid URL
-    if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
-      echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
-      return 1
-    else
-      return 0
-    fi
-  }
+		# Check if the input is a valid URL
+		if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
 
 	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
@@ -392,40 +392,46 @@ function yo() {
 
 	# Function to calculate the approximate number of tokens
 	function estimate_number_of_tokens() {
-    # Parse arguments
-    local text=$1
+		# Parse arguments
+		local text=$1 estimate
 
-    # Calculate the number of characters adn divide by four
-    echo $(((${#text} + 3) / 4))
-  }
-  # TODO: Use this function to do context compression as needed
+		# Calculate the number of characters adn divide by four
+		estimate=$(((${#text} + 3) / 4))
 
-  # Check estimated lenght in tokens
-  function check_estimated_length_in_tokens() {
+		# Apply a correction factor
+		local CORRECTION_FACTOR=1.5
+		estimate=$((estimate * CORRECTION_FACTOR))
 
-    # Parse arguments
-    local variable_name=$1
-    local variable_value=$2
-    local max_length=$3
+		# Return result
+		echo "${estimate}"
+	}
 
-    # Make variables
-    local number_of_tokens
+	# Check estimated lenght in tokens
+	function check_estimated_length_in_tokens() {
 
-    # Check that inputs are non-empty
-    check_nonempty "variable_name" "${variable_name}" || return 1
-    check_integer "max_length" "${max_length}" || return 1
+		# Parse arguments
+		local variable_name=$1
+		local variable_value=$2
+		local max_length=$3
 
-    # Calculate the number of tokens
-    number_of_tokens=$(estimate_number_of_tokens "${text}")
+		# Make variables
+		local number_of_tokens
 
-    # Check if the number of tokens is less than the max length
-    if [[ "${number_of_tokens}" -gt "${max_length}" ]]; then
-      echo "Error in ${funcstack[2]}: The estimated number of ${variable_name} (${number_of_tokens}) exceeds the maximum length (${max_length})." >&2
-      return 1
-    else
-      return 0
-    fi
-  }
+		# Check that inputs are non-empty
+		check_nonempty "variable_name" "${variable_name}" || return 1
+		check_integer "max_length" "${max_length}" || return 1
+
+		# Calculate the number of tokens
+		number_of_tokens=$(estimate_number_of_tokens "${text}")
+
+		# Check if the number of tokens is less than the max length
+		if [[ "${number_of_tokens}" -gt "${max_length}" ]]; then
+			echo "Error in ${funcstack[2]}: The estimated number of ${variable_name} (${number_of_tokens}) exceeds the maximum length (${max_length})." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
 
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
@@ -488,9 +494,9 @@ function yo() {
 				"${TASK_MODEL_FILE_NAME}" \
 				"${prompt}" \
 				false \
-				"${verbose}" \
 				false \
 				"${SEARCH_TERM_GENERATION_LENGTH}" \
+				"${SEARCH_TERM_CONTEXT_LENGTH}" \
 				"${TASK_MODEL_TEMP}" \
 				true
 		)
@@ -523,18 +529,18 @@ function yo() {
 		# Make variables
 		local file_info=""
 
-    case $source in
-    *.pdf)
-      command -v pdftotext >/dev/null 2>&1 || {
-        echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-        return 1
-      }
-      file_info=$(pdftotext "${source}" - 2>/dev/null)
-      ;;
-    *.txt | *)
-      file_info=$(cat "${source}")
-      ;;
-    esac
+		case $source in
+		*.pdf)
+			command -v pdftotext >/dev/null 2>&1 || {
+				echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+				return 1
+			}
+			file_info=$(pdftotext "${source}" - 2>/dev/null)
+			;;
+		*.txt | *)
+			file_info=$(cat "${source}")
+			;;
+		esac
 
 		# Trim to max length if needed
 		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
@@ -557,11 +563,11 @@ function yo() {
 		# Make variables
 		local file_info=""
 
-    # Fetch file_info from URL
-    if ! file_info=$(curl -s "${source}" | pandoc -f html -t plain --quiet); then
-      echo "Error: Failed to fetch information from ${source}." >&2
-      return 1
-    fi
+		# Fetch file_info from URL
+		if ! file_info=$(curl -s "${source}" | pandoc -f html -t plain --quiet); then
+			echo "Error: Failed to fetch information from ${source}." >&2
+			return 1
+		fi
 
 		# Trim to max length if needed
 		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
@@ -576,6 +582,43 @@ function yo() {
 	######################################################################################################################
 
 	### Start by establishing some prompt generators #####################################################################
+
+	# Compress text
+	function compress_text() {
+
+		# Parse arguments
+		local text=$1
+
+		# Check that inputs are valid
+		check_nonempty "text" "${text}" || return 1
+
+		# Compress text
+		local new_text
+		new_text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
+
+		#		echo "${new_text}"
+
+		# Echo number of tokens
+		estimated_length_in_tokens=$(estimate_number_of_tokens "${new_text}")
+
+		# Split the new_text into chunks of 512 tokens
+		generation_length=256
+		context_length=$(printf "%.0f" $((estimated_length_in_tokens + generation_length)))
+
+		compressed+=$(start_llama_session \
+			"${TASK_MODEL_REPO_NAME}" \
+			"${TASK_MODEL_FILE_NAME}" \
+			"${new_text}\n\n=============== END OF TEXT===============\n\n Based on the text given above, provide a list of key facts. " \
+			false \
+			false \
+			"${generation_length}" \
+			"${context_length}" \
+			0.2 \
+			true)
+
+		# Echo number of tokens
+		echo "${compressed}"
+	}
 
 	# Generate base prompt
 	function generate_base_prompt() {
@@ -687,6 +730,9 @@ function yo() {
 		# Check that inputs are valid
 		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 
+		# Compress the info
+		website_info=$(compress_text "${website_info}")
+
 		# Return file information
 		cat <<-EOF
 			Relevant information from ${url}:
@@ -719,14 +765,13 @@ function yo() {
 
 	# Generate self context using help
 	function generate_self_context() {
-	  cat <<-EOF
-	    A help message explaining how to use your command line interface
-			================= BEGINNING OF HELP MESSAGE =================
-			$(show_help)
-			===================== END OF HELP MESSAGE ====================
+		cat <<-EOF
+			    A help message explaining how to use your command line interface
+					================= BEGINNING OF HELP MESSAGE =================
+					$(show_help)
+					===================== END OF HELP MESSAGE ====================
 		EOF
 	}
-
 
 	# Generate prompt for one-off sessions
 	function generate_oneoff_instructions() {
@@ -806,9 +851,9 @@ function yo() {
 
 		# Add website information if available
 		if [[ "${website_mode}" == true ]]; then
-      timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-      prompt+=$(generate_website_context "${website_url}")+"\n\n"
-    fi
+			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
+			prompt+=$(generate_website_context "${website_url}")+"\n\n"
+		fi
 
 		# Add search information if available
 		if [[ "${search_mode}" == true ]]; then
@@ -826,20 +871,20 @@ function yo() {
 
 		# Add self context if available
 		if [[ "${add_usage_info}" == true ]]; then
-      timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
-      prompt+=$(generate_self_context)+"\n\n"
-    fi
+			timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
+			prompt+=$(generate_self_context)+"\n\n"
+		fi
 
 		# If any content was added, add an instruction about relying on the content
-		if [[ "${add_system_info}" == true \
-       || "${add_directory_info}" == true \
-       || "${add_clipboard_info}" == true \
-       || "${read_mode}" == true \
-       || "${website_mode}" == true \
-       || "${search_mode}" == true \
-       || "${surf_mode}" == true ]]; then
-      prompt+="You can use the information above to help answer the user's question.\n\n"
-    fi
+		if [[ "${add_system_info}" == true ||
+			"${add_directory_info}" == true ||
+			"${add_clipboard_info}" == true ||
+			"${read_mode}" == true ||
+			"${website_mode}" == true ||
+			"${search_mode}" == true ||
+			"${surf_mode}" == true ]]; then
+			prompt+="You can use the information above to help answer the user's question.\n\n"
+		fi
 
 		# Add query and instructions based on interactive ##################################################################
 		if [[ "${interactive}" == false ]]; then
@@ -857,17 +902,17 @@ function yo() {
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 file_name=$2 prompt=$3 interactive=$4 squash_stderr=$5 display_prompt=$6 \
-			number_of_tokens_to_generate=$7 temp=$8 task=$9
+		local repo_name=$1 file_name=$2 prompt=$3 interactive=$4 display_prompt=$5 \
+			number_of_tokens_to_generate=$6 context_length=$7 temp=$8 task=$9
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
 		check_nonempty "file_name" "${file_name}" || return 1
 		check_nonempty "prompt" "${prompt}" || return 1
 		check_boolean "interactive" "${interactive}" || return 1
-		check_boolean "squash_stderr" "${squash_stderr}" || return 1
 		check_boolean "display_prompt" "${display_prompt}" || return 1
 		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
+		check_integer "context_length" "${context_length}" || return 1
 		check_boolean "task" "${task}" || return 1
 		check_float "temp" "${temp}" || return 1
 
@@ -883,6 +928,7 @@ function yo() {
 			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
 			--predict "${number_of_tokens_to_generate}"
 			--temp "${temp}"
+			--ctx-size "${context_length}"
 			--seed 42
 			--prio 3
 			--mirostat 2
@@ -894,13 +940,11 @@ function yo() {
 		if [[ "${task}" == false ]]; then
 			if [[ "${interactive}" == true ]]; then
 				timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-				args+=(--conversation --ctx-size "${INTERACTIVE_CONTEXT_LENGTH}")
+				args+=(--conversation)
 			else
 				timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
-				args+=(--reverse-prompt "${YO}" --ctx-size "${ONEOFF_CONTEXT_LENGTH}")
+				args+=(--reverse-prompt "${YO}")
 			fi
-    else
-      arg+=(--ctx-size "${SEARCH_TERM_CONTEXT_LENGTH}")
 		fi
 
 		# Display prompt
@@ -938,7 +982,7 @@ function yo() {
 	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false
 	local serious_model_override=false
-	local quant size repo_name file_name new_tokens temp prompt model_name
+	local quant size repo_name file_name new_tokens temp prompt model_name context_length
 
 	# Make verbose a global variable
 	typeset -g verbose=false # TODO make verbose take on multiple possible values
@@ -977,7 +1021,7 @@ function yo() {
 			website_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				website_url=$2 # TODO make this add files to a list
-				shift        # TODO distinguish explicitly between local reading and web reading
+				shift          # TODO distinguish explicitly between local reading and web reading
 			else
 				echo "Error: --website requires a url." >&2
 				return 1
@@ -1011,8 +1055,8 @@ function yo() {
 		# Add clipboard information to the context
 		-c | --clipboard) add_clipboard_info=true ;;
 
-    # Add the usage information to the context
-    -u | --usage) add_usage_info=true;;
+		# Add the usage information to the context
+		-u | --usage) add_usage_info=true ;;
 
 		# Use the task model
 		-tm | --task-model) task_model_override=true ;;
@@ -1055,6 +1099,7 @@ function yo() {
 		temp="${CASUAL_MODEL_TEMP}"
 		interactive=false
 		new_tokens="${ONEOFF_GENERATION_LENGTH}"
+		context_length="${ONEOFF_CONTEXT_LENGTH}"
 	else
 		model_name="serious"
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
@@ -1062,6 +1107,7 @@ function yo() {
 		temp=${SERIOUS_MODEL_TEMP}
 		interactive=true
 		new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
+		context_length="${INTERACTIVE_CONTEXT_LENGTH}"
 	fi
 
 	### Override the model if needed ######################################################################################
@@ -1112,8 +1158,8 @@ function yo() {
 		"${prompt}" \
 		"${interactive}" \
 		"${verbose}" \
-		"${verbose}" \
 		"${new_tokens}" \
+		"${context_length}" \
 		"${temp}" \
 		false
 
