@@ -45,7 +45,7 @@ $ yo --read README.md how can I improve this source readme
 ```
 
 ```shell,no_run
-$ yo --read https://www.wikipedia.org/wiki/Paris how big is paris
+$ yo --website https://en.wikipedia.org/wiki/Paris how big is paris
  Paris has an area of approximately 105 square kilometers. ✌️
 ```
 
