@@ -36,7 +36,7 @@ function yo() {
 	### CONSTANTS AND SETTINGS ##########################################################################################
 	######################################################################################################################
 
-  # Common paramters
+  # Common parameters
 	local GENERAL_USERNAME="bartowski"
 	local GENERAL_FINETUNING_STYLE="Instruct"
 	local GENERAL_MODEL_FILETYPE="gguf"
@@ -45,6 +45,11 @@ function yo() {
 	local SEARCH_TERM_GENERATION_LENGTH=16
 	local ONEOFF_GENERATION_LENGTH=128
 	local INTERACTIVE_GENERATION_LENGTH=512
+
+	# Context lengths
+	local SEARCH_TERM_CONTEXT_LENGTH=128
+	local ONEOFF_CONTEXT_LENGTH=4096
+	local INTERACTIVE_CONTEXT_LENGTH=4096
 
 	### Define parameters for the task model #############################################################################
 
@@ -349,7 +354,7 @@ function yo() {
     fi
   }
 
-	### Function to log the time taken for a process #####################################################################
+	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
 		local emoji=$1
 		local message=$2
@@ -384,6 +389,16 @@ function yo() {
 			fi
 		fi
 	}
+
+	# Function to calculate the approximate number of tokens
+	function estimate_number_of_tokens() {
+    # Parse arguments
+    local text=$1
+
+    # Calculate the number of characters adn divide by four
+    echo $(((${#text} + 3) / 4))
+  }
+  # TODO: Use this function to do context compression as needed
 
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
@@ -852,11 +867,13 @@ function yo() {
 		if [[ "${task}" == false ]]; then
 			if [[ "${interactive}" == true ]]; then
 				timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-				args+=(--conversation)
+				args+=(--conversation --ctx-size "${INTERACTIVE_CONTEXT_LENGTH}")
 			else
 				timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
-				args+=(--reverse-prompt "${YO}")
+				args+=(--reverse-prompt "${YO}" --ctx-size "${ONEOFF_CONTEXT_LENGTH}")
 			fi
+    else
+      arg+=(--ctx-size "${SEARCH_TERM_CONTEXT_LENGTH}")
 		fi
 
 		# Display prompt
