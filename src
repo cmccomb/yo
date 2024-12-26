@@ -47,9 +47,9 @@ function yo() {
 	local INTERACTIVE_GENERATION_LENGTH=512
 
 	# Context lengths
-	local SEARCH_TERM_CONTEXT_LENGTH=128
-	local ONEOFF_CONTEXT_LENGTH=4096
-	local INTERACTIVE_CONTEXT_LENGTH=4096
+	local SEARCH_TERM_CONTEXT_LENGTH=$((8*SEARCH_TERM_GENERATION_LENGTH))
+	local ONEOFF_CONTEXT_LENGTH=$((8*ONEOFF_GENERATION_LENGTH))
+	local INTERACTIVE_CONTEXT_LENGTH=$((8*INTERACTIVE_GENERATION_LENGTH))
 
 	### Define parameters for the task model #############################################################################
 
@@ -364,7 +364,7 @@ function yo() {
 	# Function that checks to see if a model exists and download it if not
 	function check_model_download() {
 		# Parse arguments
-		local repo_name=$1 file_name=$2 verbose=$3
+		local repo_name=$1 file_name=$2
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
@@ -399,6 +399,33 @@ function yo() {
     echo $(((${#text} + 3) / 4))
   }
   # TODO: Use this function to do context compression as needed
+
+  # Check estimated lenght in tokens
+  function check_estimated_length_in_tokens() {
+
+    # Parse arguments
+    local variable_name=$1
+    local variable_value=$2
+    local max_length=$3
+
+    # Make variables
+    local number_of_tokens
+
+    # Check that inputs are non-empty
+    check_nonempty "variable_name" "${variable_name}" || return 1
+    check_integer "max_length" "${max_length}" || return 1
+
+    # Calculate the number of tokens
+    number_of_tokens=$(estimate_number_of_tokens "${text}")
+
+    # Check if the number of tokens is less than the max length
+    if [[ "${number_of_tokens}" -gt "${max_length}" ]]; then
+      echo "Error in ${funcstack[2]}: The estimated number of ${variable_name} (${number_of_tokens}) exceeds the maximum length (${max_length})." >&2
+      return 1
+    else
+      return 0
+    fi
+  }
 
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
@@ -845,7 +872,7 @@ function yo() {
 		check_float "temp" "${temp}" || return 1
 
 		# Check if the model exists and download it if not
-		check_model_download "${repo_name}" "${file_name}" "${squash_stderr}" || return 1
+		check_model_download "${repo_name}" "${file_name}" || return 1
 
 		# Configure llama-cli arguments
 		local args=(
