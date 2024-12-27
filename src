@@ -484,12 +484,11 @@ function yo() {
 				"${TASK_MODEL_REPO_NAME}" \
 				"${TASK_MODEL_FILE_NAME}" \
 				"${prompt}" \
-				false \
+				"task" \
 				false \
 				"${SEARCH_TERM_GENERATION_LENGTH}" \
 				"${SEARCH_TERM_CONTEXT_LENGTH}" \
-				"${TASK_MODEL_TEMP}" \
-				true
+				"${TASK_MODEL_TEMP}"
 		)
 
 		# Only take the first line
@@ -634,12 +633,12 @@ function yo() {
 					"${TASK_MODEL_REPO_NAME}" \
 					"${TASK_MODEL_FILE_NAME}" \
 					"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-					false \
+					"task" \
 					false \
 					"${COMPRESSION_GENERATION_LENGTH}" \
 					"${context_length}" \
 					0.2 \
-					true)
+        )
 			done
 
 			# Echo number of tokens
@@ -944,18 +943,17 @@ function yo() {
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 file_name=$2 prompt=$3 interactive=$4 display_prompt=$5 \
-			number_of_tokens_to_generate=$6 context_length=$7 temp=$8 task=$9
+		local repo_name=$1 file_name=$2 prompt=$3 mode=$4 display_prompt=$5 \
+			number_of_tokens_to_generate=$6 context_length=$7 temp=$8
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
 		check_nonempty "file_name" "${file_name}" || return 1
 		check_nonempty "prompt" "${prompt}" || return 1
-		check_boolean "interactive" "${interactive}" || return 1
+		check_nonempty "mode" "${mode}" || return 1
 		check_boolean "display_prompt" "${display_prompt}" || return 1
 		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
 		check_integer "context_length" "${context_length}" || return 1
-		check_boolean "task" "${task}" || return 1
 		check_float "temp" "${temp}" || return 1
 
 		# Check if the model exists and download it if not
@@ -983,16 +981,19 @@ function yo() {
 			--no-warmup
 		)
 
-		# Add conversation or reverse-prompt based on mode
-		if [[ "${task}" == false ]]; then
-			if [[ "${interactive}" == true ]]; then
-				timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-				args+=(--conversation)
-			else
+		# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
+		case $mode in
+		interactive)
+      timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
+      args+=(--conversation)
+      ;;
+    one-off)
 				timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
 				args+=(--reverse-prompt "${YO}")
-			fi
-		fi
+      ;;
+    task)
+      ;;
+    esac
 
 		# Display prompt
 		if [[ "${display_prompt}" != true ]]; then
@@ -1005,13 +1006,11 @@ function yo() {
 		if [[ "${verbose}" != true ]]; then
 			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				exit 1
 				return 1
 			fi
 		else
 			if ! llama-cli "${args[@]}"; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				exit 1
 				return 1
 			fi
 		fi
@@ -1032,6 +1031,7 @@ function yo() {
 	local task_model_override=false casual_model_override=false balanced_model_override=false
 	local serious_model_override=false
 	local quant size repo_name file_name new_tokens temp prompt model_name context_length
+	local interactive=true mode=""
 
 	# Make verbose a global variable
 	typeset -g verbose=false # TODO make verbose take on multiple possible values
@@ -1147,6 +1147,7 @@ function yo() {
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
 		interactive=false
+		mode="one-off"
 		new_tokens="${ONEOFF_GENERATION_LENGTH}"
 		context_length="${ONEOFF_CONTEXT_LENGTH}"
 	else
@@ -1155,6 +1156,7 @@ function yo() {
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp=${SERIOUS_MODEL_TEMP}
 		interactive=true
+		mode="interactive"
 		new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
 		context_length="${INTERACTIVE_CONTEXT_LENGTH}"
 	fi
@@ -1205,12 +1207,11 @@ function yo() {
 		"${repo_name}" \
 		"${file_name}" \
 		"${prompt}" \
-		"${interactive}" \
+		"${mode}" \
 		"${verbose}" \
 		"${new_tokens}" \
 		"${context_length}" \
-		"${temp}" \
-		false
+		"${temp}"
 
 	### Print the elapsed time ###########################################################################################
 	tput cuu1 && tput el
