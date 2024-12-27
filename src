@@ -46,7 +46,7 @@ function yo() {
 			Context Options:
 			  These options allow you to control the information that Yo uses to answer your question.
 
-        First, we have static local options that introduce specific predefined knowledge:
+			  First, we have static local options that introduce specific predefined knowledge:
 			    -u, --usage             Load this help message into Yo's context.
 
 			  Next, we have dynamic local options that pull in fress information from the local system:
@@ -695,26 +695,58 @@ function yo() {
 	### LLMs AND PROMPTS #################################################################################################
 	######################################################################################################################
 
+	function extract_facts() {
+
+		# Parse arguments
+		local chunk=$1 context_length=$2
+
+		# Check that inputs are valid
+		check_nonempty chunk || return 1
+		check_integer context_length || return 1
+
+		start_llama_session \
+			"${TASK_MODEL_REPO_NAME}" \
+			"${TASK_MODEL_FILE_NAME}" \
+			"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+			"task" \
+			"${COMPRESSION_GENERATION_LENGTH}" \
+			"${context_length}" \
+			0.2 2>/dev/null || {
+
+			# Split the chunk in half
+			local half_length=$((chunk_length_in_chars / 2))
+			local chunk1="${chunk:0:${half_length}}"
+			local chunk2="${chunk:${half_length}}"
+
+			# Process the first half
+			local result1
+			result1=$(extract_facts "${chunk1}" "${context_length}")
+
+			# Process the second half
+			local result2
+			result2=$(extract_facts "${chunk2}" "${context_length}")
+
+			# Combine the results
+			echo "${result1}${result2}"
+		}
+	}
+
 	### Start by establishing some prompt generators #####################################################################
 
 	# Compress text
 	function compress_text() {
 
 		# Parse arguments
-		local text=""
-		local remove_spaces=false
-		local remove_punctuation=false
-		local summarize=false
+		local text=$1
+		local remove_spaces=$2
+		local remove_punctuation=$3
+		local summarize=$4
 
-		while [[ $# -gt 0 ]]; do
-			case $1 in
-			--remove-spaces) remove_spaces=true ;;
-			--remove-punctuation) remove_punctuation=true ;;
-			--summarize) summarize=true ;;
-			*) text=$1 ;;
-			esac
-			shift
-		done
+		# Check that inputs are valid
+		check_nonempty text || return 1
+		check_boolean remove_spaces || return 1
+		check_boolean remove_punctuation || return 1
+		check_boolean summarize || return 1
 
 		# Remove spaces if flag is set
 		if [[ "${remove_spaces}" == true ]]; then
@@ -753,52 +785,10 @@ function yo() {
 				chunk="${text:0:${chunk_length_in_chars}}"
 				context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
 				text="${text:${chunk_length_in_chars}}"
-				compressed+=$(
-					start_llama_session \
-						"${TASK_MODEL_REPO_NAME}" \
-						"${TASK_MODEL_FILE_NAME}" \
-						"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-						"task" \
-						"${COMPRESSION_GENERATION_LENGTH}" \
-						"${context_length}" \
-						0.2 2>/dev/null || {
-						# Split the chunk in half
-						local half_length=$((chunk_length_in_chars / 2))
-						local chunk1="${chunk:0:${half_length}}"
-						local chunk2="${chunk:${half_length}}"
-
-						# Process the first half
-						local result1
-						result1=$(start_llama_session \
-							"${TASK_MODEL_REPO_NAME}" \
-							"${TASK_MODEL_FILE_NAME}" \
-							"${chunk1}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-							"task" \
-							"${COMPRESSION_GENERATION_LENGTH}" \
-							"${context_length}" \
-							0.2) || {
-              echo "Error: Failed to compress text." >&2
-              return 1
-							}
-
-						# Process the second half
-						local result2
-						result2=$(start_llama_session \
-							"${TASK_MODEL_REPO_NAME}" \
-							"${TASK_MODEL_FILE_NAME}" \
-							"${chunk2}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-							"task" \
-							"${COMPRESSION_GENERATION_LENGTH}" \
-							"${context_length}" \
-							0.2) || {
-              echo "Error: Failed to compress text." >&2
-              return 1
-							}
-
-						# Combine the results
-						echo "${result1}${result2}"
-					}
-				) # TODO: This could be much MUCH more elegant
+				compressed+=$(extract_facts "${chunk}" "${context_length}") || {
+					echo "Error: Failed to compress text." >&2
+					return 1
+				}
 			done
 
 			# Echo number of tokens
@@ -892,7 +882,7 @@ function yo() {
 		}
 
 		# Compress if needed
-		clipboard_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${clipboard_info}") || {
+		clipboard_info=$(compress_text "${clipboard_info}" true true true) || {
 			echo "Error: Failed to compress clipboard information." >&2
 			return 1
 		}
@@ -924,7 +914,7 @@ function yo() {
 		}
 
 		# Compress if needed
-		file_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${file_info}") ||
+		file_info=$(compress_text "${file_info}" true true true) ||
 			{
 				echo "Error: Failed to compress file information." >&2
 				return 1
@@ -958,7 +948,7 @@ function yo() {
 		}
 
 		# Compress the info
-		website_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${website_info}") || {
+		website_info=$(compress_text "${website_info}" true true true) || {
 			echo "Error: Failed to compress website information." >&2
 			return 1
 		}
@@ -987,7 +977,7 @@ function yo() {
 			return 1
 		}
 
-		search_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${search_info}") || {
+		search_info=$(compress_text "${search_info}" true true true) || {
 			echo "Error: Failed to compress search information." >&2
 			return 1
 		}
