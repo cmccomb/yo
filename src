@@ -51,7 +51,7 @@ function yo() {
 
 	# Context lengths
 	local SEARCH_TERM_CONTEXT_LENGTH=-1 # custom fit to prompt and generation length
-	local ONEOFF_CONTEXT_LENGTH=-1 # custom fit to prompt and generation length
+	local ONEOFF_CONTEXT_LENGTH=-1      # custom fit to prompt and generation length
 	local INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
 
 	### Define parameters for the task model #############################################################################
@@ -393,7 +393,7 @@ function yo() {
 		fi
 	}
 
-  local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+	local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
 
 	# Function to calculate the approximate number of tokens
 	function estimate_number_of_tokens() {
@@ -413,16 +413,16 @@ function yo() {
 
 	# Write a function to convert tokens to characters
 	function tokens_to_characters() {
-    # Parse arguments
-    local tokens=$1 characters int_characters
+		# Parse arguments
+		local tokens=$1 characters int_characters
 
-    # Calculate the number of characters and divide by four
-    characters=$(((tokens * 4)/TOKEN_ESTIMATION_CORRECTION_FACTOR))
+		# Calculate the number of characters and divide by four
+		characters=$(((tokens * 4) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
 		int_characters=$(printf "%.0f" "$characters")
 
-    # Return result
-    echo "${int_characters}"
-  }
+		# Return result
+		echo "${int_characters}"
+	}
 
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
@@ -583,53 +583,53 @@ function yo() {
 		# If length of tokenized text is greater than cutoff, do something
 		if [[ $(estimate_number_of_tokens "${text}") -gt "${COMPRESSION_TRIGGER_LENGTH}" ]]; then
 
-      # Make variables
-      local compressed="" chunk_length_in_chars number_of_chunks
+			# Make variables
+			local compressed="" chunk_length_in_chars number_of_chunks
 
-      # Check that inputs are valid
-      check_nonempty "text" "${text}" || return 1
+			# Check that inputs are valid
+			check_nonempty "text" "${text}" || return 1
 
-      # Compress text
-      text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
+			# Compress text
+			text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
 
-      # Echo number of tokens
-      chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
+			# Echo number of tokens
+			chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
 
-      # Estimate how the length of text divided by chunk_length_in_chars
-      number_of_chunks=$(((${#text}/chunk_length_in_chars)+1))
-      number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
+			# Estimate how the length of text divided by chunk_length_in_chars
+			number_of_chunks=$(((${#text} / chunk_length_in_chars) + 1))
+			number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
 
-      local counter=0
+			local counter=0
 
-      # While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
-      while [[ -n "${text}" ]]; do
+			# While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
+			while [[ -n "${text}" ]]; do
 
-        # Increment counter
-        counter=$((counter + 1))
+				# Increment counter
+				counter=$((counter + 1))
 
-        # Update the user on what's happening
-        timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
+				# Update the user on what's happening
+				timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
 
-        chunk="${text:0:${chunk_length_in_chars}}"
-        context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
-        text="${text:${chunk_length_in_chars}}"
-        compressed+=$(start_llama_session \
-          "${TASK_MODEL_REPO_NAME}" \
-          "${TASK_MODEL_FILE_NAME}" \
-          "${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-          false \
-          false \
-          "${COMPRESSION_GENERATION_LENGTH}" \
-          "${context_length}" \
-          0.2 \
-          true)
-      done
+				chunk="${text:0:${chunk_length_in_chars}}"
+				context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
+				text="${text:${chunk_length_in_chars}}"
+				compressed+=$(start_llama_session \
+					"${TASK_MODEL_REPO_NAME}" \
+					"${TASK_MODEL_FILE_NAME}" \
+					"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+					false \
+					false \
+					"${COMPRESSION_GENERATION_LENGTH}" \
+					"${context_length}" \
+					0.2 \
+					true)
+			done
 
-      # Echo number of tokens
-      echo "${compressed}"
-    else
-      echo "${text}"
-    fi
+			# Echo number of tokens
+			echo "${compressed}"
+		else
+			echo "${text}"
+		fi
 
 	}
 
@@ -696,12 +696,12 @@ function yo() {
 	# Generate clipboard information
 	function generate_clipboard_info_context() {
 
-	  # Make variables
-	  local clipboard_info
-	  clipboard_info=$(pbpaste)
+		# Make variables
+		local clipboard_info
+		clipboard_info=$(pbpaste)
 
-	  # Compress if needed
-	  clipboard_info=$(compress_text "${clipboard_info}")
+		# Compress if needed
+		clipboard_info=$(compress_text "${clipboard_info}")
 
 		cat <<-EOF
 			Here are the contents from the clipboard:
@@ -946,8 +946,8 @@ function yo() {
 
 		# If context size is -1, estimate it
 		if [[ "${context_length}" == -1 ]]; then
-      context_length=$(($(estimate_number_of_tokens "${prompt}")+number_of_tokens_to_generate))
-    fi
+			context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate))
+		fi
 
 		# Configure llama-cli arguments
 		local args=(
@@ -955,7 +955,6 @@ function yo() {
 			--hf-repo "$repo_name"
 			--hf-file "$file_name"
 			--prompt "$prompt"
-#			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
 			--predict "${number_of_tokens_to_generate}"
 			--temp "${temp}"
 			--ctx-size "${context_length}"
@@ -978,23 +977,21 @@ function yo() {
 		fi
 
 		# Display prompt
-		if [[ "${display_prompt}" != true ]]; then
+		if [[ "${display_prompt}" == false ]]; then
 			args+=(--no-display-prompt)
 		else
 			args+=(--verbose-prompt)
 		fi
 
 		# Start session
-		if [[ "${verbose}" != true ]]; then
+		if [[ "${verbose}" == false ]]; then
 			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				exit 1
 				return 1
 			fi
 		else
 			if ! llama-cli "${args[@]}"; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				exit 1
 				return 1
 			fi
 		fi
