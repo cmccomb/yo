@@ -41,6 +41,9 @@ function yo() {
 	local GENERAL_FINETUNING_STYLE="Instruct"
 	local GENERAL_MODEL_FILETYPE="gguf"
 
+	# Estimating lengths
+	local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+
 	# Generation lengths
 	local SEARCH_TERM_GENERATION_LENGTH=16
 	local ONEOFF_GENERATION_LENGTH=128
@@ -393,35 +396,57 @@ function yo() {
 		fi
 	}
 
-	local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+	# Write a function to convert tokens to characters
+	function tokens_to_characters() {
+		# Parse arguments
+		local tokens=$1
+
+		# Check that inputs are valid
+		check_integer "tokens" "${tokens}" || return 1
+
+		# Make variables
+		local characters
+
+		# Calculate the number of characters and divide by four
+		characters=$(((tokens * 4) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
+		characters=$(printf "%.0f" "$characters")
+
+		# Return result
+		echo "${characters}"
+	}
+
+	# Write a function to convert tokens to characters
+	function characters_to_tokens() {
+		# Parse arguments
+		local characters=$1
+
+		# Check that inputs are valid
+		check_integer "characters" "${characters}" || return 1
+
+		# Make variables
+		local tokens
+
+		# Calculate the number of characters and divide by four
+		tokens=$((((${characters} + 3) / 4) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
+		characters=$(printf "%.0f" "$characters")
+
+		# Return result
+		echo "${characters}"
+	}
 
 	# Function to calculate the approximate number of tokens
 	function estimate_number_of_tokens() {
 		# Parse arguments
-		local text=$1 estimate
+		local text=$1
 
-		# Calculate the number of characters and divide by four
-		estimate=$(((${#text} + 3) / 4))
+		# Make variables
+		local estimate
 
-		# Apply a correction factor
-		estimate=$((estimate * TOKEN_ESTIMATION_CORRECTION_FACTOR))
-		int_estimate=$(printf "%.0f" "$estimate")
+		# Estimate the number of tokens
+		estimate=$(characters_to_tokens "${#text}")
 
-		# Return result as an integer without decimal point
-		echo "${int_estimate}"
-	}
-
-	# Write a function to convert tokens to characters
-	function tokens_to_characters() {
-		# Parse arguments
-		local tokens=$1 characters int_characters
-
-		# Calculate the number of characters and divide by four
-		characters=$(((tokens * 4) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
-		int_characters=$(printf "%.0f" "$characters")
-
-		# Return result
-		echo "${int_characters}"
+		# Return the estimate
+		echo "${estimate}"
 	}
 
 	######################################################################################################################
@@ -865,42 +890,42 @@ function yo() {
 
 		# Make the base prompt
 		local prompt
-		prompt=$(generate_base_prompt)+"\n\n"
+		prompt=$(generate_base_prompt)"\n\n"
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
 			timestamp_log_to_stderr "💻" "Querying system info..." >&2
-			prompt+=$(generate_system_info_context)+"\n\n"
+			prompt+=$(generate_system_info_context)"\n\n"
 		fi
 
 		# Add directory information if requested
 		if [[ "${add_directory_info}" == true ]]; then
 			timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
-			prompt+=$(generate_directory_info_context)+"\n\n"
+			prompt+=$(generate_directory_info_context)"\n\n"
 		fi
 
 		# Add clipboard information if requested
 		if [[ "${add_clipboard_info}" == true ]]; then
 			timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
-			prompt+=$(generate_clipboard_info_context)+"\n\n"
+			prompt+=$(generate_clipboard_info_context)"\n\n"
 		fi
 
 		# Add file file_info if available
 		if [[ -n "${filename}" ]]; then
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
-			prompt+=$(generate_file_context "${filename}")+"\n\n"
+			prompt+=$(generate_file_context "${filename}")"\n\n"
 		fi
 
 		# Add website information if available
 		if [[ -n "${website_url}" ]]; then
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-			prompt+=$(generate_website_context "${website_url}")+"\n\n"
+			prompt+=$(generate_website_context "${website_url}")"\n\n"
 		fi
 
 		# Add search information if available
 		if [[ -n "${search_terms}" ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}")+"\n\n"
+			prompt+=$(generate_search_context "${search_terms}")"\n\n"
 		fi
 
 		# Add search information if available
@@ -908,25 +933,25 @@ function yo() {
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}" "${search_info}")+"\n\n"
+			prompt+=$(generate_search_context "${search_terms}" "${search_info}")"\n\n"
 		fi
 
 		# Add self context if available
 		if [[ "${add_usage_info}" == true ]]; then
 			timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
-			prompt+=$(generate_self_context)+"\n\n"
+			prompt+=$(generate_self_context)"\n\n"
 		fi
 
 		# If any content was added, add an instruction about relying on the content
-		if [[ \
-		  "${add_system_info}" == true \
-		    || "${add_directory_info}" == true \
-		    || "${add_clipboard_info}" == true \
-		    || -n "${filename}" \
-		    || -n "${website_url}" \
-		    || -n "${search_terms}" \
-		    || "${surf_and_add_results}" == true \
-    ]]; then
+		if [[ 
+			"${add_system_info}" == true ||
+			"${add_directory_info}" == true ||
+			"${add_clipboard_info}" == true ||
+			-n "${filename}" ||
+			-n "${website_url}" ||
+			-n "${search_terms}" ||
+			"${surf_and_add_results}" == true ]] \
+			; then
 			prompt+="You can use the information above to help answer the user's question.\n\n"
 		fi
 
@@ -949,8 +974,8 @@ function yo() {
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 file_name=$2 prompt=$3 mode=$4 \
-			number_of_tokens_to_generate=$5 context_length=$6 temp=$7
+		local repo_name=$1 file_name=$2 prompt=$3 mode=$4
+	  local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
@@ -1059,7 +1084,7 @@ function yo() {
 		-f | --file)
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				filename=$2 # TODO make this add files to a list
-				shift        # TODO distinguish explicitly between local reading and web reading
+				shift       # TODO distinguish explicitly between local reading and web reading
 			else
 				echo "Error: --file requires a file." >&2
 				return 1
