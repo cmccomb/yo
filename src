@@ -375,6 +375,7 @@ function yo() {
 
 	# Write a function to convert tokens to characters
 	function tokens_to_characters() {
+
 		# Parse arguments
 		local tokens=$1
 
@@ -775,7 +776,10 @@ function yo() {
 							"task" \
 							"${COMPRESSION_GENERATION_LENGTH}" \
 							"${context_length}" \
-							0.2) || return 1
+							0.2) || {
+              echo "Error: Failed to compress text." >&2
+              return 1
+							}
 
 						# Process the second half
 						local result2
@@ -786,7 +790,10 @@ function yo() {
 							"task" \
 							"${COMPRESSION_GENERATION_LENGTH}" \
 							"${context_length}" \
-							0.2) || return 1
+							0.2) || {
+              echo "Error: Failed to compress text." >&2
+              return 1
+							}
 
 						# Combine the results
 						echo "${result1}${result2}"
