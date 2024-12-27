@@ -340,7 +340,7 @@ function yo() {
 	}
 
 	# Function that checks to see if a model exists and download it if not
-	function check_model_download() {
+	function check_model_status() {
 		# Parse arguments
 		local repo_name=$1 file_name=$2
 
@@ -419,7 +419,10 @@ function yo() {
 		local text=$1
 
 		# Return the estimate
-		characters_to_tokens "${#text}" || return 1
+		characters_to_tokens "${#text}" || {
+			echo "Error: Failed to estimate the number of tokens." >&2
+			return 1
+		}
 
 		# Return successfully
 		return 0
@@ -461,7 +464,10 @@ function yo() {
 			${TASK_MODEL_FINETUNING_STYLE} \
 			${TASK_MODEL_FILETYPE} \
 			${TASK_MODEL_QUANT}
-	)"
+	)" || {
+		echo "Error: Failed to set the repository and model names for the task model." >&2
+		return 1
+	}
 	readonly TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
 
 	# Set the repository and model names for the casual model
@@ -474,7 +480,10 @@ function yo() {
 			${CASUAL_MODEL_FINETUNING_STYLE} \
 			${CASUAL_MODEL_FILETYPE} \
 			${CASUAL_MODEL_QUANT}
-	)"
+	)" || {
+		echo "Error: Failed to set the repository and model names for the casual model." >&2
+		return 1
+	}
 	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME
 
 	# Set the repository and model names for the balanced model
@@ -487,7 +496,10 @@ function yo() {
 			${BALANCED_MODEL_FINETUNING_STYLE} \
 			${BALANCED_MODEL_FILETYPE} \
 			${BALANCED_MODEL_QUANT}
-	)"
+	)" || {
+		echo "Error: Failed to set the repository and model names for the balanced model." >&2
+		return 1
+	}
 	readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME
 
 	# Set the repository and model names for the serious model
@@ -500,7 +512,10 @@ function yo() {
 			${SERIOUS_GENERAL_FINETUNING_STYLE} \
 			${SERIOUS_GENERAL_MODEL_FILETYPE} \
 			${SERIOUS_MODEL_QUANT}
-	)"
+	)" || {
+		echo "Error: Failed to set the repository and model names for the serious model." >&2
+		return 1
+	}
 	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME
 
 	######################################################################################################################
@@ -1045,8 +1060,8 @@ function yo() {
 		if [[ "$add_system_info" == true ]]; then
 			timestamp_log_to_stderr "💻" "Querying system info..." >&2
 			prompt+=$(generate_system_info_context)"\n\n" || {
-        echo "Error: Failed to generate system information context." >&2
-        return 1
+				echo "Error: Failed to generate system information context." >&2
+				return 1
 			}
 		fi
 
@@ -1054,8 +1069,8 @@ function yo() {
 		if [[ "${add_directory_info}" == true ]]; then
 			timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
 			prompt+=$(generate_directory_info_context)"\n\n" || {
-			          echo "Error: Failed to generate directory information context." >&2
-        return 1
+				echo "Error: Failed to generate directory information context." >&2
+				return 1
 			}
 		fi
 
@@ -1063,8 +1078,8 @@ function yo() {
 		if [[ "${add_clipboard_info}" == true ]]; then
 			timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
 			prompt+=$(generate_clipboard_info_context)"\n\n" || {
-			          echo "Error: Failed to generate clipboard information context." >&2
-        return 1
+				echo "Error: Failed to generate clipboard information context." >&2
+				return 1
 			}
 		fi
 
@@ -1072,8 +1087,8 @@ function yo() {
 		if [[ -n "${filename}" ]]; then
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt+=$(generate_file_context "${filename}")"\n\n" || {
-			          echo "Error: Failed to generate file information context." >&2
-        return 1
+				echo "Error: Failed to generate file information context." >&2
+				return 1
 			}
 		fi
 
@@ -1081,8 +1096,8 @@ function yo() {
 		if [[ -n "${website_url}" ]]; then
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
 			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
-			          echo "Error: Failed to generate website information context." >&2
-        return 1
+				echo "Error: Failed to generate website information context." >&2
+				return 1
 			}
 		fi
 
@@ -1090,8 +1105,8 @@ function yo() {
 		if [[ -n "${search_terms}" ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}")"\n\n" || {
-			          echo "Error: Failed to generate search information context." >&2
-        return 1
+				echo "Error: Failed to generate search information context." >&2
+				return 1
 			}
 		fi
 
@@ -1101,8 +1116,8 @@ function yo() {
 			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}" "${search_info}")"\n\n" || {
-			          echo "Error: Failed to generate search information context." >&2
-        return 1
+				echo "Error: Failed to generate search information context." >&2
+				return 1
 			}
 		fi
 
@@ -1110,8 +1125,8 @@ function yo() {
 		if [[ "${add_usage_info}" == true ]]; then
 			timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
 			prompt+=$(generate_self_context)"\n\n" || {
-			          echo "Error: Failed to generate self information context." >&2
-        return 1
+				echo "Error: Failed to generate self information context." >&2
+				return 1
 			}
 		fi
 
@@ -1132,14 +1147,14 @@ function yo() {
 		case $mode in
 		interactive)
 			prompt+=$(generate_interactive_instructions) || {
-			          echo "Error: Failed to generate interactive instructions." >&2
-        return 1
+				echo "Error: Failed to generate interactive instructions." >&2
+				return 1
 			}
 			;;
 		one-off)
 			prompt+=$(generate_oneoff_instructions "${query}") || {
-			          echo "Error: Failed to generate one-off instructions." >&2
-        return 1
+				echo "Error: Failed to generate one-off instructions." >&2
+				return 1
 			}
 			;;
 		esac
@@ -1168,13 +1183,16 @@ function yo() {
 		check_float temp || return 1
 
 		# Check if the model exists and download it if not
-		check_model_download "${repo_name}" "${file_name}" || return 1
+		check_model_status "${repo_name}" "${file_name}" || {
+			echo "Error: Failed to check status of ${repo_name}/${file_name}." >&2
+			return 1
+		}
 
 		# If context size is -1, estimate it
 		if [[ "${context_length}" == -1 ]]; then
 			context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate)) || {
-        echo "Error: Failed to estimate context length." >&2
-        return 1
+				echo "Error: Failed to estimate context length." >&2
+				return 1
 			}
 		fi
 
@@ -1244,7 +1262,7 @@ function yo() {
 	local surf_and_add_results=false search_terms=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
-	local quant size repo_name file_name new_tokens temp prompt model_name context_length
+	local repo_name file_name new_tokens temp prompt model_name context_length
 	local mode=""
 
 	# Make verbose a global variable
@@ -1406,7 +1424,10 @@ function yo() {
 			"${add_directory_info}" \
 			"${add_clipboard_info}" \
 			"${add_usage_info}"
-	) || return 1
+	) || {
+		echo "Error: Failed to generate prompt." >&2
+		return 1
+	}
 
 	### Kick off the LLM #################################################################################################
 	start_llama_session \
@@ -1416,7 +1437,11 @@ function yo() {
 		"${mode}" \
 		"${new_tokens}" \
 		"${context_length}" \
-		"${temp}" || return 1
+		"${temp}" ||
+		{
+			echo "Error: Failed to start llama-cli session." >&2
+			return 1
+		}
 
 	### Print the elapsed time ###########################################################################################
 	tput cuu1 && tput el
