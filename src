@@ -117,7 +117,7 @@ function yo() {
 	### Set the repository and file names ################################################################################
 
 	# Define a function to help
-	function compose_repo_and_model_FILE_name() {
+	function compose_repo_and_model_file_name() {
 		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
 		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" |
 			tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
@@ -126,7 +126,7 @@ function yo() {
 	# Set the repository and model names for the task model
 	local TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
 	read -r TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_FILE_name \
+		compose_repo_and_model_file_name \
 			${TASK_USERNAME} \
 			${TASK_MODEL_SERIES} \
 			${TASK_MODEL_SIZE} \
@@ -139,7 +139,7 @@ function yo() {
 	# Set the repository and model names for the casual model
 	local CASUAL_MODEL_FILE_NAME CASUAL_MODEL_REPO_NAME
 	read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_FILE_name \
+		compose_repo_and_model_file_name \
 			${CASUAL_GENERAL_USERNAME} \
 			${CASUAL_MODEL_SERIES} \
 			${CASUAL_MODEL_SIZE} \
@@ -152,7 +152,7 @@ function yo() {
 	# Set the repository and model names for the balanced model
 	local BALANCED_MODEL_FILE_NAME BALANCED_MODEL_REPO_NAME
 	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_FILE_name \
+		compose_repo_and_model_file_name \
 			${BALANCED_GENERAL_USERNAME} \
 			${BALANCED_MODEL_SERIES} \
 			${BALANCED_MODEL_SIZE} \
@@ -165,7 +165,7 @@ function yo() {
 	# Set the repository and model names for the serious model
 	local SERIOUS_MODEL_FILE_NAME SERIOUS_MODEL_REPO_NAME
 	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_FILE_name \
+		compose_repo_and_model_file_name \
 			${SERIOUS_GENERAL_USERNAME} \
 			${SERIOUS_MODEL_SERIES} \
 			${SERIOUS_MODEL_SIZE} \
@@ -371,8 +371,16 @@ function yo() {
 
 	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
+
+		# Parse arguments
 		local emoji=$1
 		local message=$2
+
+		# Make sure the inputs are valid
+		check_nonempty emoji || return 1
+		check_nonempty message || return 1
+
+		# Print the message to stderr
 		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
 	}
 
@@ -767,7 +775,7 @@ function yo() {
 		local filename=$1
 
 		# Check that inputs are valid
-		check_nonempty filename || return 1
+		check_path filename || return 1
 
 		# Make variables
 		local file_info=""
@@ -794,7 +802,7 @@ function yo() {
 		local url=$1
 
 		# Check that inputs are valid
-		check_nonempty url || return 1
+		check_url url || return 1
 
 		# Make variables
 		website_info=""
@@ -984,7 +992,7 @@ function yo() {
 
 		# Parse arguments
 		local repo_name=$1 file_name=$2 prompt=$3 mode=$4
-	  local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
+		local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
 
 		# Check that inputs are valid
 		check_nonempty repo_name || return 1
