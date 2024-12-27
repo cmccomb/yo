@@ -628,15 +628,16 @@ function yo() {
 				chunk="${text:0:${chunk_length_in_chars}}"
 				context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
 				text="${text:${chunk_length_in_chars}}"
-				compressed+=$(start_llama_session \
-					"${TASK_MODEL_REPO_NAME}" \
-					"${TASK_MODEL_FILE_NAME}" \
-					"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
-					"task" \
-					"${COMPRESSION_GENERATION_LENGTH}" \
-					"${context_length}" \
-					0.2 \
-        )
+				compressed+=$(
+					start_llama_session \
+						"${TASK_MODEL_REPO_NAME}" \
+						"${TASK_MODEL_FILE_NAME}" \
+						"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+						"task" \
+						"${COMPRESSION_GENERATION_LENGTH}" \
+						"${context_length}" \
+						0.2
+				)
 			done
 
 			# Echo number of tokens
@@ -850,12 +851,14 @@ function yo() {
 	function generate_prompt() {
 
 		# Parse arguments
-		local interactive=$1 read_mode=$2 filename=$3 query=$4 search_mode=$5 search_terms=$6 add_system_info=$7 \
-			add_directory_info=$8 add_clipboard_info=$9 surf_mode=${10} website_mode=${11} website_url=${12} \
-			add_usage_info=${13}
+		local mode=$1 query=$2
+		local filename=$3 search_terms=$4 website_url=$5
+		local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
 
 		# Check that inputs are valid
-		check_boolean "interactive" "${interactive}" || return 1
+		check_nonempty "mode" "${mode}" || return 1
+		check_boolean "surf_and_add_results" "${surf_and_add_results}" || return 1
+		check_boolean "add_usage_info" "${add_usage_info}" || return 1
 		check_boolean "add_system_info" "${add_system_info}" || return 1
 		check_boolean "add_directory_info" "${add_directory_info}" || return 1
 		check_boolean "add_clipboard_info" "${add_clipboard_info}" || return 1
@@ -883,25 +886,25 @@ function yo() {
 		fi
 
 		# Add file file_info if available
-		if [[ "${read_mode}" == true ]]; then
+		if [[ -n "${filename}" ]]; then
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt+=$(generate_file_context "${filename}")+"\n\n"
 		fi
 
 		# Add website information if available
-		if [[ "${website_mode}" == true ]]; then
+		if [[ -n "${website_url}" ]]; then
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
 			prompt+=$(generate_website_context "${website_url}")+"\n\n"
 		fi
 
 		# Add search information if available
-		if [[ "${search_mode}" == true ]]; then
+		if [[ -n "${search_terms}" ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
 			prompt+=$(generate_search_context "${search_terms}")+"\n\n"
 		fi
 
 		# Add search information if available
-		if [[ "${surf_mode}" == true ]]; then
+		if [[ "${surf_and_add_results}" == true ]]; then
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
@@ -915,22 +918,27 @@ function yo() {
 		fi
 
 		# If any content was added, add an instruction about relying on the content
-		if [[ "${add_system_info}" == true ||
-			"${add_directory_info}" == true ||
-			"${add_clipboard_info}" == true ||
-			"${read_mode}" == true ||
-			"${website_mode}" == true ||
-			"${search_mode}" == true ||
-			"${surf_mode}" == true ]]; then
+		if [[ \
+		  "${add_system_info}" == true \
+		    || "${add_directory_info}" == true \
+		    || "${add_clipboard_info}" == true \
+		    || -n "${filename}" \
+		    || -n "${website_url}" \
+		    || -n "${search_terms}" \
+		    || "${surf_and_add_results}" == true \
+    ]]; then
 			prompt+="You can use the information above to help answer the user's question.\n\n"
 		fi
 
 		# Add query and instructions based on interactive ##################################################################
-		if [[ "${interactive}" == false ]]; then
-			prompt+=$(generate_oneoff_instructions "${query}")
-		else
+		case $mode in
+		interactive)
 			prompt+=$(generate_interactive_instructions)
-		fi
+			;;
+		one-off)
+			prompt+=$(generate_oneoff_instructions "${query}")
+			;;
+		esac
 
 		# Return prompt
 		echo "${prompt}"
@@ -964,10 +972,9 @@ function yo() {
 		# Configure llama-cli arguments
 		local args=(
 			--threads "$(sysctl -n hw.logicalcpu_max)"
-			--hf-repo "$repo_name"
-			--hf-file "$file_name"
-			--prompt "$prompt"
-			#			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
+			--hf-repo "${repo_name}"
+			--hf-file "${file_name}"
+			--prompt "${prompt}"
 			--predict "${number_of_tokens_to_generate}"
 			--temp "${temp}"
 			--ctx-size "${context_length}"
@@ -981,16 +988,15 @@ function yo() {
 		# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
 		case $mode in
 		interactive)
-      timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-      args+=(--conversation)
-      ;;
-    one-off)
-				timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
-				args+=(--reverse-prompt "${YO}")
-      ;;
-    task)
-      ;;
-    esac
+			timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
+			args+=(--conversation)
+			;;
+		one-off)
+			timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
+			args+=(--reverse-prompt "${YO}")
+			;;
+		task) ;;
+		esac
 
 		# Display prompt
 		if [[ "${verbose}" == true && "${mode}" != "task" ]]; then
@@ -1021,14 +1027,13 @@ function yo() {
 
 	# Define variables
 	local query=""
-	local read_mode=false read_file="" file_info=""
-	local website_mode=false website_url=""
-	local surf_mode=false search_mode=false search_terms="" search_info=""
+	local filename=""
+	local website_url=""
+	local surf_and_add_results=false search_terms=""
 	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
-	local task_model_override=false casual_model_override=false balanced_model_override=false
-	local serious_model_override=false
+	local task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
 	local quant size repo_name file_name new_tokens temp prompt model_name context_length
-	local interactive=true mode=""
+	local mode=""
 
 	# Make verbose a global variable
 	typeset -g verbose=false # TODO make verbose take on multiple possible values
@@ -1052,9 +1057,8 @@ function yo() {
 
 		# Read in a file
 		-f | --file)
-			read_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				read_file=$2 # TODO make this add files to a list
+				filename=$2 # TODO make this add files to a list
 				shift        # TODO distinguish explicitly between local reading and web reading
 			else
 				echo "Error: --file requires a file." >&2
@@ -1064,7 +1068,6 @@ function yo() {
 
 		# Read in a file
 		-w | --website)
-			website_mode=true
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				website_url=$2 # TODO make this add files to a list
 				shift          # TODO distinguish explicitly between local reading and web reading
@@ -1076,7 +1079,6 @@ function yo() {
 
 		# Do some searching
 		-s | --search)
-			search_mode=true
 			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
 				search_terms=$2
 				shift
@@ -1090,7 +1092,7 @@ function yo() {
 		-v | --verbose) verbose=true ;;
 
 		# Surf the web with LLM-defined search terms
-		-S | --surf) surf_mode=true ;;
+		-S | --surf) surf_and_add_results=true ;;
 
 		# Add system information to the context
 		-y | --system) add_system_info=true ;;
@@ -1143,7 +1145,6 @@ function yo() {
 		repo_name="${CASUAL_MODEL_REPO_NAME}"
 		file_name="${CASUAL_MODEL_FILE_NAME}"
 		temp="${CASUAL_MODEL_TEMP}"
-		interactive=false
 		mode="one-off"
 		new_tokens="${ONEOFF_GENERATION_LENGTH}"
 		context_length="${ONEOFF_CONTEXT_LENGTH}"
@@ -1152,7 +1153,6 @@ function yo() {
 		repo_name="${SERIOUS_MODEL_REPO_NAME}"
 		file_name="${SERIOUS_MODEL_FILE_NAME}"
 		temp=${SERIOUS_MODEL_TEMP}
-		interactive=true
 		mode="interactive"
 		new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
 		context_length="${INTERACTIVE_CONTEXT_LENGTH}"
@@ -1184,18 +1184,15 @@ function yo() {
 	### Generate the prompt ##############################################################################################
 	prompt=$(
 		generate_prompt \
-			"${interactive}" \
-			"${read_mode}" \
-			"${read_file}" \
+			"${mode}" \
 			"${query}" \
-			"${search_mode}" \
+			"${filename}" \
 			"${search_terms}" \
+			"${website_url}" \
+			"${surf_and_add_results}" \
 			"${add_system_info}" \
 			"${add_directory_info}" \
 			"${add_clipboard_info}" \
-			"${surf_mode}" \
-			"${website_mode}" \
-			"${website_url}" \
 			"${add_usage_info}"
 	)
 
