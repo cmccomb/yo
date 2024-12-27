@@ -578,21 +578,38 @@ function yo() {
 	function compress_text() {
 
 		# Parse arguments
-		local text=$1
+		local text=""
+		local remove_spaces=false
+		local remove_punctuation=false
+		local summarize=false
+
+		while [[ $# -gt 0 ]]; do
+			case $1 in
+			--remove-spaces) remove_spaces=true ;;
+			--remove-punctuation) remove_punctuation=true ;;
+			--summarize) summarize=true ;;
+			*) text=$1 ;;
+			esac
+			shift
+		done
+
+		# Remove spaces if flag is set
+		if [[ "${remove_spaces}" == true ]]; then
+			text=$(echo "${text}" | tr -s "[:space:]")
+		fi
+
+		# Remove punctuation if flag is set
+		if [[ "${remove_punctuation}" == true ]]; then
+			text=$(echo "${text}" | tr -d "[:punct:]")
+		fi
 
 		# If length of tokenized text is greater than cutoff, do something
-		if [[ $(estimate_number_of_tokens "${text}") -gt "${COMPRESSION_TRIGGER_LENGTH}" ]]; then
+		if [[ $(estimate_number_of_tokens "${text}") -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
 
 			# Make variables
 			local compressed="" chunk_length_in_chars number_of_chunks
 
-			# Check that inputs are valid
-			check_nonempty "text" "${text}" || return 1
-
 			# Compress text
-			text=$(echo "${text}" | tr -d "[:punct:]" | tr -s "[:space:]")
-
-			# Echo number of tokens
 			chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
 
 			# Estimate how the length of text divided by chunk_length_in_chars
@@ -701,7 +718,7 @@ function yo() {
 		clipboard_info=$(pbpaste)
 
 		# Compress if needed
-		clipboard_info=$(compress_text "${clipboard_info}")
+		clipboard_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${clipboard_info}")
 
 		cat <<-EOF
 			Here are the contents from the clipboard:
@@ -727,7 +744,7 @@ function yo() {
 		file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 
 		# Compress if needed
-		file_info=$(compress_text "${file_info}")
+		file_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${file_info}")
 
 		# Return file information
 		cat <<-EOF
@@ -754,7 +771,7 @@ function yo() {
 		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
 
 		# Compress the info
-		website_info=$(compress_text "${website_info}")
+		website_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${website_info}")
 
 		# Return file information
 		cat <<-EOF
@@ -777,7 +794,7 @@ function yo() {
 		# Perform the search
 		search_info=$(perform_search "${search_terms}")
 
-		search_info=$(compress_text "${search_info}")
+		search_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${search_info}")
 
 		# Return search information
 		cat <<-EOF
@@ -955,6 +972,7 @@ function yo() {
 			--hf-repo "$repo_name"
 			--hf-file "$file_name"
 			--prompt "$prompt"
+			#			--prompt-cache "/tmp/yo_prompt_cache_${file_name}"
 			--predict "${number_of_tokens_to_generate}"
 			--temp "${temp}"
 			--ctx-size "${context_length}"
@@ -977,21 +995,23 @@ function yo() {
 		fi
 
 		# Display prompt
-		if [[ "${display_prompt}" == false ]]; then
+		if [[ "${display_prompt}" != true ]]; then
 			args+=(--no-display-prompt)
 		else
 			args+=(--verbose-prompt)
 		fi
 
 		# Start session
-		if [[ "${verbose}" == false ]]; then
+		if [[ "${verbose}" != true ]]; then
 			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+				exit 1
 				return 1
 			fi
 		else
 			if ! llama-cli "${args[@]}"; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+				exit 1
 				return 1
 			fi
 		fi
