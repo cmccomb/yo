@@ -46,19 +46,21 @@ function yo() {
 			Context Options:
 			  These options allow you to control the information that Yo uses to answer your question.
 
-			  First, we have local options - the options that don't require an internet connection:
+        First, we have static local options that introduce specific predefined knowledge:
+			    -u, --usage             Load this help message into Yo's context.
+
+			  Next, we have dynamic local options that pull in fress information from the local system:
 			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 			    -d, --directory         Include a list of the files in the current directory in Yo's context.
 			    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
 			                            including .pdf, .docx, .txt, .md, .py, .zsh.
-			    -u, --usage             Load this help message into Yo's context.
 			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
-			  Next, we have several option that require an internet connection:
+			  Finally, we have several option that require an internet connection:
 			    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
 			                            Yo's context. Requires an active internet connection.
-			    -S, --surf              Perform a web search using LLM-chosen terms based on the question. Integrates results
-			                            into Yo's context. Requires an active internet connection.
+			    -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the results into
+			                            Yo's context. Requires an active internet connection.
 			    -w, --website "URL"     Extract the specified website into Yo's context.
 
 			Model Size Options:
