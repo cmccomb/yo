@@ -485,7 +485,6 @@ function yo() {
 				"${TASK_MODEL_FILE_NAME}" \
 				"${prompt}" \
 				"task" \
-				false \
 				"${SEARCH_TERM_GENERATION_LENGTH}" \
 				"${SEARCH_TERM_CONTEXT_LENGTH}" \
 				"${TASK_MODEL_TEMP}"
@@ -634,7 +633,6 @@ function yo() {
 					"${TASK_MODEL_FILE_NAME}" \
 					"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
 					"task" \
-					false \
 					"${COMPRESSION_GENERATION_LENGTH}" \
 					"${context_length}" \
 					0.2 \
@@ -943,15 +941,14 @@ function yo() {
 	function start_llama_session() {
 
 		# Parse arguments
-		local repo_name=$1 file_name=$2 prompt=$3 mode=$4 display_prompt=$5 \
-			number_of_tokens_to_generate=$6 context_length=$7 temp=$8
+		local repo_name=$1 file_name=$2 prompt=$3 mode=$4 \
+			number_of_tokens_to_generate=$5 context_length=$6 temp=$7
 
 		# Check that inputs are valid
 		check_nonempty "repo_name" "${repo_name}" || return 1
 		check_nonempty "file_name" "${file_name}" || return 1
 		check_nonempty "prompt" "${prompt}" || return 1
 		check_nonempty "mode" "${mode}" || return 1
-		check_boolean "display_prompt" "${display_prompt}" || return 1
 		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
 		check_integer "context_length" "${context_length}" || return 1
 		check_float "temp" "${temp}" || return 1
@@ -996,20 +993,20 @@ function yo() {
     esac
 
 		# Display prompt
-		if [[ "${display_prompt}" != true ]]; then
-			args+=(--no-display-prompt)
-		else
+		if [[ "${verbose}" == true && "${mode}" != "task" ]]; then
 			args+=(--verbose-prompt)
+		else
+			args+=(--no-display-prompt)
 		fi
 
 		# Start session
-		if [[ "${verbose}" != true ]]; then
-			if ! llama-cli "${args[@]}" 2>/dev/null; then
+		if [[ "${verbose}" == true ]]; then
+			if ! llama-cli "${args[@]}"; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
 				return 1
 			fi
 		else
-			if ! llama-cli "${args[@]}"; then
+			if ! llama-cli "${args[@]}" 2>/dev/null; then
 				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
 				return 1
 			fi
@@ -1208,7 +1205,6 @@ function yo() {
 		"${file_name}" \
 		"${prompt}" \
 		"${mode}" \
-		"${verbose}" \
 		"${new_tokens}" \
 		"${context_length}" \
 		"${temp}"
