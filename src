@@ -263,8 +263,8 @@ function yo() {
 		local variable_value=$2
 
 		# Check if the input is empty
-		if [[ -z "${variable_value}" ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a non-empty string." >&2
+		if [[ -z $(eval echo \${${variable_name}}) ]]; then
+			echo "Error in ${funcstack[2]}: Invalid input for ${variable_name}, expected a non-empty string." >&2
 			return 1
 		else
 			return 0
@@ -276,7 +276,10 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
-		local variable_value=$2
+
+		# Make variables
+		local variable_value
+		variable_value=$(eval echo \${${variable_name}})
 
 		# Check if the input is an integer
 		if [[ ! "${variable_value}" =~ ^-?[0-9]+$ ]]; then
@@ -292,7 +295,10 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
-		local variable_value=$2
+
+		# Make variables
+		local variable_value
+		variable_value=$(eval echo \${${variable_name}})
 
 		# Check if the input is Boolean
 		if [[ "${variable_value}" != true && "${variable_value}" != false ]]; then
@@ -308,10 +314,13 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
-		local variable_value=$2
+
+		# Make variables
+		local variable_value
+		variable_value=$(eval echo \${${variable_name}})
 
 		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
+		check_nonempty variable_name || return 1
 
 		# Check if the input is a float
 		if [[ ! $variable_value =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
@@ -327,10 +336,10 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
-		local variable_value=$2
 
-		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
+		# Make variables
+		local variable_value
+		variable_value=$(eval echo \${${variable_name}})
 
 		# Check if the input is a valid path
 		if [[ ! -f "${variable_value}" ]]; then
@@ -346,10 +355,10 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
-		local variable_value=$2
 
-		# Check that inputs are non-empty
-		check_nonempty "variable_name" "${variable_name}" || return 1
+		# Make variables
+		local variable_value
+		variable_value=$(eval echo \${${variable_name}})
 
 		# Check if the input is a valid URL
 		if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
@@ -373,8 +382,8 @@ function yo() {
 		local repo_name=$1 file_name=$2
 
 		# Check that inputs are valid
-		check_nonempty "repo_name" "${repo_name}" || return 1
-		check_nonempty "file_name" "${file_name}" || return 1
+		check_nonempty repo_name || return 1
+		check_nonempty file_name || return 1
 
 		# Check if the model exists
 		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
@@ -402,7 +411,7 @@ function yo() {
 		local tokens=$1
 
 		# Check that inputs are valid
-		check_integer "tokens" "${tokens}" || return 1
+		check_integer tokens || return 1
 
 		# Make variables
 		local characters
@@ -421,7 +430,7 @@ function yo() {
 		local characters=$1
 
 		# Check that inputs are valid
-		check_integer "characters" "${characters}" || return 1
+		check_integer characters || return 1
 
 		# Make variables
 		local tokens
@@ -460,7 +469,7 @@ function yo() {
 		local terms=$1
 
 		# Check that inputs are valid
-		check_nonempty "terms" "${terms}" || return 1
+		check_nonempty terms || return 1
 
 		# Make variables
 		local url response
@@ -486,7 +495,7 @@ function yo() {
 		local query=$1
 
 		# Check that inputs are valid
-		check_nonempty "query" "${query}" || return 1
+		check_nonempty query || return 1
 
 		# Make variables
 		local prompt="" terms
@@ -537,8 +546,8 @@ function yo() {
 		local source=$1 max_length=$2
 
 		# Check that inputs are valid
-		check_path "source" "${source}" || return 1
-		check_integer "max_length" "${max_length}" || return 1
+		check_path source || return 1
+		check_integer max_length || return 1
 
 		# Make variables
 		local file_info=""
@@ -571,8 +580,8 @@ function yo() {
 		local source=$1 max_length=$2
 
 		# Check that inputs are valid
-		check_url "source" "${source}" || return 1
-		check_integer "max_length" "${max_length}" || return 1
+		check_url source || return 1
+		check_integer max_length || return 1
 
 		# Make variables
 		local file_info=""
@@ -758,7 +767,7 @@ function yo() {
 		local filename=$1
 
 		# Check that inputs are valid
-		check_nonempty "filename" "${filename}" || return 1
+		check_nonempty filename || return 1
 
 		# Make variables
 		local file_info=""
@@ -785,7 +794,7 @@ function yo() {
 		local url=$1
 
 		# Check that inputs are valid
-		check_nonempty "url" "${url}" || return 1
+		check_nonempty url || return 1
 
 		# Make variables
 		website_info=""
@@ -812,7 +821,7 @@ function yo() {
 		local search_terms=$1
 
 		# Check that inputs are valid
-		check_nonempty "search_terms" "${search_terms}" || return 1
+		check_nonempty search_terms || return 1
 
 		# Perform the search
 		search_info=$(perform_search "${search_terms}")
@@ -845,7 +854,7 @@ function yo() {
 		local query=$1
 
 		# Check that inputs are valid
-		check_nonempty "query" "${query}" || return 1
+		check_nonempty query || return 1
 
 		cat <<-EOF
 			Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
@@ -881,12 +890,12 @@ function yo() {
 		local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
 
 		# Check that inputs are valid
-		check_nonempty "mode" "${mode}" || return 1
-		check_boolean "surf_and_add_results" "${surf_and_add_results}" || return 1
-		check_boolean "add_usage_info" "${add_usage_info}" || return 1
-		check_boolean "add_system_info" "${add_system_info}" || return 1
-		check_boolean "add_directory_info" "${add_directory_info}" || return 1
-		check_boolean "add_clipboard_info" "${add_clipboard_info}" || return 1
+		check_nonempty mode || return 1
+		check_boolean surf_and_add_results || return 1
+		check_boolean add_usage_info || return 1
+		check_boolean add_system_info || return 1
+		check_boolean add_directory_info || return 1
+		check_boolean add_clipboard_info || return 1
 
 		# Make the base prompt
 		local prompt
@@ -978,13 +987,13 @@ function yo() {
 	  local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
 
 		# Check that inputs are valid
-		check_nonempty "repo_name" "${repo_name}" || return 1
-		check_nonempty "file_name" "${file_name}" || return 1
-		check_nonempty "prompt" "${prompt}" || return 1
-		check_nonempty "mode" "${mode}" || return 1
-		check_integer "number_of_tokens_to_generate" "${number_of_tokens_to_generate}" || return 1
-		check_integer "context_length" "${context_length}" || return 1
-		check_float "temp" "${temp}" || return 1
+		check_nonempty repo_name || return 1
+		check_nonempty file_name || return 1
+		check_nonempty prompt || return 1
+		check_nonempty mode || return 1
+		check_integer number_of_tokens_to_generate || return 1
+		check_integer context_length || return 1
+		check_float temp || return 1
 
 		# Check if the model exists and download it if not
 		check_model_download "${repo_name}" "${file_name}" || return 1
