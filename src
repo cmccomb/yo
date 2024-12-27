@@ -119,6 +119,7 @@ function yo() {
 
 	# Estimating lengths
 	local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+	local CHARACTERS_PER_TOKEN=4
 
 	# Generation lengths
 	local SEARCH_TERM_GENERATION_LENGTH=16
@@ -216,6 +217,9 @@ function yo() {
 		# Parse arguments
 		local variable_name=$1
 
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
+
 		# Make variables
 		local variable_value
 		variable_value=$(eval echo \${${variable_name}})
@@ -234,6 +238,9 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
+
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
 
 		# Make variables
 		local variable_value
@@ -254,12 +261,12 @@ function yo() {
 		# Parse arguments
 		local variable_name=$1
 
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
+
 		# Make variables
 		local variable_value
 		variable_value=$(eval echo \${${variable_name}})
-
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
 
 		# Check if the input is a float
 		if [[ ! $variable_value =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
@@ -275,6 +282,9 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
+
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
 
 		# Make variables
 		local variable_value
@@ -294,6 +304,9 @@ function yo() {
 
 		# Parse arguments
 		local variable_name=$1
+
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
 
 		# Make variables
 		local variable_value
@@ -321,6 +334,9 @@ function yo() {
 
 		# Print the message to stderr
 		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+
+		# Return successfully
+		return 0
 	}
 
 	# Function that checks to see if a model exists and download it if not
@@ -350,6 +366,9 @@ function yo() {
 				fi
 			fi
 		fi
+
+		# Return successfully
+		return 0
 	}
 
 	# Write a function to convert tokens to characters
@@ -364,11 +383,13 @@ function yo() {
 		local characters
 
 		# Calculate the number of characters and divide by four
-		characters=$(((tokens * 4) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
-		characters=$(printf "%.0f" "$characters")
+		characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
 		# Return result
-		echo "${characters}"
+		printf "%.0f" "$characters"
+
+		# Return successfully
+		return 0
 	}
 
 	# Write a function to convert tokens to characters
@@ -383,11 +404,13 @@ function yo() {
 		local tokens
 
 		# Calculate the number of characters and divide by four
-		tokens=$((((${characters} + 3) / 4) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
-		characters=$(printf "%.0f" "$characters")
+		tokens=$((((${characters} + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
 		# Return result
-		echo "${characters}"
+		printf "%.0f" "$characters"
+
+		# Return successfully
+		return 0
 	}
 
 	# Function to calculate the approximate number of tokens
@@ -395,24 +418,21 @@ function yo() {
 		# Parse arguments
 		local text=$1
 
-		# Make variables
-		local estimate
-
-		# Estimate the number of tokens
-		estimate=$(characters_to_tokens "${#text}")
-
 		# Return the estimate
-		echo "${estimate}"
+		characters_to_tokens "${#text}" || return 1
+
+		# Return successfully
+		return 0
 	}
 
 	######################################################################################################################
 	### Set the repository and file names ################################################################################
-  ######################################################################################################################
+	######################################################################################################################
 
 	# Define a function to help
 	function compose_repo_and_model_file_name() {
 
-	  # Parse arguments
+		# Parse arguments
 		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
 
 		# Check that inputs are valid
@@ -423,12 +443,12 @@ function yo() {
 		check_nonempty filetype || return 1
 		check_nonempty quant || return 1
 
-    # Return the repository and model names
+		# Return the repository and model names
 		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" |
 			tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
 
-    # Exit successfully
-    return 0
+		# Exit successfully
+		return 0
 	}
 
 	# Set the repository and model names for the task model
@@ -483,7 +503,6 @@ function yo() {
 	)"
 	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME
 
-
 	######################################################################################################################
 	### SEARCH ###########################################################################################################
 	######################################################################################################################
@@ -524,19 +543,26 @@ function yo() {
 		check_nonempty query || return 1
 
 		# Make variables
-		local prompt="" terms
+		local prompt terms
 
 		# Generate prompt
-		prompt+="Your task is to extract the most relevant search terms from the following query for a web search.\n\n"
-		prompt+="Here is an example:\n"
-		prompt+="User Query: how large is the capital of france ${YO}\n"
-		prompt+="Search Terms: paris capital population area\n\n"
-		prompt+="Here is another example:\n"
-		prompt+="User Query: what is the furthest planet from the sun ${YO}\n"
-		prompt+="Search Terms: solar system furthest planet distance\n\n"
-		prompt+="Here is the real user query.\n"
-		prompt+="User Query: ${query}\n"
-		prompt+="Search Terms: "
+		prompt=$(
+			cat <<-EOF
+				Your task is to extract the most relevant search terms from the following query for a web search.
+
+				Here is an example:
+				User Query: how large is the capital of france ${YO}
+				Search Terms: paris capital population area
+
+				Here is another example:
+				User Query: what is the furthest planet from the sun ${YO}
+				Search Terms: solar system furthest planet distance
+
+				Here is the real user query.
+				User Query: ${query}
+				Search Terms:
+			EOF
+		)
 
 		# Generate response
 		terms=$(
@@ -548,7 +574,10 @@ function yo() {
 				"${SEARCH_TERM_GENERATION_LENGTH}" \
 				"${SEARCH_TERM_CONTEXT_LENGTH}" \
 				"${TASK_MODEL_TEMP}"
-		)
+		) || {
+			echo "Error: Failed to extract search terms." >&2
+			return 1
+		}
 
 		# Only take the first line
 		terms=$(echo "${terms}" | head -n 1)
@@ -558,6 +587,8 @@ function yo() {
 
 		# Return results
 		echo "${terms}"
+
+		# Return successfully
 		return 0
 	}
 
@@ -584,10 +615,16 @@ function yo() {
 				echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
 				return 1
 			}
-			file_info=$(pdftotext "${source}" - 2>/dev/null)
+			file_info=$(pdftotext "${source}" - 2>/dev/null) || {
+				echo "Error: Failed to extract text from PDF file ${source}." >&2
+				return 1
+			}
 			;;
 		*.txt | *)
-			file_info=$(cat "${source}")
+			file_info=$(cat "${source}") || {
+				echo "Error: Failed to extract text from file ${source}." >&2
+				return 1
+			}
 			;;
 		esac
 
@@ -596,6 +633,8 @@ function yo() {
 
 		# Return file_info
 		echo "${file_info}"
+
+		# Return successfully
 		return 0
 	}
 
@@ -610,19 +649,27 @@ function yo() {
 		check_integer max_length || return 1
 
 		# Make variables
-		local file_info=""
+		local file_info response
 
-		# Fetch file_info from URL
-		if ! file_info=$(curl -s "${source}" | pandoc -f html -t plain --quiet); then
-			echo "Error: Failed to fetch information from ${source}." >&2
-			return 1
-		fi
+    # Fetch file_info from URL
+    if ! response=$(curl -s "${source}"); then
+      echo "Error: Failed to fetch information from ${source}." >&2
+      return 1
+    fi
+
+    # Convert HTML to plain text
+    if ! file_info=$(echo "${response}" | pandoc -f html -t plain --quiet); then
+      echo "Error: Failed to convert HTML to plain text from ${source}." >&2
+      return 1
+    fi
 
 		# Trim to max length if needed
 		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
 
 		# Return file_info
 		echo "${file_info}"
+
+		# Return successfully
 		return 0
 	}
 
