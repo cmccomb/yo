@@ -407,7 +407,7 @@ function yo() {
 		tokens=$((((${characters} + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
 		# Return result
-		printf "%.0f" "$characters"
+		printf "%.0f" "$tokens"
 
 		# Return successfully
 		return 0
@@ -651,17 +651,17 @@ function yo() {
 		# Make variables
 		local file_info response
 
-    # Fetch file_info from URL
-    if ! response=$(curl -s "${source}"); then
-      echo "Error: Failed to fetch information from ${source}." >&2
-      return 1
-    fi
+		# Fetch file_info from URL
+		if ! response=$(curl -s "${source}"); then
+			echo "Error: Failed to fetch information from ${source}." >&2
+			return 1
+		fi
 
-    # Convert HTML to plain text
-    if ! file_info=$(echo "${response}" | pandoc -f html -t plain --quiet); then
-      echo "Error: Failed to convert HTML to plain text from ${source}." >&2
-      return 1
-    fi
+		# Convert HTML to plain text
+		if ! file_info=$(echo "${response}" | pandoc -f html -t plain --quiet); then
+			echo "Error: Failed to convert HTML to plain text from ${source}." >&2
+			return 1
+		fi
 
 		# Trim to max length if needed
 		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
@@ -709,7 +709,7 @@ function yo() {
 		fi
 
 		# If length of tokenized text is greater than cutoff, do something
-		if [[ $(estimate_number_of_tokens "${text}") -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
+		if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
 
 			# Make variables
 			local compressed="" chunk_length_in_chars number_of_chunks
@@ -743,8 +743,38 @@ function yo() {
 						"task" \
 						"${COMPRESSION_GENERATION_LENGTH}" \
 						"${context_length}" \
-						0.2
-				)
+						0.2 2>/dev/null || {
+						# Split the chunk in half
+						local half_length=$((chunk_length_in_chars / 2))
+						local chunk1="${chunk:0:${half_length}}"
+						local chunk2="${chunk:${half_length}}"
+
+						# Process the first half
+						local result1
+						result1=$(start_llama_session \
+							"${TASK_MODEL_REPO_NAME}" \
+							"${TASK_MODEL_FILE_NAME}" \
+							"${chunk1}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+							"task" \
+							"${COMPRESSION_GENERATION_LENGTH}" \
+							"${context_length}" \
+							0.2) || return 1
+
+						# Process the second half
+						local result2
+						result2=$(start_llama_session \
+							"${TASK_MODEL_REPO_NAME}" \
+							"${TASK_MODEL_FILE_NAME}" \
+							"${chunk2}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+							"task" \
+							"${COMPRESSION_GENERATION_LENGTH}" \
+							"${context_length}" \
+							0.2) || return 1
+
+						# Combine the results
+						echo "${result1}${result2}"
+					}
+				) # TODO: This could be much MUCH more elegant
 			done
 
 			# Echo number of tokens
@@ -769,10 +799,22 @@ function yo() {
 		local model cores ram free_storage
 
 		# Get system information
-		model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}')
-		cores=$(sysctl -n hw.ncpu)
-		ram=$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}')
-		free_storage=$(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}')
+		model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') || {
+			echo "Error: Failed to get computer model information." >&2
+			return 1
+		}
+		cores=$(sysctl -n hw.ncpu) || {
+			echo "Error: Failed to get number of cores." >&2
+			return 1
+		}
+		ram=$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}') || {
+			echo "Error: Failed to get RAM size." >&2
+			return 1
+		}
+		free_storage=$(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}') || {
+			echo "Error: Failed to get free storage." >&2
+			return 1
+		}
 
 		# Return system information
 		cat <<-EOF
@@ -820,10 +862,16 @@ function yo() {
 
 		# Make variables
 		local clipboard_info
-		clipboard_info=$(pbpaste)
+		clipboard_info=$(pbpaste) || {
+			echo "Error: Failed to get clipboard information." >&2
+			return 1
+		}
 
 		# Compress if needed
-		clipboard_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${clipboard_info}")
+		clipboard_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${clipboard_info}") || {
+			echo "Error: Failed to compress clipboard information." >&2
+			return 1
+		}
 
 		cat <<-EOF
 			Here are the contents from the clipboard:
@@ -846,10 +894,17 @@ function yo() {
 		local file_info=""
 
 		# Check that inputs are valid
-		file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
+		file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || {
+			echo "Error: Failed to extract information from file ${filename}." >&2
+			return 1
+		}
 
 		# Compress if needed
-		file_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${file_info}")
+		file_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${file_info}") ||
+			{
+				echo "Error: Failed to compress file information." >&2
+				return 1
+			}
 
 		# Return file information
 		cat <<-EOF
@@ -873,10 +928,16 @@ function yo() {
 		website_info=""
 
 		# Check that inputs are valid
-		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || return 1
+		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || {
+			echo "Error: Failed to extract information from URL ${url}." >&2
+			return 1
+		}
 
 		# Compress the info
-		website_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${website_info}")
+		website_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${website_info}") || {
+			echo "Error: Failed to compress website information." >&2
+			return 1
+		}
 
 		# Return file information
 		cat <<-EOF
@@ -897,9 +958,15 @@ function yo() {
 		check_nonempty search_terms || return 1
 
 		# Perform the search
-		search_info=$(perform_search "${search_terms}")
+		search_info=$(perform_search "${search_terms}") || {
+			echo "Error: Failed to perform search for ${search_terms}." >&2
+			return 1
+		}
 
-		search_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${search_info}")
+		search_info=$(compress_text --remove-spaces --remove-punctuation --summarize "${search_info}") || {
+			echo "Error: Failed to compress search information." >&2
+			return 1
+		}
 
 		# Return search information
 		cat <<-EOF
@@ -977,37 +1044,55 @@ function yo() {
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
 			timestamp_log_to_stderr "💻" "Querying system info..." >&2
-			prompt+=$(generate_system_info_context)"\n\n"
+			prompt+=$(generate_system_info_context)"\n\n" || {
+        echo "Error: Failed to generate system information context." >&2
+        return 1
+			}
 		fi
 
 		# Add directory information if requested
 		if [[ "${add_directory_info}" == true ]]; then
 			timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
-			prompt+=$(generate_directory_info_context)"\n\n"
+			prompt+=$(generate_directory_info_context)"\n\n" || {
+			          echo "Error: Failed to generate directory information context." >&2
+        return 1
+			}
 		fi
 
 		# Add clipboard information if requested
 		if [[ "${add_clipboard_info}" == true ]]; then
 			timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
-			prompt+=$(generate_clipboard_info_context)"\n\n"
+			prompt+=$(generate_clipboard_info_context)"\n\n" || {
+			          echo "Error: Failed to generate clipboard information context." >&2
+        return 1
+			}
 		fi
 
 		# Add file file_info if available
 		if [[ -n "${filename}" ]]; then
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
-			prompt+=$(generate_file_context "${filename}")"\n\n"
+			prompt+=$(generate_file_context "${filename}")"\n\n" || {
+			          echo "Error: Failed to generate file information context." >&2
+        return 1
+			}
 		fi
 
 		# Add website information if available
 		if [[ -n "${website_url}" ]]; then
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-			prompt+=$(generate_website_context "${website_url}")"\n\n"
+			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
+			          echo "Error: Failed to generate website information context." >&2
+        return 1
+			}
 		fi
 
 		# Add search information if available
 		if [[ -n "${search_terms}" ]]; then
 			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}")"\n\n"
+			prompt+=$(generate_search_context "${search_terms}")"\n\n" || {
+			          echo "Error: Failed to generate search information context." >&2
+        return 1
+			}
 		fi
 
 		# Add search information if available
@@ -1015,13 +1100,19 @@ function yo() {
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 			search_terms=$(extract_search_terms "${query}")
 			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}" "${search_info}")"\n\n"
+			prompt+=$(generate_search_context "${search_terms}" "${search_info}")"\n\n" || {
+			          echo "Error: Failed to generate search information context." >&2
+        return 1
+			}
 		fi
 
 		# Add self context if available
 		if [[ "${add_usage_info}" == true ]]; then
 			timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
-			prompt+=$(generate_self_context)"\n\n"
+			prompt+=$(generate_self_context)"\n\n" || {
+			          echo "Error: Failed to generate self information context." >&2
+        return 1
+			}
 		fi
 
 		# If any content was added, add an instruction about relying on the content
@@ -1034,21 +1125,29 @@ function yo() {
 			-n "${search_terms}" ||
 			"${surf_and_add_results}" == true ]] \
 			; then
-			prompt+="You can use the information above to help answer the user's question.\n\n"
+			prompt+="Use the information above to help you answer the user's question.\n\n"
 		fi
 
 		# Add query and instructions based on interactive ##################################################################
 		case $mode in
 		interactive)
-			prompt+=$(generate_interactive_instructions)
+			prompt+=$(generate_interactive_instructions) || {
+			          echo "Error: Failed to generate interactive instructions." >&2
+        return 1
+			}
 			;;
 		one-off)
-			prompt+=$(generate_oneoff_instructions "${query}")
+			prompt+=$(generate_oneoff_instructions "${query}") || {
+			          echo "Error: Failed to generate one-off instructions." >&2
+        return 1
+			}
 			;;
 		esac
 
 		# Return prompt
 		echo "${prompt}"
+
+		# Return successfully
 		return 0
 	}
 
@@ -1073,12 +1172,15 @@ function yo() {
 
 		# If context size is -1, estimate it
 		if [[ "${context_length}" == -1 ]]; then
-			context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate))
+			context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate)) || {
+        echo "Error: Failed to estimate context length." >&2
+        return 1
+			}
 		fi
 
 		# Configure llama-cli arguments
 		local args=(
-			--threads "$(sysctl -n hw.logicalcpu_max)"
+			--threads "$(sysctl -n hw.logicalcpu_max || sysctl -n hw.ncpu || echo 1)"
 			--hf-repo "${repo_name}"
 			--hf-file "${file_name}"
 			--prompt "${prompt}"
@@ -1124,6 +1226,9 @@ function yo() {
 				return 1
 			fi
 		fi
+
+		# Return successfully
+		return 0
 	}
 
 	######################################################################################################################
@@ -1301,7 +1406,7 @@ function yo() {
 			"${add_directory_info}" \
 			"${add_clipboard_info}" \
 			"${add_usage_info}"
-	)
+	) || return 1
 
 	### Kick off the LLM #################################################################################################
 	start_llama_session \
@@ -1311,7 +1416,7 @@ function yo() {
 		"${mode}" \
 		"${new_tokens}" \
 		"${context_length}" \
-		"${temp}"
+		"${temp}" || return 1
 
 	### Print the elapsed time ###########################################################################################
 	tput cuu1 && tput el
