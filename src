@@ -563,7 +563,7 @@ function yo() {
 		# Generate prompt
 		prompt=$(
 			cat <<-EOF
-				Your task is to extract the most relevant search terms from the following query for a web search.
+				Your task is to create a list of the most relevant search terms for a web search.
 
 				Here is an example:
 				User Query: how large is the capital of france ${YO}
