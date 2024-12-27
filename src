@@ -704,10 +704,21 @@ function yo() {
 		check_nonempty chunk || return 1
 		check_integer context_length || return 1
 
+		# Create prompt
+		local prompt
+		prompt=$(cat <<-EOF
+			=============== START OF TEXT===============
+			${chunk}
+			=============== END OF TEXT===============
+
+			Based on the unstructured text given above, provide a concise list of facts and information.
+			EOF
+    )
+
 		start_llama_session \
 			"${TASK_MODEL_REPO_NAME}" \
 			"${TASK_MODEL_FILE_NAME}" \
-			"${chunk}\n\n=============== END OF TEXT===============\n\n Based on the unstructured text given above, provide a concise list of facts and information. " \
+			"${prompt}" \
 			"task" \
 			"${COMPRESSION_GENERATION_LENGTH}" \
 			"${context_length}" \
