@@ -332,6 +332,29 @@ function yo() {
 		fi
 	}
 
+	# Check if the input is a valid emoji
+  function check_emoji() {
+
+    # Parse arguments
+    local variable_name=$1
+
+    # Check that inputs are non-empty
+    check_nonempty variable_name || return 1
+
+    # Make variables
+    local variable_value
+    variable_value=$(get_value_from_name variable_name)
+
+    # Check if the input is a valid emoji
+    if [[ ! "${variable_value}" =~ "[😀-🙏🌀-🗿]" ]]; then
+      echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
+      return 1
+    else
+      return 0
+    fi
+  }
+
+
 	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
 
@@ -340,7 +363,7 @@ function yo() {
 		local message=$2
 
 		# Make sure the inputs are valid
-		check_nonempty emoji || return 1
+		check_emoji emoji || return 1
 		check_nonempty message || return 1
 
 		# Print the message to stderr
@@ -573,7 +596,7 @@ function yo() {
 		# Generate prompt
 		prompt=$(
 			cat <<-EOF
-				Your task is to create a list of the most relevant search terms for a web search.
+				Your task is to create a list of the most relevant search terms for a given topic.
 
 				Here is an example:
 				User Query: how large is the capital of france ${YO}
