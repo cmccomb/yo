@@ -1464,10 +1464,10 @@ function yo() {
 			"${search_terms}" \
 			"${website_url}" \
 			"${surf_and_add_results}" \
+			"${add_usage_info}" \
 			"${add_system_info}" \
 			"${add_directory_info}" \
-			"${add_clipboard_info}" \
-			"${add_usage_info}"
+			"${add_clipboard_info}"
 	) || {
 		echo "Error: Failed to generate prompt." >&2
 		return 1
@@ -1481,11 +1481,7 @@ function yo() {
 		"${mode}" \
 		"${new_tokens}" \
 		"${context_length}" \
-		"${temp}" ||
-		{
-			echo "Error: Failed to start llama-cli session." >&2
-			return 1
-		}
+		"${temp}"
 
 	### Print the elapsed time ###########################################################################################
 	tput cuu1 && tput el
