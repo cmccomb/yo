@@ -333,27 +333,26 @@ function yo() {
 	}
 
 	# Check if the input is a valid emoji
-  function check_emoji() {
+	function check_emoji() {
 
-    # Parse arguments
-    local variable_name=$1
+		# Parse arguments
+		local variable_name=$1
 
-    # Check that inputs are non-empty
-    check_nonempty variable_name || return 1
+		# Check that inputs are non-empty
+		check_nonempty variable_name || return 1
 
-    # Make variables
-    local variable_value
-    variable_value=$(get_value_from_name variable_name)
+		# Make variables
+		local variable_value
+		variable_value=$(get_value_from_name variable_name)
 
-    # Check if the input is a valid emoji
-    if [[ ! "${variable_value}" =~ "[😀-🙏🌀-🗿]" ]]; then
-      echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
-      return 1
-    else
-      return 0
-    fi
-  }
-
+		# Check if the input is a valid emoji
+		if [[ ! "${variable_value}" =~ "[😀-🙏🌀-🗿]" ]]; then
+			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
+			return 1
+		else
+			return 0
+		fi
+	}
 
 	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
@@ -1095,7 +1094,10 @@ function yo() {
 
 		# Make the base prompt
 		local prompt
-		prompt=$(generate_base_prompt)"\n\n"
+		prompt=$(generate_base_prompt)"\n\n" || {
+			echo "Error: Failed to generate base prompt." >&2
+			return 1
+		}
 
 		# Add system information if requested
 		if [[ "$add_system_info" == true ]]; then
