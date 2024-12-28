@@ -205,6 +205,10 @@ function yo() {
 		eval echo "\${${variable_name}}"
 	}
 
+	function check_online() {
+		ping -c 1 google.com &>/dev/null
+	}
+
 	# Check if the input is empty
 	function check_nonempty() {
 
@@ -346,7 +350,7 @@ function yo() {
 		variable_value=$(get_value_from_name variable_name)
 
 		# Check if the input is a valid emoji
-		if [[ ! "${variable_value}" =~ "[😀-🙏🌀-🗿]" ]]; then
+		if [[ ! "${variable_value}" =~ [😀-🙏🌀-🗿] ]]; then
 			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
 			return 1
 		else
@@ -384,6 +388,12 @@ function yo() {
 		# Check if the model exists
 		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
 		if [[ ! -f "${model_path}" ]]; then
+		  # Make sure we are online
+		  check_online || {
+		    echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
+		    return 1
+		  }
+
 			# Print a detailed timestamp, down to the decimal seconds
 			timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
 			if [[ "${verbose}" == true ]]; then
@@ -1341,6 +1351,10 @@ function yo() {
 
 		# Read in a file
 		-w | --website)
+			check_online || {
+				echo "Error: You are not connected to the internet, so the --website flag is unavailable." >&2
+				return 1
+			}
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
 				website_url=$2 # TODO make this add files to a list
 				shift          # TODO distinguish explicitly between local reading and web reading
@@ -1352,6 +1366,10 @@ function yo() {
 
 		# Do some searching
 		-s | --search)
+			check_online || {
+				echo "Error: You are not connected to the internet, so the --search flag is unavailable." >&2
+				return 1
+			}
 			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
 				search_terms=$2
 				shift
@@ -1365,7 +1383,14 @@ function yo() {
 		-v | --verbose) verbose=true ;;
 
 		# Surf the web with LLM-defined search terms
-		-S | --surf) surf_and_add_results=true ;;
+		-S | --surf)
+			check_online || {
+				echo "Error: You are not connected to the internet, so the --surf flag is unavailable." >&2
+				return 1
+			}
+
+			surf_and_add_results=true
+			;;
 
 		# Add system information to the context
 		-y | --system) add_system_info=true ;;
