@@ -54,15 +54,17 @@ function yo() {
 			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 			    -d, --directory         Include a list of the files in the current directory in Yo's context.
 			    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
-			                            including .pdf, .docx, .txt, .md, .py, .zsh.
+			                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated multiple times
+			                            to bring in multiple files.
 			    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 			  Finally, we have several option that require an internet connection:
 			    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
-			                            Yo's context. Requires an active internet connection.
-			    -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the results into
-			                            Yo's context. Requires an active internet connection.
-			    -w, --website "URL"     Extract the specified website into Yo's context.
+			                            Yo's context. This flag can be repeated multiple times to perform unique searches.
+			    -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the
+			                            results into Yo's context.
+			    -w, --website "URL"     Extract the specified website into Yo's context. This flag can be repeated multiple
+			                            times to bring in multiple sites.
 
 			Model Size Options:
 			  Yo uses four distinct models. In order of increasing size, they are: a task model (1B), a casual model (3B), a
@@ -77,6 +79,7 @@ function yo() {
 			General Purpose Options:
 			  These options provide general functionality.
 			    -h, --help              Show this help message and exit.
+			    -q, --quiet             Suppress all output except the answer.
 			    -v, --verbose           Enable verbose mode for detailed output.
 			    -V, --version           Show the version and exit.
 
