@@ -1,0 +1,18 @@
+name: Installation
+
+on:
+  # Runs on successful completion of static.yml
+  workflow_run:
+      workflows: ["Deploy static content to Pages"]
+      types:
+      - completed
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - name: Install
+        run: zsh <(curl -s https://cmccomb.com/yo/install)
