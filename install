@@ -58,6 +58,7 @@ echo "Yo introduction complete."
 
 # Yo to the ~/.zshrc
 echo "Saving the Yo function to ~/.zshrc..."
-sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc
-declare -f yo >>~/.zshrc
+sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc || sed -i '' '/^yo () {/,/^}$/d' ~/.bashrc ||
+declare -f yo >>~/.zshrc || declare -f yo >>~/.bashrc
+source ~/.zshrc || source ~/.bashrc
 echo "Update to ~/.zshrc complete."
