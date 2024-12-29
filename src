@@ -362,16 +362,19 @@ function yo() {
 	# Function to log the time taken for a process
 	function timestamp_log_to_stderr() {
 
-		# Parse arguments
-		local emoji=$1
-		local message=$2
+		if [[ "${QUIET}" == false ]]; then
 
-		# Make sure the inputs are valid
-		check_emoji emoji || return 1
-		check_nonempty message || return 1
+			# Parse arguments
+			local emoji=$1
+			local message=$2
 
-		# Print the message to stderr
-		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+			# Make sure the inputs are valid
+			check_emoji emoji || return 1
+			check_nonempty message || return 1
+
+			# Print the message to stderr
+			echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+		fi
 
 		# Return successfully
 		return 0
@@ -1097,8 +1100,8 @@ function yo() {
 
 		# Split filenames into an array of files
 		filenames=($(echo "${filenames}" | tr '\n' ' '))
-		search_terms=($(echo "${search_terms}" |  tr ' ' '+' | tr '\n' ' '))
-		website_urls=($(echo "${website_urls}"  |tr '\n' ' '))
+		search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
+		website_urls=($(echo "${website_urls}" | tr '\n' ' '))
 
 		# Check that inputs are valid
 		check_nonempty mode || return 1
@@ -1334,7 +1337,7 @@ function yo() {
 	local query=""
 	local file_path_list=""
 	local website_url_list=""
-  local search_term_list=""
+	local search_term_list=""
 	local surf_and_add_results=false
 	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
@@ -1343,6 +1346,7 @@ function yo() {
 
 	# Make verbose a global variable
 	local VERBOSE=false
+	local QUIET=false
 
 	# Start parsing arguments
 	while [[ $# -gt 0 ]]; do
@@ -1403,6 +1407,9 @@ function yo() {
 
 		# Make the output verbose
 		-v | --verbose) VERBOSE=true ;;
+
+		# Make the output quiet
+		-q | --quiet) QUIET=true ;;
 
 		# Surf the web with LLM-defined search terms
 		-S | --surf)
