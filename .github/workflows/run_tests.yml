@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Tests
+name: Test Install
 
 on:
   # Runs on successful completion of static.yml
@@ -11,11 +11,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-
-
 jobs:
   test:
     runs-on: macos-latest
     steps:
       - name: Install
-        run: zsh <(curl -s https://cmccomb.com/yo/install)
+        run: zsh <(curl -s https://cmc`comb.com/yo/install)
+      - name: Verify
+        run: yo say hi
