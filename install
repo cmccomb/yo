@@ -29,35 +29,24 @@ fi
 
 # Check to see if pdftotext is installed and install it if it is not
 if ! command -v pdftotext &>/dev/null; then
-	echo "pdftotext not found. Installing pdftotext..."
+	echo "pdftotext not found. Installing poppler..."
 	brew install poppler
-	echo "pdftotext installation complete."
+	echo "poppler installation complete."
 else
 	echo "pdftotext is already installed."
 fi
 
 # Check to see if gdate is install and install it if it is not
 if ! command -v gdate &>/dev/null; then
-  echo "gdate not found. Installing gdate..."
+  echo "gdate not found. Installing coreutils..."
   brew install coreutils
-  echo "gdate installation complete."
+  echo "coreutils installation complete."
 else
   echo "gdate is already installed."
 fi
 
-# Yo to the shell
-echo "Sourcing the Yo script..."
-# shellcheck disable=SC1090
-source <(curl -s https://cmccomb.com/yo/src)
-echo "Yo script sourced."
-
-# Yo to the user
-echo "Introducing Yo..."
-yo say hi
-echo "Yo introduction complete."
-
-# Yo to the ~/.zshrc
-echo "Saving the Yo function to ~/.zshrc..."
-sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc
-declare -f yo >>~/.zshrc
-echo "Update to ~/.zshrc complete."
+# Download the latest version of yo
+echo "Downloading the latest version of yo..."
+curl -s https://www.cmccomb.com/yo/src > /tmp/yo
+chmod +x /tmp/yo
+sudo mv /tmp/yo /usr/local/bin/yo

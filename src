@@ -14,1542 +14,1533 @@
 ########################################################################################################################
 ########################################################################################################################
 
-function yo() {
+#function yo() {
 
-	######################################################################################################################
-	### THE YO ###########################################################################################################
-	######################################################################################################################
+########################################################################################################################
+### THE YO #############################################################################################################
+########################################################################################################################
 
-	### Define the Yo ####################################################################################################
-	local YO="✌️"
-	readonly YO
+### Define the Yo ######################################################################################################
+YO="✌️"
+readonly YO
 
-	### All versioning follows semver as defined at https://semver.org/ ##################################################
-	local VERSION="0.1.0"
-	readonly VERSION
+### All versioning follows semver as defined at https://semver.org/ ####################################################
+VERSION="0.1.0"
+readonly VERSION
 
-	### Display version information ######################################################################################
-	function show_version() {
-		echo "yo v${VERSION}"
-	}
+### Display version information ########################################################################################
+function show_version() {
+	echo "yo v${VERSION}"
+}
 
-	### Display help instructions #######################################################################################
-	function show_help() {
-		cat <<-EOF
-			yo - A command-line AI assistant.
+### Display help instructions ##########################################################################################
+function show_help() {
+	cat <<-EOF
+		    yo - A command-line AI assistant.
 
-			Usage:
-			  yo [options] [question]
+		    Usage:
+		      yo [options] [question]
 
-			Description:
-			  If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
+		    Description:
+		      If a question is provided, Yo will answer the question. Otherwise, Yo will enter an interactive session.
 
-			Context Options:
-			  These options allow you to control the information that Yo uses to answer your question.
+		    Context Options:
+		      These options allow you to control the information that Yo uses to answer your question.
 
-			  First, we have static local options that introduce specific predefined knowledge:
-			    -u, --usage             Load this help message into Yo's context.
+		      First, we have static local options that introduce specific predefined knowledge:
+		        -u, --usage             Load this help message into Yo's context.
 
-			  Next, we have dynamic local options that pull in fress information from the local system:
-			    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
-			    -d, --directory         Include a list of the files in the current directory in Yo's context.
-			    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
-			                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated multiple times
-			                            to bring in multiple files.
-			    -y, --system            Run a few system commands and integrate the information into Yo's context.
+		      Next, we have dynamic local options that pull in fress information from the local system:
+		        -c, --clipboard         Copy the contents of the clipboard into Yo's context.
+		        -d, --directory         Include a list of the files in the current directory in Yo's context.
+		        -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
+		                                including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated multiple times
+		                                to bring in multiple files.
+		        -y, --system            Run a few system commands and integrate the information into Yo's context.
 
-			  Finally, we have several option that require an internet connection:
-			    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
-			                            Yo's context. This flag can be repeated multiple times to perform unique searches.
-			    -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the
-			                            results into Yo's context.
-			    -w, --website "URL"     Extract the specified website into Yo's context. This flag can be repeated multiple
-			                            times to bring in multiple sites.
+		      Finally, we have several option that require an internet connection:
+		        -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
+		                                Yo's context. This flag can be repeated multiple times to perform unique searches.
+		        -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the
+		                                results into Yo's context.
+		        -w, --website "URL"     Extract the specified website into Yo's context. This flag can be repeated multiple
+		                                times to bring in multiple sites.
 
-			Model Size Options:
-			  Yo uses four distinct models. In order of increasing size, they are: a task model (1B), a casual model (3B), a
-			  balanced model (7B), and a serious model (14B). By default, Yo uses the task model for summarization and other
-			  small tasks, the casual model for one-off questions, and the serious model for interactive sessions. You can
-			  override the default model by using the following options:
-			    -tm, --task-model       Use the task model
-			    -cm, --casual-model     Use the casual model
-			    -bm, --balanced-model   Use the balanced model
-			    -sm, --serious-model    Use the serious model
+		    Model Size Options:
+		      Yo uses four distinct models. In order of increasing size, they are: a task model (1B), a casual model (3B), a
+		      balanced model (7B), and a serious model (14B). By default, Yo uses the task model for summarization and other
+		      small tasks, the casual model for one-off questions, and the serious model for interactive sessions. You can
+		      override the default model by using the following options:
+		        -tm, --task-model       Use the task model
+		        -cm, --casual-model     Use the casual model
+		        -bm, --balanced-model   Use the balanced model
+		        -sm, --serious-model    Use the serious model
 
-			General Purpose Options:
-			  These options provide general functionality.
-			    -h, --help              Show this help message and exit.
-			    -q, --quiet             Suppress all output except the answer.
-			    -v, --verbose           Enable verbose mode for detailed output.
-			    -V, --version           Show the version and exit.
+		    General Purpose Options:
+		      These options provide general functionality.
+		        -h, --help              Show this help message and exit.
+		        -q, --quiet             Suppress all output except the answer.
+		        -v, --verbose           Enable verbose mode for detailed output.
+		        -V, --version           Show the version and exit.
 
-			Examples:
-			  * Answer a question:
-			    $ yo "What is the capital of France?"
+		    Examples:
+		      * Answer a question:
+		        $ yo "What is the capital of France?"
 
-			  * For simple cases, you can omit the quotes:
-			    $ yo what is the capital of france
+		      * For simple cases, you can omit the quotes:
+		        $ yo what is the capital of france
 
-			  * Start an interactive session:
-			    $ yo
+		      * Start an interactive session:
+		        $ yo
 
-			  * Integrate information from a file:
-			    $ yo --file src "How can I improve this source code?"
+		      * Integrate information from a file:
+		        $ yo --file src "How can I improve this source code?"
 
-			  * Integrate information from a URL:
-			    $ yo --website "https://en.wikipedia.org/wiki/Paris" how big is paris
+		      * Integrate information from a URL:
+		        $ yo --website "https://en.wikipedia.org/wiki/Paris" how big is paris
 
-			  * Integrate Google search results:
-			    $ yo --search "what is the capital of Tobago"
+		      * Integrate Google search results:
+		        $ yo --search "what is the capital of Tobago"
 
-			  * Use LLM-selected search terms:
-			    $ yo --surf tell me about renewable energy trends.
+		      * Use LLM-selected search terms:
+		        $ yo --surf tell me about renewable energy trends.
 
-			  * Combine context sources:
-			    $ yo --file src --search "what is the capital of france"
+		      * Combine context sources:
+		        $ yo --file src --search "what is the capital of france"
 
-			  * Add verbosity to any of these commands
-			    $ yo what is the capital of france --verbose
-		EOF
-		return 0
-	}
+		      * Add verbosity to any of these commands
+		        $ yo what is the capital of france --verbose
+	EOF
+	return 0
+}
 
-	######################################################################################################################
-	### CONSTANTS AND SETTINGS ##########################################################################################
-	######################################################################################################################
+########################################################################################################################
+### CONSTANTS AND SETTINGS #############################################################################################
+########################################################################################################################
 
-	# Common parameters
-	local GENERAL_USERNAME="bartowski"
-	local GENERAL_FINETUNING_STYLE="Instruct"
-	local GENERAL_MODEL_FILETYPE="gguf"
+# Common parameters
+GENERAL_USERNAME="bartowski"
+GENERAL_FINETUNING_STYLE="Instruct"
+GENERAL_MODEL_FILETYPE="gguf"
 
-	# Estimating lengths
-	local TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
-	local CHARACTERS_PER_TOKEN=4
+# Estimating lengths
+TOKEN_ESTIMATION_CORRECTION_FACTOR=1.2
+CHARACTERS_PER_TOKEN=4
 
-	# Generation lengths
-	local SEARCH_TERM_GENERATION_LENGTH=16
-	local ONEOFF_GENERATION_LENGTH=128
-	local INTERACTIVE_GENERATION_LENGTH=512
-	local COMPRESSION_GENERATION_LENGTH=128
-	local COMPRESSION_CHUNK_LENGTH=4096
-	local COMPRESSION_TRIGGER_LENGTH=1024
+# Generation lengths
+SEARCH_TERM_GENERATION_LENGTH=16
+ ONEOFF_GENERATION_LENGTH=128
+ INTERACTIVE_GENERATION_LENGTH=512
+ COMPRESSION_GENERATION_LENGTH=128
+ COMPRESSION_CHUNK_LENGTH=4096
+ COMPRESSION_TRIGGER_LENGTH=1024
 
-	# Context lengths
-	local SEARCH_TERM_CONTEXT_LENGTH=-1 # custom fit to prompt and generation length
-	local ONEOFF_CONTEXT_LENGTH=-1      # custom fit to prompt and generation length
-	local INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
+# Context lengths
+SEARCH_TERM_CONTEXT_LENGTH=-1 # custom fit to prompt and generation length
+ONEOFF_CONTEXT_LENGTH=-1      # custom fit to prompt and generation length
+INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
 
-	### Define parameters for the task model #############################################################################
+### Define parameters for the task model ###############################################################################
 
-	# Model parameters
-	local TASK_USERNAME=${GENERAL_USERNAME}
-	local TASK_MODEL_SERIES="Llama-3.2"
-	local TASK_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
-	local TASK_MODEL_SIZE="1B"
-	local TASK_MODEL_QUANT="Q4_K_M"
-	local TASK_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+# Model parameters
+TASK_USERNAME=${GENERAL_USERNAME}
+TASK_MODEL_SERIES="Llama-3.2"
+TASK_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+TASK_MODEL_SIZE="1B"
+TASK_MODEL_QUANT="Q4_K_M"
+TASK_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
-	# Generation parameters
-	local TASK_MODEL_TEMP=0.2
+# Generation parameters
+TASK_MODEL_TEMP=0.2
 
-	### Define parameters for the casual model ###########################################################################
+### Define parameters for the casual model #############################################################################
 
-	# Model parameters
-	local CASUAL_GENERAL_USERNAME=${GENERAL_USERNAME}
-	local CASUAL_MODEL_SERIES="Qwen2.5"
-	local CASUAL_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
-	local CASUAL_MODEL_SIZE="3B"
-	local CASUAL_MODEL_QUANT="Q4_K_M"
-	local CASUAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+# Model parameters
+CASUAL_GENERAL_USERNAME=${GENERAL_USERNAME}
+CASUAL_MODEL_SERIES="Qwen2.5"
+CASUAL_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+CASUAL_MODEL_SIZE="3B"
+CASUAL_MODEL_QUANT="Q4_K_M"
+CASUAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
-	# Generation parameters
-	local CASUAL_MODEL_TEMP=0.2
+# Generation parameters
+CASUAL_MODEL_TEMP=0.2
 
-	### Define parameters for the balanced model #########################################################################
-	local BALANCED_GENERAL_USERNAME=${GENERAL_USERNAME}
-	local BALANCED_MODEL_SERIES="Qwen2.5"
-	local BALANCED_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
-	local BALANCED_MODEL_SIZE="7B"
-	local BALANCED_MODEL_QUANT="Q4_K_M"
-	local BALANCED_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+### Define parameters for the balanced model ###########################################################################
+BALANCED_GENERAL_USERNAME=${GENERAL_USERNAME}
+BALANCED_MODEL_SERIES="Qwen2.5"
+BALANCED_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+BALANCED_MODEL_SIZE="7B"
+BALANCED_MODEL_QUANT="Q4_K_M"
+BALANCED_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
-	# Generation parameters
-	local BALANCED_MODEL_TEMP=0.2
+# Generation parameters
+BALANCED_MODEL_TEMP=0.2
 
-	### Define the series model parameters ###############################################################################
-	local SERIOUS_GENERAL_USERNAME=${GENERAL_USERNAME}
-	local SERIOUS_MODEL_SERIES="Qwen2.5-Coder"
-	local SERIOUS_GENERAL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
-	local SERIOUS_MODEL_SIZE="14B"
-	local SERIOUS_MODEL_QUANT="IQ4_XS"
-	local SERIOUS_GENERAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+### Define the series model parameters #################################################################################
+SERIOUS_GENERAL_USERNAME=${GENERAL_USERNAME}
+SERIOUS_MODEL_SERIES="Qwen2.5-Coder"
+SERIOUS_GENERAL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+SERIOUS_MODEL_SIZE="14B"
+SERIOUS_MODEL_QUANT="IQ4_XS"
+SERIOUS_GENERAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
-	# Generation parameters
-	local SERIOUS_MODEL_TEMP=0.2
+# Generation parameters
+SERIOUS_MODEL_TEMP=0.2
 
-	### Custom search API key ############################################################################################
-	local GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
-	local GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
-	local GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
-	readonly GOOGLE_CSE_API_KEY GOOGLE_CSE_ID GOOGLE_CSE_BASE_URL
+### Custom search API key ##############################################################################################
+GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
+GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"
+GOOGLE_CSE_BASE_URL="https://customsearch.googleapis.com/customsearch/v1"
+readonly GOOGLE_CSE_API_KEY GOOGLE_CSE_ID GOOGLE_CSE_BASE_URL
 
-	### Maximum length of file content to extract ########################################################################
-	local MAX_FILE_CONTENT_LENGTH=300000
+### Maximum length of file content to extract ##########################################################################
+MAX_FILE_CONTENT_LENGTH=300000
 
-	######################################################################################################################
-	### UTILITY FUNCTIONS ################################################################################################
-	######################################################################################################################
+########################################################################################################################
+### UTILITY FUNCTIONS ##################################################################################################
+########################################################################################################################
 
-	function get_epoch_in_seconds_and_decimals() {
-		gdate +%s.%N
-	}
+function get_epoch_in_seconds_and_decimals() {
+	gdate +%s.%N
+}
 
-	function get_value_from_name() {
-		eval echo "\${${variable_name}}"
-	}
+function get_value_from_name() {
+	eval echo "\${${variable_name}}"
+}
 
-	function check_online() {
-		ping -c 1 google.com &>/dev/null
-	}
+function check_online() {
+	ping -c 1 google.com &>/dev/null
+}
+
+# Check if the input is empty
+function check_nonempty() {
+
+	# Parse arguments
+	local variable_name=$1
 
 	# Check if the input is empty
-	function check_nonempty() {
+	if [[ -z $(get_value_from_name variable_name) ]]; then
+		# In order to use funcstack without warnings from shellcheck, we need to disable SC2154
+		# shellcheck disable=SC2154
+		echo "Error in ${funcstack[2]}: Invalid input for ${variable_name}, expected a non-empty string." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Parse arguments
-		local variable_name=$1
+# Check if the input is an integer and print an error message with the name of the variable if not
+function check_integer() {
 
-		# Check if the input is empty
-		if [[ -z $(get_value_from_name variable_name) ]]; then
-			# In order to use funcstack without warnings from shellcheck, we need to disable SC2154
-			# shellcheck disable=SC2154
-			echo "Error in ${funcstack[2]}: Invalid input for ${variable_name}, expected a non-empty string." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Parse arguments
+	local variable_name=$1
 
-	# Check if the input is an integer and print an error message with the name of the variable if not
-	function check_integer() {
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
 
-		# Parse arguments
-		local variable_name=$1
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
+	# Check if the input is an integer
+	if [[ ! "${variable_value}" =~ ^-?[0-9]+$ ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected an integer." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
+# Check if the input is Boolean
+function check_boolean() {
 
-		# Check if the input is an integer
-		if [[ ! "${variable_value}" =~ ^-?[0-9]+$ ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected an integer." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Parse arguments
+	local variable_name=$1
+
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
+
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
 	# Check if the input is Boolean
-	function check_boolean() {
+	if [[ "${variable_value}" != true && "${variable_value}" != false ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a boolean." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Parse arguments
-		local variable_name=$1
+# Check if the input is a float
+function check_float() {
 
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
+	# Parse arguments
+	local variable_name=$1
 
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
 
-		# Check if the input is Boolean
-		if [[ "${variable_value}" != true && "${variable_value}" != false ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a boolean." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
 	# Check if the input is a float
-	function check_float() {
+	if [[ ! ${variable_value} =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Parse arguments
-		local variable_name=$1
+# Check if the input is a filepath
+function check_path() {
 
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
+	# Parse arguments
+	local variable_name=$1
 
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
 
-		# Check if the input is a float
-		if [[ ! ${variable_value} =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
-	# Check if the input is a filepath
-	function check_path() {
+	# Check if the input is a valid path
+	if [[ ! -f "${variable_value}" ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid path." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Parse arguments
-		local variable_name=$1
+# Check if hte input is a url
+function check_url() {
 
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
+	# Parse arguments
+	local variable_name=$1
 
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
 
-		# Check if the input is a valid path
-		if [[ ! -f "${variable_value}" ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid path." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
-	# Check if hte input is a url
-	function check_url() {
+	# Check if the input is a valid URL
+	if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
+		return 1
+	else
+		return 0
+	fi
+}
 
-		# Parse arguments
-		local variable_name=$1
+# Check if the input is a valid emoji
+function check_emoji() {
 
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
+	# Parse arguments
+	local variable_name=$1
 
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
+	# Check that inputs are non-empty
+	check_nonempty variable_name || return 1
 
-		# Check if the input is a valid URL
-		if [[ ! "${variable_value}" =~ ^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$ ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
 
 	# Check if the input is a valid emoji
-	function check_emoji() {
-
-		# Parse arguments
-		local variable_name=$1
-
-		# Check that inputs are non-empty
-		check_nonempty variable_name || return 1
-
-		# Make variables
-		local variable_value
-		variable_value=$(get_value_from_name variable_name)
-
-		# Check if the input is a valid emoji
-		if [[ ! "${variable_value}" =~ [😀-🙏🌀-🗿] ]]; then
-			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
-			return 1
-		else
-			return 0
-		fi
-	}
-
-	# Function to log the time taken for a process
-	function timestamp_log_to_stderr() {
-
-		if [[ "${QUIET}" == false ]]; then
-
-			# Parse arguments
-			local emoji=$1
-			local message=$2
-
-			# Make sure the inputs are valid
-			check_emoji emoji || return 1
-			check_nonempty message || return 1
-
-			# Print the message to stderr
-			echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
-		fi
-
-		# Return successfully
+	if [[ ! "${variable_value}" =~ [😀-🙏🌀-🗿] ]]; then
+		echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
+		return 1
+	else
 		return 0
-	}
+	fi
+}
 
-	# Function that checks to see if a model exists and download it if not
-	function check_model_status() {
+# Function to log the time taken for a process
+function timestamp_log_to_stderr() {
+
+	if [[ "${QUIET}" == false ]]; then
+
 		# Parse arguments
-		local repo_name=$1 file_name=$2
+		local emoji=$1
+		local message=$2
 
-		# Check that inputs are valid
-		check_nonempty repo_name || return 1
-		check_nonempty file_name || return 1
+		# Make sure the inputs are valid
+		check_emoji emoji || return 1
+		check_nonempty message || return 1
 
-		# Check if the model exists
-		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
-		if [[ ! -f "${model_path}" ]]; then
-			# Make sure we are online
-			check_online || {
-				echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
+		# Print the message to stderr
+		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+	fi
+
+	# Return successfully
+	return 0
+}
+
+# Function that checks to see if a model exists and download it if not
+function check_model_status() {
+	# Parse arguments
+	local repo_name=$1 file_name=$2
+
+	# Check that inputs are valid
+	check_nonempty repo_name || return 1
+	check_nonempty file_name || return 1
+
+	# Check if the model exists
+	local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
+	if [[ ! -f "${model_path}" ]]; then
+		# Make sure we are online
+		check_online || {
+			echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
+			return 1
+		}
+
+		# Print a detailed timestamp, down to the decimal seconds
+		timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
+		if [[ "${VERBOSE}" == true ]]; then
+			# Print message about downloading model to stderr
+			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
+				echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
 				return 1
-			}
-
-			# Print a detailed timestamp, down to the decimal seconds
-			timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
-			if [[ "${VERBOSE}" == true ]]; then
-				# Print message about downloading model to stderr
-				if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
-					echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
-					return 1
-				fi
-			else
-				if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
-					echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
-					return 1
-				fi
+			fi
+		else
+			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
+				echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
+				return 1
 			fi
 		fi
+	fi
 
-		# Return successfully
-		return 0
-	}
+	# Return successfully
+	return 0
+}
 
-	# Write a function to convert tokens to characters
-	function tokens_to_characters() {
+# Write a function to convert tokens to characters
+function tokens_to_characters() {
 
-		# Parse arguments
-		local tokens=$1
+	# Parse arguments
+	local tokens=$1
 
-		# Check that inputs are valid
-		check_integer tokens || return 1
+	# Check that inputs are valid
+	check_integer tokens || return 1
 
-		# Make variables
-		local characters
+	# Make variables
+	local characters
 
-		# Calculate the number of characters and divide by four
-		characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
+	# Calculate the number of characters and divide by four
+	characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
-		# Return result
-		printf "%.0f" "${characters}"
+	# Return result
+	printf "%.0f" "${characters}"
 
-		# Return successfully
-		return 0
-	}
+	# Return successfully
+	return 0
+}
 
-	# Write a function to convert tokens to characters
-	function characters_to_tokens() {
-		# Parse arguments
-		local characters=$1
+# Write a function to convert tokens to characters
+function characters_to_tokens() {
+	# Parse arguments
+	local characters=$1
 
-		# Check that inputs are valid
-		check_integer characters || return 1
+	# Check that inputs are valid
+	check_integer characters || return 1
 
-		# Make variables
-		local tokens
+	# Make variables
+	local tokens
 
-		# Calculate the number of characters and divide by four
-		tokens=$((((characters + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
+	# Calculate the number of characters and divide by four
+	tokens=$((((characters + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
-		# Return result
-		printf "%.0f" "${tokens}"
+	# Return result
+	printf "%.0f" "${tokens}"
 
-		# Return successfully
-		return 0
-	}
+	# Return successfully
+	return 0
+}
 
-	# Function to calculate the approximate number of tokens
-	function estimate_number_of_tokens() {
+# Function to calculate the approximate number of tokens
+function estimate_number_of_tokens() {
 
-		# Estimate the number of tokens
-		characters_to_tokens "${#1}" || {
-			echo "Error: Failed to estimate the number of tokens." >&2
-			return 1
-		}
-
-		# Return successfully
-		return 0
-	}
-
-	######################################################################################################################
-	### Set the repository and file names ################################################################################
-	######################################################################################################################
-
-	# Define a function to help
-	function compose_repo_and_model_file_name() {
-
-		# Parse arguments
-		local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
-
-		# Check that inputs are valid
-		check_nonempty username || return 1
-		check_nonempty series || return 1
-		check_nonempty size || return 1
-		check_nonempty finetuning || return 1
-		check_nonempty filetype || return 1
-		check_nonempty quant || return 1
-
-		# Return the repository and model names
-		echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" |
-			tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
-
-		# Exit successfully
-		return 0
-	}
-
-	# Set the repository and model names for the task model
-	local TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
-	read -r TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_file_name \
-			"${TASK_USERNAME}" \
-			"${TASK_MODEL_SERIES}" \
-			"${TASK_MODEL_SIZE}" \
-			"${TASK_MODEL_FINETUNING_STYLE}" \
-			"${TASK_MODEL_FILETYPE}" \
-			"${TASK_MODEL_QUANT}"
-	)" || {
-		echo "Error: Failed to set the repository and model names for the task model." >&2
+	# Estimate the number of tokens
+	characters_to_tokens "${#1}" || {
+		echo "Error: Failed to estimate the number of tokens." >&2
 		return 1
 	}
-	readonly TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
 
-	# Set the repository and model names for the casual model
-	local CASUAL_MODEL_FILE_NAME CASUAL_MODEL_REPO_NAME
-	read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_file_name \
-			"${CASUAL_GENERAL_USERNAME}" \
-			"${CASUAL_MODEL_SERIES}" \
-			"${CASUAL_MODEL_SIZE}" \
-			"${CASUAL_MODEL_FINETUNING_STYLE}" \
-			"${CASUAL_MODEL_FILETYPE}" \
-			"${CASUAL_MODEL_QUANT}"
-	)" || {
-		echo "Error: Failed to set the repository and model names for the casual model." >&2
+	# Return successfully
+	return 0
+}
+
+########################################################################################################################
+### Set the repository and file names ##################################################################################
+########################################################################################################################
+
+# Define a function to help
+function compose_repo_and_model_file_name() {
+
+	# Parse arguments
+	local username=$1 series=$2 size=$3 finetuning=$4 filetype=$5 quant=$6
+
+	# Check that inputs are valid
+	check_nonempty username || return 1
+	check_nonempty series || return 1
+	check_nonempty size || return 1
+	check_nonempty finetuning || return 1
+	check_nonempty filetype || return 1
+	check_nonempty quant || return 1
+
+	# Return the repository and model names
+	echo "${username}/${series}-${size}-${finetuning}-$(echo "${filetype}" |
+		tr '[:lower:]' '[:upper:]') ${repo_name} ${series}-${size}-${finetuning}-${quant}.${filetype}"
+
+	# Exit successfully
+	return 0
+}
+
+# Set the repository and model names for the task model
+read -r TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME <<<"$(
+	compose_repo_and_model_file_name \
+		"${TASK_USERNAME}" \
+		"${TASK_MODEL_SERIES}" \
+		"${TASK_MODEL_SIZE}" \
+		"${TASK_MODEL_FINETUNING_STYLE}" \
+		"${TASK_MODEL_FILETYPE}" \
+		"${TASK_MODEL_QUANT}"
+)" || {
+	echo "Error: Failed to set the repository and model names for the task model." >&2
+	return 1
+}
+readonly TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
+
+# Set the repository and model names for the casual model
+read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME <<<"$(
+	compose_repo_and_model_file_name \
+		"${CASUAL_GENERAL_USERNAME}" \
+		"${CASUAL_MODEL_SERIES}" \
+		"${CASUAL_MODEL_SIZE}" \
+		"${CASUAL_MODEL_FINETUNING_STYLE}" \
+		"${CASUAL_MODEL_FILETYPE}" \
+		"${CASUAL_MODEL_QUANT}"
+)" || {
+	echo "Error: Failed to set the repository and model names for the casual model." >&2
+	return 1
+}
+readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME
+
+# Set the repository and model names for the balanced model
+read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME <<<"$(
+	compose_repo_and_model_file_name \
+		"${BALANCED_GENERAL_USERNAME}" \
+		"${BALANCED_MODEL_SERIES}" \
+		"${BALANCED_MODEL_SIZE}" \
+		"${BALANCED_MODEL_FINETUNING_STYLE}" \
+		"${BALANCED_MODEL_FILETYPE}" \
+		"${BALANCED_MODEL_QUANT}"
+)" || {
+	echo "Error: Failed to set the repository and model names for the balanced model." >&2
+	return 1
+}
+readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME
+
+# Set the repository and model names for the serious model
+read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME <<<"$(
+	compose_repo_and_model_file_name \
+		"${SERIOUS_GENERAL_USERNAME}" \
+		"${SERIOUS_MODEL_SERIES}" \
+		"${SERIOUS_MODEL_SIZE}" \
+		"${SERIOUS_GENERAL_FINETUNING_STYLE}" \
+		"${SERIOUS_GENERAL_MODEL_FILETYPE}" \
+		"${SERIOUS_MODEL_QUANT}"
+)" || {
+	echo "Error: Failed to set the repository and model names for the serious model." >&2
+	return 1
+}
+readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME
+
+########################################################################################################################
+### SEARCH #############################################################################################################
+########################################################################################################################
+
+### Perform a web search with user-provided terms ######################################################################
+function perform_search() {
+
+	# Parse arguments
+	local terms=$1
+
+	# Check that inputs are valid
+	check_nonempty terms || return 1
+
+	# Make variables
+	local url response
+
+	# Example API call
+	url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /+}"
+
+	# Perform search and extract relevant information
+	if ! response=$(\curl -s "${url}" | grep -E "^      \"title\"|^      \"snippet\""); then
+		echo "Error: Failed to perform web search." >&2
 		return 1
-	}
-	readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME
-
-	# Set the repository and model names for the balanced model
-	local BALANCED_MODEL_FILE_NAME BALANCED_MODEL_REPO_NAME
-	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_file_name \
-			"${BALANCED_GENERAL_USERNAME}" \
-			"${BALANCED_MODEL_SERIES}" \
-			"${BALANCED_MODEL_SIZE}" \
-			"${BALANCED_MODEL_FINETUNING_STYLE}" \
-			"${BALANCED_MODEL_FILETYPE}" \
-			"${BALANCED_MODEL_QUANT}"
-	)" || {
-		echo "Error: Failed to set the repository and model names for the balanced model." >&2
-		return 1
-	}
-	readonly BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME
-
-	# Set the repository and model names for the serious model
-	local SERIOUS_MODEL_FILE_NAME SERIOUS_MODEL_REPO_NAME
-	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME <<<"$(
-		compose_repo_and_model_file_name \
-			"${SERIOUS_GENERAL_USERNAME}" \
-			"${SERIOUS_MODEL_SERIES}" \
-			"${SERIOUS_MODEL_SIZE}" \
-			"${SERIOUS_GENERAL_FINETUNING_STYLE}" \
-			"${SERIOUS_GENERAL_MODEL_FILETYPE}" \
-			"${SERIOUS_MODEL_QUANT}"
-	)" || {
-		echo "Error: Failed to set the repository and model names for the serious model." >&2
-		return 1
-	}
-	readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME
-
-	######################################################################################################################
-	### SEARCH ###########################################################################################################
-	######################################################################################################################
-
-	### Perform a web search with user-provided terms ####################################################################
-	function perform_search() {
-
-		# Parse arguments
-		local terms=$1
-
-		# Check that inputs are valid
-		check_nonempty terms || return 1
-
-		# Make variables
-		local url response
-
-		# Example API call
-		url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /+}"
-
-		# Perform search and extract relevant information
-		if ! response=$(\curl -s "${url}" | grep -E "^      \"title\"|^      \"snippet\""); then
-			echo "Error: Failed to perform web search." >&2
-			return 1
-		else
-			# Return response
-			echo "${response}"
-			return 0
-		fi
-	}
-
-	### Extract optimized search terms using a small model ###############################################################
-	function extract_search_terms() {
-
-		# Parse arguments
-		local query=$1
-
-		# Check that inputs are valid
-		check_nonempty query || return 1
-
-		# Make variables
-		local prompt terms
-
-		# Generate prompt
-		prompt=$(
-			cat <<-EOF
-				Your task is to create a list of the most relevant search terms for a given topic.
-
-				Here is an example:
-				User Query: how large is the capital of france ${YO}
-				Search Terms: paris capital population area
-
-				Here is another example:
-				User Query: what is the furthest planet from the sun ${YO}
-				Search Terms: solar system furthest planet distance
-
-				Here is the real user query.
-				User Query: ${query}
-				Search Terms:
-			EOF
-		)
-
-		# Generate response
-		terms=$(
-			start_llama_session \
-				"${TASK_MODEL_REPO_NAME}" \
-				"${TASK_MODEL_FILE_NAME}" \
-				"${prompt}" \
-				"task" \
-				"${SEARCH_TERM_GENERATION_LENGTH}" \
-				"${SEARCH_TERM_CONTEXT_LENGTH}" \
-				"${TASK_MODEL_TEMP}"
-		) || {
-			echo "Error: Failed to extract search terms." >&2
-			return 1
-		}
-
-		# Only take the first line
-		terms=$(echo "${terms}" | head -n 1)
-
-		# Remove [end of text] marker if needed
-		terms="${terms//\[end of text\]/}"
-
-		# Return results
-		echo "${terms}"
-
-		# Return successfully
+	else
+		# Return response
+		echo "${response}"
 		return 0
-	}
+	fi
+}
 
-	######################################################################################################################
-	### CONTENT EXTRACTION ###############################################################################################
-	######################################################################################################################
+### Extract optimized search terms using a small model #################################################################
+function extract_search_terms() {
 
-	### Extract file_info from a file or URL (supports text and PDF files) ###############################################
-	function extract_file_info() {
+	# Parse arguments
+	local query=$1
 
-		# Parse arguments
-		local source=$1 max_length=$2
+	# Check that inputs are valid
+	check_nonempty query || return 1
 
-		# Check that inputs are valid
-		check_path source || return 1
-		check_integer max_length || return 1
+	# Make variables
+	local prompt terms
 
-		# Make variables
-		local file_info=""
+	# Generate prompt
+	prompt=$(
+		cat <<-EOF
+			      Your task is to create a list of the most relevant search terms for a given topic.
 
-		case ${source} in
-		*.pdf)
-			command -v pdftotext >/dev/null 2>&1 || {
-				echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-				return 1
-			}
-			file_info=$(pdftotext "${source}" - 2>/dev/null) || {
-				echo "Error: Failed to extract text from PDF file ${source}." >&2
-				return 1
-			}
-			;;
-		*.txt | *)
-			file_info=$(cat "${source}") || {
-				echo "Error: Failed to extract text from file ${source}." >&2
-				return 1
-			}
-			;;
-		esac
+			      Here is an example:
+			      User Query: how large is the capital of france ${YO}
+			      Search Terms: paris capital population area
 
-		# Trim to max length if needed
-		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
+			      Here is another example:
+			      User Query: what is the furthest planet from the sun ${YO}
+			      Search Terms: solar system furthest planet distance
 
-		# Return file_info
-		echo "${file_info}"
+			      Here is the real user query.
+			      User Query: ${query}
+			      Search Terms:
+		EOF
+	)
 
-		# Return successfully
-		return 0
-	}
-
-	### Extract file_info from a file or URL (supports text and PDF files) ###############################################
-	function extract_url_info() {
-
-		# Parse arguments
-		local source=$1 max_length=$2
-
-		# Check that inputs are valid
-		check_url source || return 1
-		check_integer max_length || return 1
-
-		# Make variables
-		local file_info response
-
-		# Fetch file_info from URL
-		if ! response=$(curl -s "${source}"); then
-			echo "Error: Failed to fetch information from ${source}." >&2
-			return 1
-		fi
-
-		# Convert HTML to plain text
-		if ! file_info=$(echo "${response}" | pandoc -f html -t plain --quiet); then
-			echo "Error: Failed to convert HTML to plain text from ${source}." >&2
-			return 1
-		fi
-
-		# Trim to max length if needed
-		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
-
-		# Return file_info
-		echo "${file_info}"
-
-		# Return successfully
-		return 0
-	}
-
-	######################################################################################################################
-	### LLMs AND PROMPTS #################################################################################################
-	######################################################################################################################
-
-	function extract_facts() {
-
-		# Parse arguments
-		local chunk=$1 context_length=$2
-
-		# Check that inputs are valid
-		check_nonempty chunk || return 1
-		check_integer context_length || return 1
-
-		# Create prompt
-		local prompt
-		prompt=$(
-			cat <<-EOF
-				=============== START OF TEXT===============
-				${chunk}
-				=============== END OF TEXT===============
-
-				Based on the unstructured text given above, provide a concise list of facts and information.
-			EOF
-		)
-
+	# Generate response
+	terms=$(
 		start_llama_session \
 			"${TASK_MODEL_REPO_NAME}" \
 			"${TASK_MODEL_FILE_NAME}" \
 			"${prompt}" \
 			"task" \
-			"${COMPRESSION_GENERATION_LENGTH}" \
-			"${context_length}" \
-			0.2 2>/dev/null || {
-
-			# Split the chunk in half
-			local half_length=$((chunk_length_in_chars / 2))
-			local chunk1="${chunk:0:${half_length}}"
-			local chunk2="${chunk:${half_length}}"
-
-			# Process the first half
-			local result1
-			result1=$(extract_facts "${chunk1}" "${context_length}")
-
-			# Process the second half
-			local result2
-			result2=$(extract_facts "${chunk2}" "${context_length}")
-
-			# Combine the results
-			echo "${result1}${result2}"
-		}
-	}
-
-	### Start by establishing some prompt generators #####################################################################
-
-	# Compress text
-	function compress_text() {
-
-		# Parse arguments
-		local text=$1
-		local remove_spaces=$2
-		local remove_punctuation=$3
-		local summarize=$4
-
-		# Check that inputs are valid
-		check_nonempty text || return 1
-		check_boolean remove_spaces || return 1
-		check_boolean remove_punctuation || return 1
-		check_boolean summarize || return 1
-
-		# Remove spaces if flag is set
-		if [[ "${remove_spaces}" == true ]]; then
-			text=$(echo "${text}" | tr -s "[:space:]")
-		fi
-
-		# Remove punctuation if flag is set
-		if [[ "${remove_punctuation}" == true ]]; then
-			text=$(echo "${text}" | tr -d "[:punct:]")
-		fi
-
-		# If length of tokenized text is greater than cutoff, do something
-		if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
-
-			# Make variables
-			local compressed="" chunk_length_in_chars number_of_chunks
-
-			# Compress text
-			chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
-
-			# Estimate how the length of text divided by chunk_length_in_chars
-			number_of_chunks=$(((${#text} / chunk_length_in_chars) + 1))
-			number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
-
-			local counter=0
-
-			# While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
-			while [[ -n "${text}" ]]; do
-
-				# Increment counter
-				counter=$((counter + 1))
-
-				# Update the user on what's happening
-				timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
-
-				chunk="${text:0:${chunk_length_in_chars}}"
-				context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
-				text="${text:${chunk_length_in_chars}}"
-				compressed+=$(extract_facts "${chunk}" "${context_length}") || {
-					echo "Error: Failed to compress text." >&2
-					return 1
-				}
-			done
-
-			# Echo number of tokens
-			echo "${compressed}"
-		else
-			echo "${text}"
-		fi
-
-	}
-
-	# Generate base prompt
-	function generate_base_prompt() {
-		cat <<-EOF
-			You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. It is currently $(date).
-		EOF
-	}
-
-	# Generate system information
-	function generate_system_info_context() {
-
-		# Make variables
-		local model cores ram free_storage
-
-		# Get system information
-		model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') || {
-			echo "Error: Failed to get computer model information." >&2
-			return 1
-		}
-		cores=$(sysctl -n hw.ncpu) || {
-			echo "Error: Failed to get number of cores." >&2
-			return 1
-		}
-		ram=$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}') || {
-			echo "Error: Failed to get RAM size." >&2
-			return 1
-		}
-		free_storage=$(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}') || {
-			echo "Error: Failed to get free storage." >&2
-			return 1
-		}
-
-		# Return system information
-		cat <<-EOF
-			===================== BEGINNING OF SYSTEM INFORMATION =====================
-			You are on a ${model} with ${cores} cores, ${ram}GB RAM, and ${free_storage}GB free disk space.
-			======================== END OF  SYSTEM INFORMATION =======================
-		EOF
-	}
-
-	# Generate directory information
-	function generate_directory_info_context() {
-
-		# Make variables
-		local file_list file_previews
-
-		# Generate file list and previews
-		file_list=$(ls -lahpSR | head -n 50)
-		file_previews=$(
-			find . -maxdepth 1 -type f -exec file --mime {} + |
-				grep 'text/' |
-				cut -d: -f1 |
-				xargs du -h |
-				sort -rh |
-				head -n 5 |
-				awk '{print $2}' |
-				xargs -I {} sh -c 'echo "\n\nFile: {}"; echo ---\\n$(head -n 10 "{}")\\n---'
-		)
-
-		cat <<-EOF
-			================= BEGINNING OF CURRENT DIRECTORY CONTENTS =================
-			You were invoked from the $(pwd) directory.
-
-			Here are the contents (truncated at 50, sorted by file size):
-			${file_list}
-
-			Here is a preview of the contents of the largest readable files:
-			${file_previews}
-			==================== END OF CURRENT DIRECTORY CONTENTS ====================
-		EOF
-
-	}
-
-	# Generate clipboard information
-	function generate_clipboard_info_context() {
-
-		# Make variables
-		local clipboard_info
-		clipboard_info=$(pbpaste) || {
-			echo "Error: Failed to get clipboard information." >&2
-			return 1
-		}
-
-		# Compress if needed
-		clipboard_info=$(compress_text "${clipboard_info}" true true true) || {
-			echo "Error: Failed to compress clipboard information." >&2
-			return 1
-		}
-
-		cat <<-EOF
-			Here are the contents from the clipboard:
-			================= BEGINNING OF CURRENT CLIPBOARD CONTENTS =================
-			${clipboard_info}
-			==================== END OF CURRENT CLIPBOARD CONTENTS ====================
-		EOF
-	}
-
-	# Generate file contents context
-	function generate_file_context() {
-
-		# Parse arguments
-		local filename=$1
-
-		# Check that inputs are valid
-		check_path filename || return 1
-
-		# Make variables
-		local file_info=""
-
-		# Check that inputs are valid
-		file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || {
-			echo "Error: Failed to extract information from file ${filename}." >&2
-			return 1
-		}
-
-		# Compress if needed
-		file_info=$(compress_text "${file_info}" true true true) ||
-			{
-				echo "Error: Failed to compress file information." >&2
-				return 1
-			}
-
-		# Return file information
-		cat <<-EOF
-			Relevant information from ${filename}:
-			================= BEGINNING OF FILE CONTENTS =================
-			${file_info}
-			===================== END OF FILE CONTENTS ===================
-		EOF
-	}
-
-	# Generate website contents
-	function generate_website_context() {
-
-		# Parse arguments
-		local url=$1
-
-		# Check that inputs are valid
-		check_url url || return 1
-
-		# Make variables
-		website_info=""
-
-		# Check that inputs are valid
-		website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || {
-			echo "Error: Failed to extract information from URL ${url}." >&2
-			return 1
-		}
-
-		# Compress the info
-		website_info=$(compress_text "${website_info}" true true true) || {
-			echo "Error: Failed to compress website information." >&2
-			return 1
-		}
-
-		# Return file information
-		cat <<-EOF
-			Relevant information from ${url}:
-			================= BEGINNING OF WEBSITE CONTENTS =================
-			${website_info}
-			===================== END OF WEBSITE CONTENTS ===================
-		EOF
-	}
-
-	# Generate search context
-	function generate_search_context() {
-
-		# Parse arguments
-		local search_terms=$1
-
-		# Check that inputs are valid
-		check_nonempty search_terms || return 1
-
-		# Perform the search
-		search_info=$(perform_search "${search_terms}") || {
-			echo "Error: Failed to perform search for ${search_terms}." >&2
-			return 1
-		}
-
-		search_info=$(compress_text "${search_info}" true true true) || {
-			echo "Error: Failed to compress search information." >&2
-			return 1
-		}
-
-		# Return search information
-		cat <<-EOF
-			Relevant information from web search using ${search_terms}:
-			================= BEGINNING OF SEARCH RESULTS =================
-			${search_info}
-			===================== END OF SEARCH RESULTS ====================
-		EOF
-	}
-
-	# Generate self context using help
-	function generate_self_context() {
-		cat <<-EOF
-			    A help message explaining how to use your command line interface
-					================= BEGINNING OF HELP MESSAGE =================
-					$(show_help)
-					===================== END OF HELP MESSAGE ====================
-		EOF
-	}
-
-	# Generate prompt for one-off sessions
-	function generate_oneoff_instructions() {
-
-		# Parse arguments
-		local query=$1
-
-		# Check that inputs are valid
-		check_nonempty query || return 1
-
-		cat <<-EOF
-			Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
-
-			Here is an example:
-			User Query:how large is the capital of france ${YO}
-			Your Super-Short Answer:41 square miles (105 square km) ${YO}
-
-			Here is another example:
-			User Query:what is the furthest planet from the sun ${YO}
-			Search Terms:Neptune is the furthest planet from the Sun. ${YO}
-
-			Here is the real user query.
-			User Query:${query} ${YO}
-			Your Super-Short Answer:
-		EOF
-	}
-
-	# Generate interactive instructions
-	function generate_interactive_instructions() {
-		cat <<-EOF
-			Your task is to assist the user in an interactive session, responding concisely and accurately.
-		EOF
-	}
-
-	### Generate a prompt for one-off or interactive sessions ############################################################
-	function generate_prompt() {
-
-		# Parse arguments
-		local mode=$1 query=$2
-		local filenames=$3 search_terms=$4 website_urls=$5
-		local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
-
-		# Split filenames into an array of files
-		filenames=($(echo "${filenames}" | tr '\n' ' '))
-		search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
-		website_urls=($(echo "${website_urls}" | tr '\n' ' '))
-
-		# Check that inputs are valid
-		check_nonempty mode || return 1
-		check_boolean surf_and_add_results || return 1
-		check_boolean add_usage_info || return 1
-		check_boolean add_system_info || return 1
-		check_boolean add_directory_info || return 1
-		check_boolean add_clipboard_info || return 1
-
-		# Make the base prompt
-		local prompt
-		prompt=$(generate_base_prompt)"\n\n" || {
-			echo "Error: Failed to generate base prompt." >&2
-			return 1
-		}
-
-		# Add system information if requested
-		if [[ "${add_system_info}" == true ]]; then
-			timestamp_log_to_stderr "💻" "Querying system info..." >&2
-			prompt+=$(generate_system_info_context)"\n\n" || {
-				echo "Error: Failed to generate system information context." >&2
-				return 1
-			}
-		fi
-
-		# Add directory information if requested
-		if [[ "${add_directory_info}" == true ]]; then
-			timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
-			prompt+=$(generate_directory_info_context)"\n\n" || {
-				echo "Error: Failed to generate directory information context." >&2
-				return 1
-			}
-		fi
-
-		# Add clipboard information if requested
-		if [[ "${add_clipboard_info}" == true ]]; then
-			timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
-			prompt+=$(generate_clipboard_info_context)"\n\n" || {
-				echo "Error: Failed to generate clipboard information context." >&2
-				return 1
-			}
-		fi
-
-		# Add file file_info if available
-		if [[ -n "${filenames[*]}" ]]; then
-			for filename in "${filenames[@]}"; do
-				timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
-				prompt+=$(generate_file_context "${filename}")"\n\n" || {
-					echo "Error: Failed to generate file information context for ${filename}." >&2
-					return 1
-				}
-			done
-		fi
-
-		# Add website information if available
-		if [[ -n "${website_urls[*]}" ]]; then
-			for website_url in "${website_urls[@]}"; do
-				timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-				prompt+=$(generate_website_context "${website_url}")"\n\n" || {
-					echo "Error: Failed to generate website information context for ${website_url}." >&2
-					return 1
-				}
-			done
-		fi
-
-		# Add search information if available
-		if [[ -n "${search_terms[*]}" ]]; then
-			for termset in "${search_terms[@]}"; do
-				timestamp_log_to_stderr "🔎" "Searching for \"${termset//+/ }\"..." >&2
-				prompt+=$(generate_search_context "${termset}")"\n\n" || {
-					echo "Error: Failed to generate search information context for ${termset}." >&2
-					return 1
-				}
-			done
-		fi
-
-		# Add search information if available
-		if [[ "${surf_and_add_results}" == true ]]; then
-			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
-			local llm_generated_search_terms
-			llm_generated_search_terms=$(extract_search_terms "${query}")
-			timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${llm_generated_search_terms}" "${search_info}")"\n\n" || {
-				echo "Error: Failed to generate search information context." >&2
-				return 1
-			}
-		fi
-
-		# Add self context if available
-		if [[ "${add_usage_info}" == true ]]; then
-			timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
-			prompt+=$(generate_self_context)"\n\n" || {
-				echo "Error: Failed to generate self information context." >&2
-				return 1
-			}
-		fi
-
-		# If any content was added, add an instruction about relying on the content
-		if [[ 
-			"${add_system_info}" == true ||
-			"${add_directory_info}" == true ||
-			"${add_clipboard_info}" == true ||
-			-n "${filename}" ||
-			-n "${website_url}" ||
-			-n "${search_terms}" ||
-			"${surf_and_add_results}" == true ]] \
-			; then
-			prompt+="Use the information above to help you answer the user's question.\n\n"
-		fi
-
-		# Add query and instructions based on interactive ##################################################################
-		case ${mode} in
-		interactive)
-			prompt+=$(generate_interactive_instructions) || {
-				echo "Error: Failed to generate interactive instructions." >&2
-				return 1
-			}
-			;;
-		one-off)
-			prompt+=$(generate_oneoff_instructions "${query}") || {
-				echo "Error: Failed to generate one-off instructions." >&2
-				return 1
-			}
-			;;
-		task) ;;
-		*)
-			echo "Error: Invalid mode: ${mode}" >&2
-			return 1
-			;;
-		esac
-
-		# Return prompt
-		echo "${prompt}"
-
-		# Return successfully
-		return 0
-	}
-
-	### Start a llama-cli session ########################################################################################
-	function start_llama_session() {
-
-		# Parse arguments
-		local repo_name=$1 file_name=$2 prompt=$3 mode=$4
-		local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
-
-		# Check that inputs are valid
-		check_nonempty repo_name || return 1
-		check_nonempty file_name || return 1
-		check_nonempty prompt || return 1
-		check_nonempty mode || return 1
-		check_integer number_of_tokens_to_generate || return 1
-		check_integer context_length || return 1
-		check_float temp || return 1
-
-		# Check if the model exists and download it if not
-		check_model_status "${repo_name}" "${file_name}" || {
-			echo "Error: Failed to check status of ${repo_name}/${file_name}." >&2
-			return 1
-		}
-
-		# If context size is -1, estimate it
-		if [[ "${context_length}" == -1 ]]; then
-			context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate)) || {
-				echo "Error: Failed to estimate context length." >&2
-				return 1
-			}
-		fi
-
-		# Configure llama-cli arguments
-		local args=(
-			--threads "$(sysctl -n hw.logicalcpu_max || sysctl -n hw.ncpu || echo 1)"
-			--hf-repo "${repo_name}"
-			--hf-file "${file_name}"
-			--prompt "${prompt}"
-			--predict "${number_of_tokens_to_generate}"
-			--temp "${temp}"
-			--ctx-size "${context_length}"
-			--seed 42
-			--prio 3
-			--mirostat 2
-			--flash-attn
-			--no-warmup
-		)
-
-		# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
-		case ${mode} in
-		interactive)
-			timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
-			args+=(--conversation)
-			;;
-		one-off)
-			timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
-			args+=(--reverse-prompt "${YO}")
-			;;
-		task) ;;
-		*)
-			echo "Error: Invalid mode: ${mode}" >&2
-			return 1
-			;;
-		esac
-
-		# Display prompt
-		if [[ "${VERBOSE}" == true && "${mode}" != "task" ]]; then
-			args+=(--verbose-prompt)
-		else
-			args+=(--no-display-prompt)
-		fi
-
-		# Start session
-		if [[ "${VERBOSE}" == true ]]; then
-			if ! llama-cli "${args[@]}"; then
-				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				return 1
-			fi
-		else
-			if ! llama-cli "${args[@]}" 2>/dev/null; then
-				echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-				return 1
-			fi
-		fi
-
-		# Return successfully
-		return 0
-	}
-
-	######################################################################################################################
-	### MAIN FUNCTION ####################################################################################################
-	######################################################################################################################
-
-	### Parse arguments ##################################################################################################
-
-	# Define variables
-	local query=""
-	local file_path_list=""
-	local website_url_list=""
-	local search_term_list=""
-	local surf_and_add_results=false
-	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
-	local task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
-	local repo_name file_name new_tokens temp prompt model_name context_length
-	local mode=""
-
-	# Make verbose a global variable
-	local VERBOSE=false
-	local QUIET=false
-
-	# Start parsing arguments
-	while [[ $# -gt 0 ]]; do
-		case $1 in
-
-		# Early exit with help message
-		-h | --help)
-			show_help
-			return 0
-			;;
-
-		# Early exit with version information
-		-V | --version)
-			show_version
-			return 0
-			;;
-
-		# Read in a file
-		-f | --file)
-			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				file_path_list+="$2\n"
-				shift
-			else
-				echo "Error: --file requires a file." >&2
-				return 1
-			fi
-			;;
-
-		# Read in a file
-		-w | --website)
-			check_online || {
-				echo "Error: You are not connected to the internet, so the --website flag is unavailable." >&2
-				return 1
-			}
-			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				website_url_list+="$2\n"
-				shift
-			else
-				echo "Error: --website requires a url." >&2
-				return 1
-			fi
-			;;
-
-		# Do some searching
-		-s | --search)
-			check_online || {
-				echo "Error: You are not connected to the internet, so the --search flag is unavailable." >&2
-				return 1
-			}
-			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
-				search_term_list+="$2\n"
-				shift
-			else
-				echo "Error: --search requires quoted terms." >&2
-				return 1
-			fi
-			;;
-
-		# Make the output verbose
-		-v | --verbose) VERBOSE=true ;;
-
-		# Make the output quiet
-		-q | --quiet) QUIET=true ;;
-
-		# Surf the web with LLM-defined search terms
-		-S | --surf)
-			check_online || {
-				echo "Error: You are not connected to the internet, so the --surf flag is unavailable." >&2
-				return 1
-			}
-
-			surf_and_add_results=true
-			;;
-
-		# Add system information to the context
-		-y | --system) add_system_info=true ;;
-
-		# Add directory information to the context
-		-d | --directory) add_directory_info=true ;;
-
-		# Add clipboard information to the context
-		-c | --clipboard) add_clipboard_info=true ;;
-
-		# Add the usage information to the context
-		-u | --usage) add_usage_info=true ;;
-
-		# Use the task model
-		-tm | --task-model) task_model_override=true ;;
-
-		# Use the casual model
-		-cm | --casual-model) casual_model_override=true ;;
-
-		# Use the balanced model
-		-bm | --balanced-model) balanced_model_override=true ;;
-
-		# Use the serious model
-		-sm | --serious-model) serious_model_override=true ;;
-
-		# If its something that looks like a flag but isn't one of the above, show an error
-		-*)
-			echo "Error: Unknown flag: $1" >&2
-			return 1
-			;;
-
-		# If its not a flag, add it to the general query
-		*) query+="$1 " ;;
-		esac
-		shift
-	done
-
-	### Print the starting time ###########################################################################################
-
-	# Print a detailed timestamp
-	timestamp_log_to_stderr "⏳" "Starting..." >&2
-
-	# Save starting time to calculate elapsed time later one
-	local start_time
-	start_time=$(get_epoch_in_seconds_and_decimals) || {
-		echo "Error: Failed to get the start time." >&2
-		return 1
-	}
-
-	### Configure the model based on whether its a one-off or interactive session ########################################
-	if [[ -n "${query}" ]]; then
-		model_name="casual"
-		repo_name="${CASUAL_MODEL_REPO_NAME}"
-		file_name="${CASUAL_MODEL_FILE_NAME}"
-		temp="${CASUAL_MODEL_TEMP}"
-		mode="one-off"
-		new_tokens="${ONEOFF_GENERATION_LENGTH}"
-		context_length="${ONEOFF_CONTEXT_LENGTH}"
-	else
-		model_name="serious"
-		repo_name="${SERIOUS_MODEL_REPO_NAME}"
-		file_name="${SERIOUS_MODEL_FILE_NAME}"
-		temp=${SERIOUS_MODEL_TEMP}
-		mode="interactive"
-		new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
-		context_length="${INTERACTIVE_CONTEXT_LENGTH}"
-	fi
-
-	### Override the model if needed ######################################################################################
-	if [[ "${task_model_override}" == true ]]; then
-		repo_name="${TASK_MODEL_REPO_NAME}"
-		file_name="${TASK_MODEL_FILE_NAME}"
-		temp="${TASK_MODEL_TEMP}"
-		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
-	elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
-		repo_name="${CASUAL_MODEL_REPO_NAME}"
-		file_name="${CASUAL_MODEL_FILE_NAME}"
-		temp="${CASUAL_MODEL_TEMP}"
-		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
-	elif [[ "${balanced_model_override}" == true ]]; then
-		repo_name="${BALANCED_MODEL_REPO_NAME}"
-		file_name="${BALANCED_MODEL_FILE_NAME}"
-		temp="${BALANCED_MODEL_TEMP}"
-		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
-	elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
-		repo_name="${SERIOUS_MODEL_REPO_NAME}"
-		file_name="${SERIOUS_MODEL_FILE_NAME}"
-		temp="${SERIOUS_MODEL_TEMP}"
-		timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
-	fi
-
-	### Generate the prompt ##############################################################################################
-	prompt=$(
-		generate_prompt \
-			"${mode}" \
-			"${query}" \
-			"${file_path_list}" \
-			"${search_term_list}" \
-			"${website_url_list}" \
-			"${surf_and_add_results}" \
-			"${add_usage_info}" \
-			"${add_system_info}" \
-			"${add_directory_info}" \
-			"${add_clipboard_info}"
+			"${SEARCH_TERM_GENERATION_LENGTH}" \
+			"${SEARCH_TERM_CONTEXT_LENGTH}" \
+			"${TASK_MODEL_TEMP}"
 	) || {
-		echo "Error: Failed to generate prompt." >&2
+		echo "Error: Failed to extract search terms." >&2
 		return 1
 	}
 
-	### Kick off the LLM #################################################################################################
-	start_llama_session \
-		"${repo_name}" \
-		"${file_name}" \
-		"${prompt}" \
-		"${mode}" \
-		"${new_tokens}" \
-		"${context_length}" \
-		"${temp}"
+	# Only take the first line
+	terms=$(echo "${terms}" | head -n 1)
 
-	### Print the elapsed time ###########################################################################################
-	tput cuu1 && tput el
-	local end_time
-	end_time=$(get_epoch_in_seconds_and_decimals) || {
-		echo "Error: Failed to get the end time." >&2
-		return 1
-	}
-	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" $((end_time - start_time))) seconds." >&2
+	# Remove [end of text] marker if needed
+	terms="${terms//\[end of text\]/}"
 
-	### Return success ###################################################################################################
+	# Return results
+	echo "${terms}"
+
+	# Return successfully
 	return 0
 }
+
+########################################################################################################################
+### CONTENT EXTRACTION #################################################################################################
+########################################################################################################################
+
+### Extract file_info from a file or URL (supports text and PDF files) #################################################
+function extract_file_info() {
+
+	# Parse arguments
+	local source=$1 max_length=$2
+
+	# Check that inputs are valid
+	check_path source || return 1
+	check_integer max_length || return 1
+
+	# Make variables
+	local file_info=""
+
+	case ${source} in
+	*.pdf)
+		command -v pdftotext >/dev/null 2>&1 || {
+			echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
+			return 1
+		}
+		file_info=$(pdftotext "${source}" - 2>/dev/null) || {
+			echo "Error: Failed to extract text from PDF file ${source}." >&2
+			return 1
+		}
+		;;
+	*.txt | *)
+		file_info=$(cat "${source}") || {
+			echo "Error: Failed to extract text from file ${source}." >&2
+			return 1
+		}
+		;;
+	esac
+
+	# Trim to max length if needed
+	[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
+
+	# Return file_info
+	echo "${file_info}"
+
+	# Return successfully
+	return 0
+}
+
+### Extract file_info from a file or URL (supports text and PDF files) #################################################
+function extract_url_info() {
+
+	# Parse arguments
+	local source=$1 max_length=$2
+
+	# Check that inputs are valid
+	check_url source || return 1
+	check_integer max_length || return 1
+
+	# Make variables
+	local file_info response
+
+	# Fetch file_info from URL
+	if ! response=$(curl -s "${source}"); then
+		echo "Error: Failed to fetch information from ${source}." >&2
+		return 1
+	fi
+
+	# Convert HTML to plain text
+	if ! file_info=$(echo "${response}" | pandoc -f html -t plain --quiet); then
+		echo "Error: Failed to convert HTML to plain text from ${source}." >&2
+		return 1
+	fi
+
+	# Trim to max length if needed
+	[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
+
+	# Return file_info
+	echo "${file_info}"
+
+	# Return successfully
+	return 0
+}
+
+########################################################################################################################
+### LLMs AND PROMPTS ###################################################################################################
+########################################################################################################################
+
+function extract_facts() {
+
+	# Parse arguments
+	local chunk=$1 context_length=$2
+
+	# Check that inputs are valid
+	check_nonempty chunk || return 1
+	check_integer context_length || return 1
+
+	# Create prompt
+	local prompt
+	prompt=$(
+		cat <<-EOF
+			      =============== START OF TEXT===============
+			      ${chunk}
+			      =============== END OF TEXT===============
+
+			      Based on the unstructured text given above, provide a concise list of facts and information.
+		EOF
+	)
+
+	start_llama_session \
+		"${TASK_MODEL_REPO_NAME}" \
+		"${TASK_MODEL_FILE_NAME}" \
+		"${prompt}" \
+		"task" \
+		"${COMPRESSION_GENERATION_LENGTH}" \
+		"${context_length}" \
+		0.2 2>/dev/null || {
+
+		# Split the chunk in half
+		local half_length=$((chunk_length_in_chars / 2))
+		local chunk1="${chunk:0:${half_length}}"
+		local chunk2="${chunk:${half_length}}"
+
+		# Process the first half
+		local result1
+		result1=$(extract_facts "${chunk1}" "${context_length}")
+
+		# Process the second half
+		local result2
+		result2=$(extract_facts "${chunk2}" "${context_length}")
+
+		# Combine the results
+		echo "${result1}${result2}"
+	}
+}
+
+### Start by establishing some prompt generators #######################################################################
+
+# Compress text
+function compress_text() {
+
+	# Parse arguments
+	local text=$1
+	local remove_spaces=$2
+	local remove_punctuation=$3
+	local summarize=$4
+
+	# Check that inputs are valid
+	check_nonempty text || return 1
+	check_boolean remove_spaces || return 1
+	check_boolean remove_punctuation || return 1
+	check_boolean summarize || return 1
+
+	# Remove spaces if flag is set
+	if [[ "${remove_spaces}" == true ]]; then
+		text=$(echo "${text}" | tr -s "[:space:]")
+	fi
+
+	# Remove punctuation if flag is set
+	if [[ "${remove_punctuation}" == true ]]; then
+		text=$(echo "${text}" | tr -d "[:punct:]")
+	fi
+
+	# If length of tokenized text is greater than cutoff, do something
+	if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
+
+		# Make variables
+		local compressed="" chunk_length_in_chars number_of_chunks
+
+		# Compress text
+		chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
+
+		# Estimate how the length of text divided by chunk_length_in_chars
+		number_of_chunks=$(((${#text} / chunk_length_in_chars) + 1))
+		number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
+
+		local counter=0
+
+		# While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
+		while [[ -n "${text}" ]]; do
+
+			# Increment counter
+			counter=$((counter + 1))
+
+			# Update the user on what's happening
+			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
+
+			chunk="${text:0:${chunk_length_in_chars}}"
+			context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
+			text="${text:${chunk_length_in_chars}}"
+			compressed+=$(extract_facts "${chunk}" "${context_length}") || {
+				echo "Error: Failed to compress text." >&2
+				return 1
+			}
+		done
+
+		# Echo number of tokens
+		echo "${compressed}"
+	else
+		echo "${text}"
+	fi
+
+}
+
+# Generate base prompt
+function generate_base_prompt() {
+	cat <<-EOF
+		    You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. It is currently $(date).
+	EOF
+}
+
+# Generate system information
+function generate_system_info_context() {
+
+	# Make variables
+	local model cores ram free_storage
+
+	# Get system information
+	model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') || {
+		echo "Error: Failed to get computer model information." >&2
+		return 1
+	}
+	cores=$(sysctl -n hw.ncpu) || {
+		echo "Error: Failed to get number of cores." >&2
+		return 1
+	}
+	ram=$(sysctl -n hw.memsize | awk '{x=$1/1024/1024/1024; print x}') || {
+		echo "Error: Failed to get RAM size." >&2
+		return 1
+	}
+	free_storage=$(df -h / | tail -1 | awk '{split($4, a, "G"); print a[1]}') || {
+		echo "Error: Failed to get free storage." >&2
+		return 1
+	}
+
+	# Return system information
+	cat <<-EOF
+		    ===================== BEGINNING OF SYSTEM INFORMATION =====================
+		    You are on a ${model} with ${cores} cores, ${ram}GB RAM, and ${free_storage}GB free disk space.
+		    ======================== END OF  SYSTEM INFORMATION =======================
+	EOF
+}
+
+# Generate directory information
+function generate_directory_info_context() {
+
+	# Make variables
+	local file_list file_previews
+
+	# Generate file list and previews
+	file_list=$(ls -lahpSR | head -n 50)
+	file_previews=$(
+		find . -maxdepth 1 -type f -exec file --mime {} + |
+			grep 'text/' |
+			cut -d: -f1 |
+			xargs du -h |
+			sort -rh |
+			head -n 5 |
+			awk '{print $2}' |
+			xargs -I {} sh -c 'echo "\n\nFile: {}"; echo ---\\n$(head -n 10 "{}")\\n---'
+	)
+
+	cat <<-EOF
+		    ================= BEGINNING OF CURRENT DIRECTORY CONTENTS =================
+		    You were invoked from the $(pwd) directory.
+
+		    Here are the contents (truncated at 50, sorted by file size):
+		    ${file_list}
+
+		    Here is a preview of the contents of the largest readable files:
+		    ${file_previews}
+		    ==================== END OF CURRENT DIRECTORY CONTENTS ====================
+	EOF
+
+}
+
+# Generate clipboard information
+function generate_clipboard_info_context() {
+
+	# Make variables
+	local clipboard_info
+	clipboard_info=$(pbpaste) || {
+		echo "Error: Failed to get clipboard information." >&2
+		return 1
+	}
+
+	# Compress if needed
+	clipboard_info=$(compress_text "${clipboard_info}" true true true) || {
+		echo "Error: Failed to compress clipboard information." >&2
+		return 1
+	}
+
+	cat <<-EOF
+		    Here are the contents from the clipboard:
+		    ================= BEGINNING OF CURRENT CLIPBOARD CONTENTS =================
+		    ${clipboard_info}
+		    ==================== END OF CURRENT CLIPBOARD CONTENTS ====================
+	EOF
+}
+
+# Generate file contents context
+function generate_file_context() {
+
+	# Parse arguments
+	local filename=$1
+
+	# Check that inputs are valid
+	check_path filename || return 1
+
+	# Make variables
+	local file_info=""
+
+	# Check that inputs are valid
+	file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || {
+		echo "Error: Failed to extract information from file ${filename}." >&2
+		return 1
+	}
+
+	# Compress if needed
+	file_info=$(compress_text "${file_info}" true true true) ||
+		{
+			echo "Error: Failed to compress file information." >&2
+			return 1
+		}
+
+	# Return file information
+	cat <<-EOF
+		    Relevant information from ${filename}:
+		    ================= BEGINNING OF FILE CONTENTS =================
+		    ${file_info}
+		    ===================== END OF FILE CONTENTS ===================
+	EOF
+}
+
+# Generate website contents
+function generate_website_context() {
+
+	# Parse arguments
+	local url=$1
+
+	# Check that inputs are valid
+	check_url url || return 1
+
+	# Make variables
+	website_info=""
+
+	# Check that inputs are valid
+	website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || {
+		echo "Error: Failed to extract information from URL ${url}." >&2
+		return 1
+	}
+
+	# Compress the info
+	website_info=$(compress_text "${website_info}" true true true) || {
+		echo "Error: Failed to compress website information." >&2
+		return 1
+	}
+
+	# Return file information
+	cat <<-EOF
+		    Relevant information from ${url}:
+		    ================= BEGINNING OF WEBSITE CONTENTS =================
+		    ${website_info}
+		    ===================== END OF WEBSITE CONTENTS ===================
+	EOF
+}
+
+# Generate search context
+function generate_search_context() {
+
+	# Parse arguments
+	local search_terms=$1
+
+	# Check that inputs are valid
+	check_nonempty search_terms || return 1
+
+	# Perform the search
+	search_info=$(perform_search "${search_terms}") || {
+		echo "Error: Failed to perform search for ${search_terms}." >&2
+		return 1
+	}
+
+	search_info=$(compress_text "${search_info}" true true true) || {
+		echo "Error: Failed to compress search information." >&2
+		return 1
+	}
+
+	# Return search information
+	cat <<-EOF
+		    Relevant information from web search using ${search_terms}:
+		    ================= BEGINNING OF SEARCH RESULTS =================
+		    ${search_info}
+		    ===================== END OF SEARCH RESULTS ====================
+	EOF
+}
+
+# Generate self context using help
+function generate_self_context() {
+	cat <<-EOF
+		        A help message explaining how to use your command line interface
+		        ================= BEGINNING OF HELP MESSAGE =================
+		        $(show_help)
+		        ===================== END OF HELP MESSAGE ====================
+	EOF
+}
+
+# Generate prompt for one-off sessions
+function generate_oneoff_instructions() {
+
+	# Parse arguments
+	local query=$1
+
+	# Check that inputs are valid
+	check_nonempty query || return 1
+
+	cat <<-EOF
+		    Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
+
+		    Here is an example:
+		    User Query:how large is the capital of france ${YO}
+		    Your Super-Short Answer:41 square miles (105 square km) ${YO}
+
+		    Here is another example:
+		    User Query:what is the furthest planet from the sun ${YO}
+		    Search Terms:Neptune is the furthest planet from the Sun. ${YO}
+
+		    Here is the real user query.
+		    User Query:${query} ${YO}
+		    Your Super-Short Answer:
+	EOF
+}
+
+# Generate interactive instructions
+function generate_interactive_instructions() {
+	cat <<-EOF
+		    Your task is to assist the user in an interactive session, responding concisely and accurately.
+	EOF
+}
+
+### Generate a prompt for one-off or interactive sessions ##############################################################
+function generate_prompt() {
+
+	# Parse arguments
+	local mode=$1 query=$2
+	local filenames=$3 search_terms=$4 website_urls=$5
+	local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
+
+	# Split filenames into an array of files
+	filenames=($(echo "${filenames}" | tr '\n' ' '))
+	search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
+	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
+
+	# Check that inputs are valid
+	check_nonempty mode || return 1
+	check_boolean surf_and_add_results || return 1
+	check_boolean add_usage_info || return 1
+	check_boolean add_system_info || return 1
+	check_boolean add_directory_info || return 1
+	check_boolean add_clipboard_info || return 1
+
+	# Make the base prompt
+	local prompt
+	prompt=$(generate_base_prompt)"\n\n" || {
+		echo "Error: Failed to generate base prompt." >&2
+		return 1
+	}
+
+	# Add system information if requested
+	if [[ "${add_system_info}" == true ]]; then
+		timestamp_log_to_stderr "💻" "Querying system info..." >&2
+		prompt+=$(generate_system_info_context)"\n\n" || {
+			echo "Error: Failed to generate system information context." >&2
+			return 1
+		}
+	fi
+
+	# Add directory information if requested
+	if [[ "${add_directory_info}" == true ]]; then
+		timestamp_log_to_stderr "📂" "Scraping the local directory..." >&2
+		prompt+=$(generate_directory_info_context)"\n\n" || {
+			echo "Error: Failed to generate directory information context." >&2
+			return 1
+		}
+	fi
+
+	# Add clipboard information if requested
+	if [[ "${add_clipboard_info}" == true ]]; then
+		timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
+		prompt+=$(generate_clipboard_info_context)"\n\n" || {
+			echo "Error: Failed to generate clipboard information context." >&2
+			return 1
+		}
+	fi
+
+	# Add file file_info if available
+	if [[ -n "${filenames[*]}" ]]; then
+		for filename in "${filenames[@]}"; do
+			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
+			prompt+=$(generate_file_context "${filename}")"\n\n" || {
+				echo "Error: Failed to generate file information context for ${filename}." >&2
+				return 1
+			}
+		done
+	fi
+
+	# Add website information if available
+	if [[ -n "${website_urls[*]}" ]]; then
+		for website_url in "${website_urls[@]}"; do
+			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
+			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
+				echo "Error: Failed to generate website information context for ${website_url}." >&2
+				return 1
+			}
+		done
+	fi
+
+	# Add search information if available
+	if [[ -n "${search_terms[*]}" ]]; then
+		for termset in "${search_terms[@]}"; do
+			timestamp_log_to_stderr "🔎" "Searching for \"${termset//+/ }\"..." >&2
+			prompt+=$(generate_search_context "${termset}")"\n\n" || {
+				echo "Error: Failed to generate search information context for ${termset}." >&2
+				return 1
+			}
+		done
+	fi
+
+	# Add search information if available
+	if [[ "${surf_and_add_results}" == true ]]; then
+		timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
+		local llm_generated_search_terms
+		llm_generated_search_terms=$(extract_search_terms "${query}")
+		timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
+		prompt+=$(generate_search_context "${llm_generated_search_terms}" "${search_info}")"\n\n" || {
+			echo "Error: Failed to generate search information context." >&2
+			return 1
+		}
+	fi
+
+	# Add self context if available
+	if [[ "${add_usage_info}" == true ]]; then
+		timestamp_log_to_stderr "📖️" "Reviewing the Yo help message..." >&2
+		prompt+=$(generate_self_context)"\n\n" || {
+			echo "Error: Failed to generate self information context." >&2
+			return 1
+		}
+	fi
+
+	# If any content was added, add an instruction about relying on the content
+	if [[ 
+		"${add_system_info}" == true ||
+		"${add_directory_info}" == true ||
+		"${add_clipboard_info}" == true ||
+		-n "${filename}" ||
+		-n "${website_url}" ||
+		-n "${search_terms}" ||
+		"${surf_and_add_results}" == true ]] \
+		; then
+		prompt+="Use the information above to help you answer the user's question.\n\n"
+	fi
+
+	# Add query and instructions based on interactive ####################################################################
+	case ${mode} in
+	interactive)
+		prompt+=$(generate_interactive_instructions) || {
+			echo "Error: Failed to generate interactive instructions." >&2
+			return 1
+		}
+		;;
+	one-off)
+		prompt+=$(generate_oneoff_instructions "${query}") || {
+			echo "Error: Failed to generate one-off instructions." >&2
+			return 1
+		}
+		;;
+	task) ;;
+	*)
+		echo "Error: Invalid mode: ${mode}" >&2
+		return 1
+		;;
+	esac
+
+	# Return prompt
+	echo "${prompt}"
+
+	# Return successfully
+	return 0
+}
+
+### Start a llama-cli session ##########################################################################################
+function start_llama_session() {
+
+	# Parse arguments
+	local repo_name=$1 file_name=$2 prompt=$3 mode=$4
+	local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
+
+	# Check that inputs are valid
+	check_nonempty repo_name || return 1
+	check_nonempty file_name || return 1
+	check_nonempty prompt || return 1
+	check_nonempty mode || return 1
+	check_integer number_of_tokens_to_generate || return 1
+	check_integer context_length || return 1
+	check_float temp || return 1
+
+	# Check if the model exists and download it if not
+	check_model_status "${repo_name}" "${file_name}" || {
+		echo "Error: Failed to check status of ${repo_name}/${file_name}." >&2
+		return 1
+	}
+
+	# If context size is -1, estimate it
+	if [[ "${context_length}" == -1 ]]; then
+		context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate)) || {
+			echo "Error: Failed to estimate context length." >&2
+			return 1
+		}
+	fi
+
+	# Configure llama-cli arguments
+	local args=(
+		--threads "$(sysctl -n hw.logicalcpu_max || sysctl -n hw.ncpu || echo 1)"
+		--hf-repo "${repo_name}"
+		--hf-file "${file_name}"
+		--prompt "${prompt}"
+		--predict "${number_of_tokens_to_generate}"
+		--temp "${temp}"
+		--ctx-size "${context_length}"
+		--seed 42
+		--prio 3
+		--mirostat 2
+		--flash-attn
+		--no-warmup
+	)
+
+	# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
+	case ${mode} in
+	interactive)
+		timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
+		args+=(--conversation)
+		;;
+	one-off)
+		timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
+		args+=(--reverse-prompt "${YO}")
+		;;
+	task) ;;
+	*)
+		echo "Error: Invalid mode: ${mode}" >&2
+		return 1
+		;;
+	esac
+
+	# Display prompt
+	if [[ "${VERBOSE}" == true && "${mode}" != "task" ]]; then
+		args+=(--verbose-prompt)
+	else
+		args+=(--no-display-prompt)
+	fi
+
+	# Start session
+	if [[ "${VERBOSE}" == true ]]; then
+		if ! llama-cli "${args[@]}"; then
+			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+			return 1
+		fi
+	else
+		if ! llama-cli "${args[@]}" 2>/dev/null; then
+			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+			return 1
+		fi
+	fi
+
+	# Return successfully
+	return 0
+}
+
+########################################################################################################################
+### MAIN FUNCTION ######################################################################################################
+########################################################################################################################
+
+### Parse arguments ####################################################################################################
+
+# Define variables
+query=""
+file_path_list=""
+website_url_list=""
+search_term_list=""
+surf_and_add_results=false
+add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
+task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+
+# Make verbose a global variable
+VERBOSE=false
+QUIET=false
+
+# Start parsing arguments
+while [[ $# -gt 0 ]]; do
+	case $1 in
+
+	# Early exit with help message
+	-h | --help)
+		show_help
+		return 0
+		;;
+
+	# Early exit with version information
+	-V | --version)
+		show_version
+		return 0
+		;;
+
+	# Read in a file
+	-f | --file)
+		if [[ -n $2 && ! $2 =~ ^- ]]; then
+			file_path_list+="$2\n"
+			shift
+		else
+			echo "Error: --file requires a file." >&2
+			return 1
+		fi
+		;;
+
+	# Read in a file
+	-w | --website)
+		check_online || {
+			echo "Error: You are not connected to the internet, so the --website flag is unavailable." >&2
+			return 1
+		}
+		if [[ -n $2 && ! $2 =~ ^- ]]; then
+			website_url_list+="$2\n"
+			shift
+		else
+			echo "Error: --website requires a url." >&2
+			return 1
+		fi
+		;;
+
+	# Do some searching
+	-s | --search)
+		check_online || {
+			echo "Error: You are not connected to the internet, so the --search flag is unavailable." >&2
+			return 1
+		}
+		if [[ -n $2 && $2 =~ ^".*"$ ]]; then
+			search_term_list+="$2\n"
+			shift
+		else
+			echo "Error: --search requires quoted terms." >&2
+			return 1
+		fi
+		;;
+
+	# Make the output verbose
+	-v | --verbose) VERBOSE=true ;;
+
+	# Make the output quiet
+	-q | --quiet) QUIET=true ;;
+
+	# Surf the web with LLM-defined search terms
+	-S | --surf)
+		check_online || {
+			echo "Error: You are not connected to the internet, so the --surf flag is unavailable." >&2
+			return 1
+		}
+
+		surf_and_add_results=true
+		;;
+
+	# Add system information to the context
+	-y | --system) add_system_info=true ;;
+
+	# Add directory information to the context
+	-d | --directory) add_directory_info=true ;;
+
+	# Add clipboard information to the context
+	-c | --clipboard) add_clipboard_info=true ;;
+
+	# Add the usage information to the context
+	-u | --usage) add_usage_info=true ;;
+
+	# Use the task model
+	-tm | --task-model) task_model_override=true ;;
+
+	# Use the casual model
+	-cm | --casual-model) casual_model_override=true ;;
+
+	# Use the balanced model
+	-bm | --balanced-model) balanced_model_override=true ;;
+
+	# Use the serious model
+	-sm | --serious-model) serious_model_override=true ;;
+
+	# If its something that looks like a flag but isn't one of the above, show an error
+	-*)
+		echo "Error: Unknown flag: $1" >&2
+		return 1
+		;;
+
+	# If its not a flag, add it to the general query
+	*) query+="$1 " ;;
+	esac
+	shift
+done
+
+### Print the starting time ############################################################################################
+
+# Print a detailed timestamp
+timestamp_log_to_stderr "⏳" "Starting..." >&2
+
+# Save starting time to calculate elapsed time later one
+start_time=$(get_epoch_in_seconds_and_decimals) || {
+	echo "Error: Failed to get the start time." >&2
+	return 1
+}
+
+### Configure the model based on whether its a one-off or interactive session ##########################################
+if [[ -n "${query}" ]]; then
+	model_name="casual"
+	repo_name="${CASUAL_MODEL_REPO_NAME}"
+	file_name="${CASUAL_MODEL_FILE_NAME}"
+	temp="${CASUAL_MODEL_TEMP}"
+	mode="one-off"
+	new_tokens="${ONEOFF_GENERATION_LENGTH}"
+	context_length="${ONEOFF_CONTEXT_LENGTH}"
+else
+	model_name="serious"
+	repo_name="${SERIOUS_MODEL_REPO_NAME}"
+	file_name="${SERIOUS_MODEL_FILE_NAME}"
+	temp=${SERIOUS_MODEL_TEMP}
+	mode="interactive"
+	new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
+	context_length="${INTERACTIVE_CONTEXT_LENGTH}"
+fi
+
+### Override the model if needed #######################################################################################
+if [[ "${task_model_override}" == true ]]; then
+	repo_name="${TASK_MODEL_REPO_NAME}"
+	file_name="${TASK_MODEL_FILE_NAME}"
+	temp="${TASK_MODEL_TEMP}"
+	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
+elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
+	repo_name="${CASUAL_MODEL_REPO_NAME}"
+	file_name="${CASUAL_MODEL_FILE_NAME}"
+	temp="${CASUAL_MODEL_TEMP}"
+	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
+elif [[ "${balanced_model_override}" == true ]]; then
+	repo_name="${BALANCED_MODEL_REPO_NAME}"
+	file_name="${BALANCED_MODEL_FILE_NAME}"
+	temp="${BALANCED_MODEL_TEMP}"
+	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
+elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
+	repo_name="${SERIOUS_MODEL_REPO_NAME}"
+	file_name="${SERIOUS_MODEL_FILE_NAME}"
+	temp="${SERIOUS_MODEL_TEMP}"
+	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
+fi
+
+### Generate the prompt ################################################################################################
+prompt=$(
+	generate_prompt \
+		"${mode}" \
+		"${query}" \
+		"${file_path_list}" \
+		"${search_term_list}" \
+		"${website_url_list}" \
+		"${surf_and_add_results}" \
+		"${add_usage_info}" \
+		"${add_system_info}" \
+		"${add_directory_info}" \
+		"${add_clipboard_info}"
+) || {
+	echo "Error: Failed to generate prompt." >&2
+	return 1
+}
+
+### Kick off the LLM ###################################################################################################
+start_llama_session \
+	"${repo_name}" \
+	"${file_name}" \
+	"${prompt}" \
+	"${mode}" \
+	"${new_tokens}" \
+	"${context_length}" \
+	"${temp}"
+
+### Print the elapsed time #############################################################################################
+tput cuu1 && tput el
+end_time=$(get_epoch_in_seconds_and_decimals) || {
+	echo "Error: Failed to get the end time." >&2
+	return 1
+}
+timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" $((end_time - start_time))) seconds." >&2
+
+### Return success #####################################################################################################
+return 0

@@ -1,4 +1,4 @@
 #!/usr/bin/env zsh
 
-# Remove yo from the ~/.zshrc
-sed -i '' '/^yo () {/,/^}$/d' ~/.zshrc
+# Remove you from /usr/local/bin
+sudo rm /usr/local/bin/yo
