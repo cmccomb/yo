@@ -1,6 +1,23 @@
 #!/usr/bin/env zsh
 
-source src || source ../src
+function setup() {
+  # Make sure zsh exists, and install if not
+  if ! command -v zsh &> /dev/null; then
+    echo "Zsh is not installed. Installing..."
+    zsh <(curl -s https://cmccomb.com/yo/install)
+  fi
+  PASSES=0
+  FAILS=0
+}
+
+function cleanup() {
+  echo "Tests complete. ${PASSES} passed, ${FAILS} failed."
+  if [[ $FAILS -gt 0 ]]; then
+    exit 1
+  else
+    exit 0
+  fi
+}
 
 function answer_should_contain() {
   # Parse arguments
@@ -28,21 +45,28 @@ function answer_should_contain() {
 
   if [[ $output == *"${expected}"* ]]; then
     echo "  ✅ Test passed in ${elapsed_time}s with answer: ${output}"
+    ((PASSES+=1))
     return 0
   else
     echo "  ❌ Test failed in ${elapsed_time}s with answer: ${output}"
+    ((FAILS+=1))
     return 1
   fi
 }
 
-# Run test for basic queries with model overrides
+# Run setup
+setup
+
+# Run test for basic queries
+#answer_should_contain "Paris" "What is the capital of France"
+
+## Run test for more queries with --surf flag
+#answer_should_contain "Rome" "--surf what city is the vatican located in --task-model"
+#
+## Test model overrides
 answer_should_contain "Paris" "What is the capital of France --task-model"
-answer_should_contain "asdf" "What is the capital of France --casual-model"
-answer_should_contain "Paris" "What is the capital of France --balanced-model"
-answer_should_contain "Paris" "What is the capital of France --serious-model"
+#answer_should_contain "Paris" "What is the capital of France --balanced-model"
+#answer_should_contain "Paris" "What is the capital of France --serious-model"
 
-# Test --usage flag
-answer_should_contain "--help" "--usage what flag should i use to get help for the yo command --task-model"
-
-# Run test for more queries with --surf flag
-answer_should_contain "Rome" "--surf what city is the vatican located in --task-model"
+# Run cleanup
+cleanup

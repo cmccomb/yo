@@ -1,9 +1,9 @@
-name: Installation
+name: Tests
 
 on:
   # Runs on successful completion of static.yml
   workflow_run:
-      workflows: ["Deploy static content to Pages"]
+      workflows: ["Installation"]
       types:
       - completed
 
@@ -16,3 +16,7 @@ jobs:
     steps:
       - name: Install
         run: zsh <(curl -s https://cmccomb.com/yo/install)
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test
+        run: zsh tests/run.zsh
