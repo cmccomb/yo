@@ -218,8 +218,8 @@ function yo() {
 
 		# Check if the input is empty
 		if [[ -z $(get_value_from_name variable_name) ]]; then
+			# In order to use funcstack without warnings from shellcheck, we need to disable SC2154
 			# shellcheck disable=SC2154
-			# In order to use funcstack with shellcheck, we need to disable SC2154
 			echo "Error in ${funcstack[2]}: Invalid input for ${variable_name}, expected a non-empty string." >&2
 			return 1
 		else
@@ -578,7 +578,7 @@ function yo() {
 		local url response
 
 		# Example API call
-		url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /%20}"
+		url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /+}"
 
 		# Perform search and extract relevant information
 		if ! response=$(\curl -s "${url}" | grep -E "^      \"title\"|^      \"snippet\""); then
@@ -1092,8 +1092,13 @@ function yo() {
 
 		# Parse arguments
 		local mode=$1 query=$2
-		local filename=$3 search_terms=$4 website_url=$5
+		local filenames=$3 search_terms=$4 website_urls=$5
 		local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
+
+		# Split filenames into an array of files
+		filenames=($(echo "${filenames}" | tr '\n' ' '))
+		search_terms=($(echo "${search_terms}" |  tr ' ' '+' | tr '\n' ' '))
+		website_urls=($(echo "${website_urls}"  |tr '\n' ' '))
 
 		# Check that inputs are valid
 		check_nonempty mode || return 1
@@ -1138,38 +1143,45 @@ function yo() {
 		fi
 
 		# Add file file_info if available
-		if [[ -n "${filename}" ]]; then
-			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
-			prompt+=$(generate_file_context "${filename}")"\n\n" || {
-				echo "Error: Failed to generate file information context." >&2
-				return 1
-			}
+		if [[ -n "${filenames[*]}" ]]; then
+			for filename in "${filenames[@]}"; do
+				timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
+				prompt+=$(generate_file_context "${filename}")"\n\n" || {
+					echo "Error: Failed to generate file information context for ${filename}." >&2
+					return 1
+				}
+			done
 		fi
 
 		# Add website information if available
-		if [[ -n "${website_url}" ]]; then
-			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
-				echo "Error: Failed to generate website information context." >&2
-				return 1
-			}
+		if [[ -n "${website_urls[*]}" ]]; then
+			for website_url in "${website_urls[@]}"; do
+				timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
+				prompt+=$(generate_website_context "${website_url}")"\n\n" || {
+					echo "Error: Failed to generate website information context for ${website_url}." >&2
+					return 1
+				}
+			done
 		fi
 
 		# Add search information if available
-		if [[ -n "${search_terms}" ]]; then
-			timestamp_log_to_stderr "🔎" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}")"\n\n" || {
-				echo "Error: Failed to generate search information context." >&2
-				return 1
-			}
+		if [[ -n "${search_terms[*]}" ]]; then
+			for termset in "${search_terms[@]}"; do
+				timestamp_log_to_stderr "🔎" "Searching for \"${termset//+/ }\"..." >&2
+				prompt+=$(generate_search_context "${termset}")"\n\n" || {
+					echo "Error: Failed to generate search information context for ${termset}." >&2
+					return 1
+				}
+			done
 		fi
 
 		# Add search information if available
 		if [[ "${surf_and_add_results}" == true ]]; then
 			timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
-			search_terms=$(extract_search_terms "${query}")
-			timestamp_log_to_stderr "🌐" "Searching for \"${search_terms}\"..." >&2
-			prompt+=$(generate_search_context "${search_terms}" "${search_info}")"\n\n" || {
+			local llm_generated_search_terms
+			llm_generated_search_terms=$(extract_search_terms "${query}")
+			timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
+			prompt+=$(generate_search_context "${llm_generated_search_terms}" "${search_info}")"\n\n" || {
 				echo "Error: Failed to generate search information context." >&2
 				return 1
 			}
@@ -1320,9 +1332,10 @@ function yo() {
 
 	# Define variables
 	local query=""
-	local filename=""
-	local website_url=""
-	local surf_and_add_results=false search_terms=""
+	local file_path_list=""
+	local website_url_list=""
+  local search_term_list=""
+	local surf_and_add_results=false
 	local add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 	local task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
 	local repo_name file_name new_tokens temp prompt model_name context_length
@@ -1350,7 +1363,7 @@ function yo() {
 		# Read in a file
 		-f | --file)
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				filename=$2 # TODO make this add files to a list
+				file_path_list+="$2\n"
 				shift
 			else
 				echo "Error: --file requires a file." >&2
@@ -1365,7 +1378,7 @@ function yo() {
 				return 1
 			}
 			if [[ -n $2 && ! $2 =~ ^- ]]; then
-				website_url=$2 # TODO make this add files to a list
+				website_url_list+="$2\n"
 				shift
 			else
 				echo "Error: --website requires a url." >&2
@@ -1380,7 +1393,7 @@ function yo() {
 				return 1
 			}
 			if [[ -n $2 && $2 =~ ^".*"$ ]]; then
-				search_terms=$2
+				search_term_list+="$2\n"
 				shift
 			else
 				echo "Error: --search requires quoted terms." >&2
@@ -1496,9 +1509,9 @@ function yo() {
 		generate_prompt \
 			"${mode}" \
 			"${query}" \
-			"${filename}" \
-			"${search_terms}" \
-			"${website_url}" \
+			"${file_path_list}" \
+			"${search_term_list}" \
+			"${website_url_list}" \
 			"${surf_and_add_results}" \
 			"${add_usage_info}" \
 			"${add_system_info}" \
