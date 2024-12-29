@@ -1,6 +1,7 @@
 # Yo 
 
-[![Test Install](https://github.com/cmccomb/yo/actions/workflows/run_tests.yml/badge.svg)](https://github.com/cmccomb/yo/actions/workflows/run_tests.yml)
+[![Installation](https://github.com/cmccomb/yo/actions/workflows/installation.yml/badge.svg)](https://github.com/cmccomb/yo/actions/workflows/installation.yml)
+[![Tests](https://github.com/cmccomb/yo/actions/workflows/run_tests.yml/badge.svg)](https://github.com/cmccomb/yo/actions/workflows/run_tests.yml)
 
 Yo is a command-line assistant that interacts with the user and provides information about the system and recent commands.
 
