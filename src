@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ########################################################################################################################
@@ -139,12 +140,12 @@ function yo() {
 	### Define parameters for the task model #############################################################################
 
 	# Model parameters
-	local TASK_USERNAME=$GENERAL_USERNAME
+	local TASK_USERNAME=${GENERAL_USERNAME}
 	local TASK_MODEL_SERIES="Llama-3.2"
-	local TASK_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
+	local TASK_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 	local TASK_MODEL_SIZE="1B"
 	local TASK_MODEL_QUANT="Q4_K_M"
-	local TASK_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
+	local TASK_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 	# Generation parameters
 	local TASK_MODEL_TEMP=0.2
@@ -152,34 +153,34 @@ function yo() {
 	### Define parameters for the casual model ###########################################################################
 
 	# Model parameters
-	local CASUAL_GENERAL_USERNAME=$GENERAL_USERNAME
+	local CASUAL_GENERAL_USERNAME=${GENERAL_USERNAME}
 	local CASUAL_MODEL_SERIES="Qwen2.5"
-	local CASUAL_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
+	local CASUAL_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 	local CASUAL_MODEL_SIZE="3B"
 	local CASUAL_MODEL_QUANT="Q4_K_M"
-	local CASUAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
+	local CASUAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 	# Generation parameters
 	local CASUAL_MODEL_TEMP=0.2
 
 	### Define parameters for the balanced model #########################################################################
-	local BALANCED_GENERAL_USERNAME=$GENERAL_USERNAME
+	local BALANCED_GENERAL_USERNAME=${GENERAL_USERNAME}
 	local BALANCED_MODEL_SERIES="Qwen2.5"
-	local BALANCED_MODEL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
+	local BALANCED_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 	local BALANCED_MODEL_SIZE="7B"
 	local BALANCED_MODEL_QUANT="Q4_K_M"
-	local BALANCED_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
+	local BALANCED_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 	# Generation parameters
 	local BALANCED_MODEL_TEMP=0.2
 
 	### Define the series model parameters ###############################################################################
-	local SERIOUS_GENERAL_USERNAME=$GENERAL_USERNAME
+	local SERIOUS_GENERAL_USERNAME=${GENERAL_USERNAME}
 	local SERIOUS_MODEL_SERIES="Qwen2.5-Coder"
-	local SERIOUS_GENERAL_FINETUNING_STYLE=$GENERAL_FINETUNING_STYLE
+	local SERIOUS_GENERAL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 	local SERIOUS_MODEL_SIZE="14B"
 	local SERIOUS_MODEL_QUANT="IQ4_XS"
-	local SERIOUS_GENERAL_MODEL_FILETYPE=$GENERAL_MODEL_FILETYPE
+	local SERIOUS_GENERAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 	# Generation parameters
 	local SERIOUS_MODEL_TEMP=0.2
@@ -284,7 +285,7 @@ function yo() {
 		variable_value=$(get_value_from_name variable_name)
 
 		# Check if the input is a float
-		if [[ ! $variable_value =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+		if [[ ! ${variable_value} =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
 			echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected a float." >&2
 			return 1
 		else
@@ -388,11 +389,11 @@ function yo() {
 		# Check if the model exists
 		local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
 		if [[ ! -f "${model_path}" ]]; then
-		  # Make sure we are online
-		  check_online || {
-		    echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
-		    return 1
-		  }
+			# Make sure we are online
+			check_online || {
+				echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
+				return 1
+			}
 
 			# Print a detailed timestamp, down to the decimal seconds
 			timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
@@ -430,7 +431,7 @@ function yo() {
 		characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
 		# Return result
-		printf "%.0f" "$characters"
+		printf "%.0f" "${characters}"
 
 		# Return successfully
 		return 0
@@ -451,7 +452,7 @@ function yo() {
 		tokens=$((((characters + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
 
 		# Return result
-		printf "%.0f" "$tokens"
+		printf "%.0f" "${tokens}"
 
 		# Return successfully
 		return 0
@@ -500,12 +501,12 @@ function yo() {
 	local TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME
 	read -r TASK_MODEL_REPO_NAME TASK_MODEL_FILE_NAME <<<"$(
 		compose_repo_and_model_file_name \
-			${TASK_USERNAME} \
-			${TASK_MODEL_SERIES} \
-			${TASK_MODEL_SIZE} \
-			${TASK_MODEL_FINETUNING_STYLE} \
-			${TASK_MODEL_FILETYPE} \
-			${TASK_MODEL_QUANT}
+			"${TASK_USERNAME}" \
+			"${TASK_MODEL_SERIES}" \
+			"${TASK_MODEL_SIZE}" \
+			"${TASK_MODEL_FINETUNING_STYLE}" \
+			"${TASK_MODEL_FILETYPE}" \
+			"${TASK_MODEL_QUANT}"
 	)" || {
 		echo "Error: Failed to set the repository and model names for the task model." >&2
 		return 1
@@ -516,12 +517,12 @@ function yo() {
 	local CASUAL_MODEL_FILE_NAME CASUAL_MODEL_REPO_NAME
 	read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME <<<"$(
 		compose_repo_and_model_file_name \
-			${CASUAL_GENERAL_USERNAME} \
-			${CASUAL_MODEL_SERIES} \
-			${CASUAL_MODEL_SIZE} \
-			${CASUAL_MODEL_FINETUNING_STYLE} \
-			${CASUAL_MODEL_FILETYPE} \
-			${CASUAL_MODEL_QUANT}
+			"${CASUAL_GENERAL_USERNAME}" \
+			"${CASUAL_MODEL_SERIES}" \
+			"${CASUAL_MODEL_SIZE}" \
+			"${CASUAL_MODEL_FINETUNING_STYLE}" \
+			"${CASUAL_MODEL_FILETYPE}" \
+			"${CASUAL_MODEL_QUANT}"
 	)" || {
 		echo "Error: Failed to set the repository and model names for the casual model." >&2
 		return 1
@@ -532,12 +533,12 @@ function yo() {
 	local BALANCED_MODEL_FILE_NAME BALANCED_MODEL_REPO_NAME
 	read -r BALANCED_MODEL_REPO_NAME BALANCED_MODEL_FILE_NAME <<<"$(
 		compose_repo_and_model_file_name \
-			${BALANCED_GENERAL_USERNAME} \
-			${BALANCED_MODEL_SERIES} \
-			${BALANCED_MODEL_SIZE} \
-			${BALANCED_MODEL_FINETUNING_STYLE} \
-			${BALANCED_MODEL_FILETYPE} \
-			${BALANCED_MODEL_QUANT}
+			"${BALANCED_GENERAL_USERNAME}" \
+			"${BALANCED_MODEL_SERIES}" \
+			"${BALANCED_MODEL_SIZE}" \
+			"${BALANCED_MODEL_FINETUNING_STYLE}" \
+			"${BALANCED_MODEL_FILETYPE}" \
+			"${BALANCED_MODEL_QUANT}"
 	)" || {
 		echo "Error: Failed to set the repository and model names for the balanced model." >&2
 		return 1
@@ -548,12 +549,12 @@ function yo() {
 	local SERIOUS_MODEL_FILE_NAME SERIOUS_MODEL_REPO_NAME
 	read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME <<<"$(
 		compose_repo_and_model_file_name \
-			${SERIOUS_GENERAL_USERNAME} \
-			${SERIOUS_MODEL_SERIES} \
-			${SERIOUS_MODEL_SIZE} \
-			${SERIOUS_GENERAL_FINETUNING_STYLE} \
-			${SERIOUS_GENERAL_MODEL_FILETYPE} \
-			${SERIOUS_MODEL_QUANT}
+			"${SERIOUS_GENERAL_USERNAME}" \
+			"${SERIOUS_MODEL_SERIES}" \
+			"${SERIOUS_MODEL_SIZE}" \
+			"${SERIOUS_GENERAL_FINETUNING_STYLE}" \
+			"${SERIOUS_GENERAL_MODEL_FILETYPE}" \
+			"${SERIOUS_MODEL_QUANT}"
 	)" || {
 		echo "Error: Failed to set the repository and model names for the serious model." >&2
 		return 1
@@ -666,7 +667,7 @@ function yo() {
 		# Make variables
 		local file_info=""
 
-		case $source in
+		case ${source} in
 		*.pdf)
 			command -v pdftotext >/dev/null 2>&1 || {
 				echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
@@ -686,7 +687,7 @@ function yo() {
 		esac
 
 		# Trim to max length if needed
-		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
+		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
 
 		# Return file_info
 		echo "${file_info}"
@@ -721,7 +722,7 @@ function yo() {
 		fi
 
 		# Trim to max length if needed
-		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:$max_length}
+		[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
 
 		# Return file_info
 		echo "${file_info}"
@@ -1110,7 +1111,7 @@ function yo() {
 		}
 
 		# Add system information if requested
-		if [[ "$add_system_info" == true ]]; then
+		if [[ "${add_system_info}" == true ]]; then
 			timestamp_log_to_stderr "💻" "Querying system info..." >&2
 			prompt+=$(generate_system_info_context)"\n\n" || {
 				echo "Error: Failed to generate system information context." >&2
@@ -1197,7 +1198,7 @@ function yo() {
 		fi
 
 		# Add query and instructions based on interactive ##################################################################
-		case $mode in
+		case ${mode} in
 		interactive)
 			prompt+=$(generate_interactive_instructions) || {
 				echo "Error: Failed to generate interactive instructions." >&2
@@ -1209,6 +1210,11 @@ function yo() {
 				echo "Error: Failed to generate one-off instructions." >&2
 				return 1
 			}
+			;;
+		task) ;;
+		*)
+			echo "Error: Invalid mode: ${mode}" >&2
+			return 1
 			;;
 		esac
 
@@ -1266,7 +1272,7 @@ function yo() {
 		)
 
 		# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
-		case $mode in
+		case ${mode} in
 		interactive)
 			timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
 			args+=(--conversation)
@@ -1276,6 +1282,10 @@ function yo() {
 			args+=(--reverse-prompt "${YO}")
 			;;
 		task) ;;
+		*)
+			echo "Error: Invalid mode: ${mode}" >&2
+			return 1
+			;;
 		esac
 
 		# Display prompt
