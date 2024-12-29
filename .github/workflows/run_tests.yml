@@ -1,5 +1,4 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Test Install
+name: Installation
 
 on:
   # Runs on successful completion of static.yml
