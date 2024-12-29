@@ -47,6 +47,5 @@ fi
 
 # Download the latest version of yo
 echo "Downloading the latest version of yo..."
-curl -s https://www.cmccomb.com/yo/src > /tmp/yo
-chmod +x /tmp/yo
-sudo mv /tmp/yo /usr/local/bin/yo
+sudo curl --silent https://cmccomb.com/yo/src --output /usr/local/bin/yo
+sudo chmod +x /usr/local/bin/yo
