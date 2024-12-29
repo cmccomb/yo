@@ -1087,7 +1087,6 @@ function yo() {
 
 	# Generate interactive instructions
 	function generate_interactive_instructions() {
-
 		cat <<-EOF
 			Your task is to assist the user in an interactive session, responding concisely and accurately.
 		EOF
