@@ -212,7 +212,9 @@ function start_llama_session() {
 		timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
 		args+=(--reverse-prompt "${YO}")
 		;;
-	task) ;;
+	task)
+		args+=(--repeat-penalty 3)
+		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2
 		return 1
