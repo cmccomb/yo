@@ -2,3 +2,6 @@
 
 # Remove you from /usr/local/bin
 sudo rm /usr/local/bin/yo
+
+# Remove the side files from /usr/local/share/yo
+sudo rm -rf /usr/local/share/yo
