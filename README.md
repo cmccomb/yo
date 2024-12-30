@@ -11,12 +11,7 @@ Yo is a command-line assistant that interacts with the user and provides informa
 
 ## Installation
 
-To try out `yo`, run this command:
-```zsh
-source <(curl -s https://cmccomb.com/yo/src)
-```
-
-To install `yo` and keep it updated, simply run this command:
+To install `yo`, simply run this command:
 ```zsh
 zsh <(curl -s https://cmccomb.com/yo/install)
 ```

@@ -2,10 +2,14 @@
 
 function setup() {
   # Make sure zsh exists, and install if not
-  if ! command -v zsh &> /dev/null; then
-    echo "Zsh is not installed. Installing..."
+  if ! command -v yo &> /dev/null; then
+    echo "Yo is not installed. Installing..."
     zsh <(curl -s https://cmccomb.com/yo/install)
   fi
+
+  # Warm up yo
+  yo say hi -tm
+
   PASSES=0
   FAILS=0
 }
