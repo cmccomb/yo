@@ -15,7 +15,7 @@
 ########################################################################################################################
 
 ########################################################################################################################
-### Source things in ###################################################################################################
+### SOURCE EXTERNAL SCRIPTS ############################################################################################
 ########################################################################################################################
 
 # Get the directory where this file is saved
@@ -34,6 +34,7 @@ source "${DIR}/settings.zsh"
 source "${DIR}/input_validation.zsh"
 source "${DIR}/logging.zsh"
 source "${DIR}/status_checks.zsh"
+source "${DIR}/installation_management.zsh"
 source "${DIR}/set_model_names.zsh"
 source "${DIR}/web_search.zsh"
 source "${DIR}/tokens.zsh"
@@ -132,6 +133,18 @@ while [[ $# -gt 0 ]]; do
 
 		surf_and_add_results=true
 		;;
+
+  # Update system
+  -U | --update)
+    timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
+    update_yo && return 0
+    ;;
+
+  # Uninstall system
+  -X | --uninstall)
+    timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
+    uninstall_yo && return 0
+    ;;
 
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
@@ -244,7 +257,6 @@ start_llama_session \
 
 ### Print the elapsed time #############################################################################################
 end_log "${start_time}"
-
 
 ### Show that verbose and quiet are used ###############################################################################
 : "${VERBOSE} ${QUIET}"

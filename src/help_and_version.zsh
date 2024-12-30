@@ -65,6 +65,8 @@ function show_help() {
 		    -q, --quiet             Suppress all output except the answer.
 		    -v, --verbose           Enable verbose mode for detailed output.
 		    -V, --version           Show the version and exit.
+		    -U, --update            Update Yo to the latest version.
+		    -X, --uninstall         Uninstall Yo from your system.
 
 		Examples:
 		  * Answer a question:

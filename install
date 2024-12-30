@@ -59,6 +59,7 @@ files=(
 	"content_processing.zsh"
 	"help_and_version.zsh"
 	"input_validation.zsh"
+	"installation_management.zsh"
 	"llm_session_management.zsh"
 	"logging.zsh"
 	"prompt_generators.zsh"
