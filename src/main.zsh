@@ -14,6 +14,16 @@
 ########################################################################################################################
 ########################################################################################################################
 
+
+### Define the Yo ######################################################################################################
+YO="✌️"
+readonly YO
+
+########################################################################################################################
+### Source things in ###################################################################################################
+########################################################################################################################
+
+
 # Get the directory where this file is saved
 DIR=$(dirname -- "$0")
 
@@ -25,17 +35,17 @@ elif [[ ${DIR} == *"bin" ]]; then
 fi
 
 # Source the necessary files
-source "${DIR}/app.zsh"
+source "${DIR}/help_and_version.zsh"
 source "${DIR}/settings.zsh"
 source "${DIR}/input_validation.zsh"
-source "${DIR}/logs.zsh"
+source "${DIR}/logging.zsh"
 source "${DIR}/status_checks.zsh"
-source "${DIR}/repo_and_file_names.zsh"
-source "${DIR}/search.zsh"
+source "${DIR}/set_model_names.zsh"
+source "${DIR}/web_search.zsh"
 source "${DIR}/tokens.zsh"
-source "${DIR}/content_extraction.zsh"
+source "${DIR}/content_processing.zsh"
 source "${DIR}/prompt_generators.zsh"
-source "${DIR}/llms_and_prompts.zsh"
+source "${DIR}/llm_session_management.zsh"
 
 ########################################################################################################################
 ### MAIN FUNCTION ######################################################################################################

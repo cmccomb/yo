@@ -31,7 +31,7 @@ function perform_search() {
 }
 
 ### Extract optimized search terms using a small model #################################################################
-function extract_search_terms() {
+function generate_search_terms() {
 
 	# Parse arguments
 	local query=$1

@@ -96,9 +96,9 @@ function generate_prompt() {
 	if [[ "${surf_and_add_results}" == true ]]; then
 		timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 		local llm_generated_search_terms
-		llm_generated_search_terms=$(extract_search_terms "${query}")
+		llm_generated_search_terms=$(generate_search_terms "${query}")
 		timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
-		prompt+=$(generate_search_context "${llm_generated_search_terms}" "${search_info}")"\n\n" || {
+		prompt+=$(generate_search_context "${llm_generated_search_terms}")"\n\n" || {
 			echo "Error: Failed to generate search information context." >&2
 			return 1
 		}
