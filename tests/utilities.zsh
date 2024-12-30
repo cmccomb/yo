@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# In order to use funcfiletrace, we need to supress a warning
+# shellcheck disable=SC2154
 
 function setup() {
 	# Make sure zsh exists, and install if not
@@ -8,7 +10,12 @@ function setup() {
 	fi
 
 	# Warm up yo
-	yo say hi -tm
+	yo say hi -tm &>/dev/null
+
+	# Send a message of the form
+	local script_with_line=${funcfiletrace[1]}
+	echo "\n================================================================================================================"
+	echo "\n\033[1mRunning tests in ${script_with_line%%:*}\033[0m\n"
 
 	# Set up counters
 	PASSES=0
@@ -16,7 +23,7 @@ function setup() {
 }
 
 function cleanup() {
-	echo "Tests complete. ${PASSES} passed, ${FAILS} failed."
+	echo "  \033[1mTests complete. ${PASSES} passed, ${FAILS} failed.\033[0m"
 	if [[ $FAILS -gt 0 ]]; then
 		exit 1
 	else
@@ -30,7 +37,7 @@ function answer_should_contain() {
 	local query="${*:2}"
 
 	# Print test description
-	echo "Testing query: 'yo ${query}' (answer must contain \"${expected}\")"
+	echo "  Testing query: 'yo ${query}' (answer must contain \"${expected}\")"
 
 	# Measure start time
 	local start_time
@@ -49,11 +56,11 @@ function answer_should_contain() {
 	elapsed_time=$(echo "$end_time - $start_time" | bc | awk '{printf "%.2f", $0}')
 
 	if [[ $output == *"${expected}"* ]]; then
-		echo "  ✅ Test passed in ${elapsed_time}s with answer: ${output}"
+		echo "    ✅ Test passed in ${elapsed_time}s with answer: ${output}"
 		((PASSES += 1))
 		return 0
 	else
-		echo "  ❌ Test failed in ${elapsed_time}s with answer: ${output}"
+		echo "    ❌ Test failed in ${elapsed_time}s with answer: ${output}"
 		((FAILS += 1))
 		return 1
 	fi
