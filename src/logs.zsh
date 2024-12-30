@@ -9,7 +9,6 @@ function get_epoch_in_seconds_and_decimals() {
 	gdate +%s.%N
 }
 
-
 # Function to log the time taken for a process
 function timestamp_log_to_stderr() {
 
@@ -29,4 +28,39 @@ function timestamp_log_to_stderr() {
 
 	# Return successfully
 	return 0
+}
+
+# Function to log the time taken for a process
+function start_log() {
+	# Print a detailed timestamp
+	timestamp_log_to_stderr "⏳" "Starting..." >&2
+
+	# Save starting time to calculate elapsed time later one
+	start_time=$(get_epoch_in_seconds_and_decimals) || {
+		echo "Error: Failed to get the start time." >&2
+		return 1
+	}
+
+	# Return start time
+	echo "${start_time}"
+
+	# Return successfully
+	return 0
+
+}
+
+# Function to log the time taken for a process
+function end_log() {
+  # Parse arguments
+	start_time=$1
+
+	# Remove a line, cuz
+	tput cuu1 && tput el
+
+	# Print a detailed timestamp
+	end_time=$(get_epoch_in_seconds_and_decimals) || {
+		echo "Error: Failed to get the end time." >&2
+		return 1
+	}
+	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" $((end_time - start_time))) seconds." >&2
 }

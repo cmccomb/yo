@@ -27,9 +27,9 @@ fi
 # Source the necessary files
 source "${DIR}/app.zsh"
 source "${DIR}/settings.zsh"
-source "${DIR}/check_inputs.zsh"
+source "${DIR}/input_validation.zsh"
 source "${DIR}/logs.zsh"
-source "${DIR}/check_status.zsh"
+source "${DIR}/status_checks.zsh"
 source "${DIR}/repo_and_file_names.zsh"
 source "${DIR}/search.zsh"
 source "${DIR}/tokens.zsh"
@@ -84,7 +84,7 @@ while [[ $# -gt 0 ]]; do
 
 	# Read in a file
 	-w | --website)
-		check_online || {
+		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --website flag is unavailable." >&2
 			return 1
 		}
@@ -99,7 +99,7 @@ while [[ $# -gt 0 ]]; do
 
 	# Do some searching
 	-s | --search)
-		check_online || {
+		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --search flag is unavailable." >&2
 			return 1
 		}
@@ -120,7 +120,7 @@ while [[ $# -gt 0 ]]; do
 
 	# Surf the web with LLM-defined search terms
 	-S | --surf)
-		check_online || {
+		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --surf flag is unavailable." >&2
 			return 1
 		}
@@ -165,15 +165,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 ### Print the starting time ############################################################################################
+start_time=$(start_log)
 
-# Print a detailed timestamp
-timestamp_log_to_stderr "⏳" "Starting..." >&2
-
-# Save starting time to calculate elapsed time later one
-start_time=$(get_epoch_in_seconds_and_decimals) || {
-	echo "Error: Failed to get the start time." >&2
-	return 1
-}
 
 ### Configure the model based on whether its a one-off or interactive session ##########################################
 if [[ -n "${query}" ]]; then
@@ -246,12 +239,7 @@ start_llama_session \
 	"${temp}"
 
 ### Print the elapsed time #############################################################################################
-tput cuu1 && tput el
-end_time=$(get_epoch_in_seconds_and_decimals) || {
-	echo "Error: Failed to get the end time." >&2
-	return 1
-}
-timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" $((end_time - start_time))) seconds." >&2
+end_log "${start_time}"
 
 ### Return success #####################################################################################################
 return 0

@@ -4,12 +4,12 @@
 ### CHECK STATUS #######################################################################################################
 ########################################################################################################################
 
-function check_online() {
+function system_is_online() {
 	ping -c 1 google.com &>/dev/null
 }
 
 # Function that checks to see if a model exists and download it if not
-function check_model_status() {
+function model_is_available() {
 	# Parse arguments
 	local repo_name=$1 file_name=$2
 

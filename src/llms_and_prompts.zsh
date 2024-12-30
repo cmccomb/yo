@@ -406,7 +406,7 @@ function start_llama_session() {
 	check_float temp || return 1
 
 	# Check if the model exists and download it if not
-	check_model_status "${repo_name}" "${file_name}" || {
+	model_is_available "${repo_name}" "${file_name}" || {
 		echo "Error: Failed to check status of ${repo_name}/${file_name}." >&2
 		return 1
 	}
