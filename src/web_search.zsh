@@ -45,11 +45,12 @@ function generate_search_terms() {
 	# Generate prompt
 	prompt=$(
 		cat <<-EOF
-			Your task is to create a list of the most relevant search terms for a given topic.
+			Your task is to create an appropriate web search query for a given user query.
+			Draw search terms directly from the query itself whenever possible. Do not infer additional information.
 
 			Here is an example:
 			User Query: how large is the capital of france ${YO}
-			Search Terms: paris capital population area
+			Search Terms: french capital size population area
 
 			Here is another example:
 			User Query: what is the furthest planet from the sun ${YO}
@@ -60,6 +61,8 @@ function generate_search_terms() {
 			Search Terms:
 		EOF
 	)
+
+	  echo "${prompt}" >&2
 
 	# Generate response
 	terms=$(
@@ -83,7 +86,7 @@ function generate_search_terms() {
 	terms="${terms//\[end of text\]/}"
 
 	# Return results
-	echo "${terms}"
+	echo "${terms## }"
 
 	# Return successfully
 	return 0
