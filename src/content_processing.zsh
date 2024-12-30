@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ### CONTENT EXTRACTION #################################################################################################
@@ -105,11 +106,11 @@ function extract_facts() {
 	)
 
 	start_llama_session \
-		"${TASK_MODEL_REPO_NAME}" \
-		"${TASK_MODEL_FILE_NAME}" \
+		"${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" \
+		"${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" \
 		"${prompt}" \
 		"task" \
-		"${COMPRESSION_GENERATION_LENGTH}" \
+		"${COMPRESSION_GENERATION_LENGTH:-"128"}" \
 		"${context_length}" \
 		0.2 2>/dev/null || {
 
@@ -159,13 +160,13 @@ function compress_text() {
 	fi
 
 	# If length of tokenized text is greater than cutoff, do something
-	if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH}" && "${summarize}" == true ]]; then
+	if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH:-"1024"}" && "${summarize}" == true ]]; then
 
 		# Make variables
 		local compressed="" chunk_length_in_chars number_of_chunks
 
 		# Compress text
-		chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH}")
+		chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH:-"4096"}")
 
 		# Estimate how the length of text divided by chunk_length_in_chars
 		number_of_chunks=$(((${#text} / chunk_length_in_chars) + 1))

@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ### TOKEN COUNTING FUNCTIONS ###########################################################################################
@@ -17,7 +18,7 @@ function tokens_to_characters() {
 	local characters
 
 	# Calculate the number of characters and divide by four
-	characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
+	characters=$(((tokens * ${CHARACTERS_PER_TOKEN:-"4"}) / ${TOKEN_ESTIMATION_CORRECTION_FACTOR:-"1.2"}))
 
 	# Return result
 	printf "%.0f" "${characters}"

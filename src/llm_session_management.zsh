@@ -15,7 +15,7 @@ function generate_prompt() {
 	local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
 
 	# Split filenames into an array of files
-	filenames=($(echo "${filenames}" | tr '\n' ' '))
+  filenames=($(echo "${filenames}" | tr '\n' ' '))
 	search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
 	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
 
@@ -222,7 +222,7 @@ function start_llama_session() {
 	esac
 
 	# Display prompt
-	if [[ "${VERBOSE}" == true && "${mode}" != "task" ]]; then
+	if [[ "${VERBOSE:-"false"}" == true && "${mode}" != "task" ]]; then
 		args+=(--verbose-prompt)
 	else
 		args+=(--no-display-prompt)

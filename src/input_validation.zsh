@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
-# In order to use funcstack without warnings from shellcheck, we need to disable SC2154
-# shellcheck disable=SC2154
+# shellcheck enable=all
 
 ########################################################################################################################
 ### INPUT CHECKING #####################################################################################################
@@ -18,7 +17,7 @@ function check_nonempty() {
 
 	# Check if the input is empty
 	if [[ -z $(get_value_from_name variable_name) ]]; then
-		echo "Error in ${funcstack[2]}: Invalid input for ${variable_name}, expected a non-empty string." >&2
+		echo "Error in ${funcstack[2]:-"Yo"}: Invalid input for ${variable_name}, expected a non-empty string." >&2
 		return 1
 	else
 		return 0

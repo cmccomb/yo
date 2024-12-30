@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
-# In order to use funcfiletrace, we need to supress a warning
-# shellcheck disable=SC2154
+# shellcheck enable=all
 
 function setup() {
 	# Make sure zsh exists, and install if not
@@ -13,7 +12,7 @@ function setup() {
 	yo say hi -tm &>/dev/null
 
 	# Send a message of the form
-	local script_with_line=${funcfiletrace[1]}
+	local script_with_line="${funcfiletrace[1]:-"Yo"}"
 	echo "\n================================================================================================================"
 	echo "\n\033[1mRunning tests in ${script_with_line%%:*}\033[0m\n"
 

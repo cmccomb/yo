@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ### SYSTEM PROMPT GENERATORS ############################################################################################
@@ -21,7 +22,9 @@ function generate_oneoff_instructions() {
 	check_nonempty query || return 1
 
 	cat <<-EOF
-		Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
+		Your task is to directly answer the user's question.
+		Your answer will be concise, helpful, and immediately usable.
+		End your answer with the symbol ${YO-"✌️"}.
 
 		Here is an example:
 		User Query:how large is the capital of france ${YO}
@@ -164,7 +167,7 @@ function generate_file_context() {
 	local file_info=""
 
 	# Check that inputs are valid
-	file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH}") || {
+	file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH:-"100000"}") || {
 		echo "Error: Failed to extract information from file ${filename}." >&2
 		return 1
 	}

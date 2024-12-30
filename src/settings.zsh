@@ -1,4 +1,8 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
+# Since this script is sourced into another script, many of the variables aren't used. For that reason, we disable SC2034
+# to hide the warnings.
+# shellcheck disable=SC2034
 
 ########################################################################################################################
 ### CONSTANTS AND SETTINGS #############################################################################################

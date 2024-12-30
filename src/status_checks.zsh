@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
-# Disable SC2154 because we are using funcstack
-# shellcheck disable=SC2154
+# shellcheck enable=all
 
 ########################################################################################################################
 ### CHECK STATUS #######################################################################################################
@@ -30,10 +29,10 @@ function model_is_available() {
 
 		# Print a detailed timestamp, down to the decimal seconds
 		timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
-		if [[ "${VERBOSE}" == true ]]; then
+		if [[ "${VERBOSE:-"false"}" == true ]]; then
 			# Print message about downloading model to stderr
 			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
-				echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
+				echo "Error in ${funcstack[3]:-"Yo"}: Failed to download ${repo_name}/${file_name}." >&2
 				return 1
 			fi
 		else

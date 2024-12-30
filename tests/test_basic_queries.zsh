@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 source tests/utilities.zsh
 

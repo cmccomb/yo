@@ -175,42 +175,42 @@ start_time=$(start_log)
 ### Configure the model based on whether its a one-off or interactive session ##########################################
 if [[ -n "${query}" ]]; then
 	model_name="casual"
-	repo_name="${CASUAL_MODEL_REPO_NAME}"
-	file_name="${CASUAL_MODEL_FILE_NAME}"
-	temp="${CASUAL_MODEL_TEMP}"
+	repo_name="${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}"
+	file_name="${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}"
+	temp="${CASUAL_MODEL_TEMP:-"0.2"}"
 	mode="one-off"
-	new_tokens="${ONEOFF_GENERATION_LENGTH}"
-	context_length="${ONEOFF_CONTEXT_LENGTH}"
+	new_tokens="${ONEOFF_GENERATION_LENGTH:-"128"}"
+	context_length="${ONEOFF_CONTEXT_LENGTH:-"-1"}"
 else
 	model_name="serious"
-	repo_name="${SERIOUS_MODEL_REPO_NAME}"
-	file_name="${SERIOUS_MODEL_FILE_NAME}"
-	temp=${SERIOUS_MODEL_TEMP}
+	repo_name="${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}"
+	file_name="${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}"
+	temp=${SERIOUS_MODEL_TEMP:-"0.2"}
 	mode="interactive"
-	new_tokens="${INTERACTIVE_GENERATION_LENGTH}"
-	context_length="${INTERACTIVE_CONTEXT_LENGTH}"
+	new_tokens="${INTERACTIVE_GENERATION_LENGTH:-"512"}"
+	context_length="${INTERACTIVE_CONTEXT_LENGTH:-"0"}"
 fi
 
 ### Override the model if needed #######################################################################################
 if [[ "${task_model_override}" == true ]]; then
-	repo_name="${TASK_MODEL_REPO_NAME}"
-	file_name="${TASK_MODEL_FILE_NAME}"
-	temp="${TASK_MODEL_TEMP}"
+	repo_name="${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}"
+	file_name="${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}"
+	temp="${TASK_MODEL_TEMP:-"0.2"}"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
 elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
-	repo_name="${CASUAL_MODEL_REPO_NAME}"
-	file_name="${CASUAL_MODEL_FILE_NAME}"
-	temp="${CASUAL_MODEL_TEMP}"
+	repo_name="${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}"
+	file_name="${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}"
+	temp="${CASUAL_MODEL_TEMP:-"0.2"}"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
 elif [[ "${balanced_model_override}" == true ]]; then
-	repo_name="${BALANCED_MODEL_REPO_NAME}"
-	file_name="${BALANCED_MODEL_FILE_NAME}"
-	temp="${BALANCED_MODEL_TEMP}"
+	repo_name="${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}"
+	file_name="${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}"
+	temp="${BALANCED_MODEL_TEMP:-"0.2"}"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
 elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
-	repo_name="${SERIOUS_MODEL_REPO_NAME}"
-	file_name="${SERIOUS_MODEL_FILE_NAME}"
-	temp="${SERIOUS_MODEL_TEMP}"
+	repo_name="${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}"
+	file_name="${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}"
+	temp="${SERIOUS_MODEL_TEMP:-"0.2"}"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
 fi
 
@@ -244,6 +244,10 @@ start_llama_session \
 
 ### Print the elapsed time #############################################################################################
 end_log "${start_time}"
+
+
+### Show that verbose and quiet are used ###############################################################################
+: "${VERBOSE} ${QUIET}"
 
 ### Return success #####################################################################################################
 return 0

@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 # Remove you from /usr/local/bin
 sudo rm /usr/local/bin/yo

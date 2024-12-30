@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ### SEARCH #############################################################################################################
@@ -17,7 +18,7 @@ function perform_search() {
 	local url response
 
 	# Example API call
-	url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /+}"
+	url="${GOOGLE_CSE_BASE_URL:-""}?key=${GOOGLE_CSE_API_KEY:-""}&cx=${GOOGLE_CSE_ID:-""}&q=${terms// /+}"
 
 	# Perform search and extract relevant information
 	if ! response=$(curl -s "${url}" | grep -E "^\s*\"title\"|^\s*\"snippet\""); then
@@ -49,7 +50,7 @@ function generate_search_terms() {
 			Draw search terms directly from the query itself whenever possible. Do not infer additional information.
 
 			Here is an example:
-			User Query: how large is the capital of france ${YO}
+			User Query: how large is the capital of france ${YO:-"✌️"}
 			Search Terms: french capital size population area
 
 			Here is another example:
@@ -62,18 +63,16 @@ function generate_search_terms() {
 		EOF
 	)
 
-	  echo "${prompt}" >&2
-
 	# Generate response
 	terms=$(
 		start_llama_session \
-			"${TASK_MODEL_REPO_NAME}" \
-			"${TASK_MODEL_FILE_NAME}" \
+			"${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" \
+			"${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" \
 			"${prompt}" \
 			"task" \
-			"${SEARCH_TERM_GENERATION_LENGTH}" \
-			"${SEARCH_TERM_CONTEXT_LENGTH}" \
-			"${TASK_MODEL_TEMP}"
+			"${SEARCH_TERM_GENERATION_LENGTH:-"8"}" \
+			"${SEARCH_TERM_CONTEXT_LENGTH:-"-1"}" \
+			"${TASK_MODEL_TEMP:-"0.2"}"
 	) || {
 		echo "Error: Failed to extract search terms." >&2
 		return 1

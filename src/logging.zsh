@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+# shellcheck enable=all
 
 ########################################################################################################################
 ### LOGS ###############################################################################################################
@@ -12,7 +13,7 @@ function get_epoch_in_seconds_and_decimals() {
 # Function to log the time taken for a process
 function timestamp_log_to_stderr() {
 
-	if [[ "${QUIET}" == false ]]; then
+	if [[ "${QUIET:-"false"}" == false ]]; then
 
 		# Parse arguments
 		local emoji=$1
@@ -58,7 +59,7 @@ function end_log() {
 	check_float start_time || return 1
 
 	# Remove a line if the terminal is set
-	[[ -n $TERM ]] && tput cuu1 && tput el
+	[[ -n "${TERM}" ]] && tput cuu1 && tput el
 
 	# Print a detailed timestamp
 	end_time=$(get_epoch_in_seconds_and_decimals) || {
