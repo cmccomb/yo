@@ -20,7 +20,7 @@ function perform_search() {
 	url="${GOOGLE_CSE_BASE_URL}?key=${GOOGLE_CSE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${terms// /+}"
 
 	# Perform search and extract relevant information
-	if ! response=$(\curl -s "${url}" | grep -E "^\"title\"|^\"snippet\""); then
+	if ! response=$(curl -s "${url}" | grep -E "^\s*\"title\"|^\s*\"snippet\""); then
 		echo "Error: Failed to perform web search." >&2
 		return 1
 	else
