@@ -7,7 +7,7 @@
 
 # Function to get the current epoch time in seconds and decimals
 function get_epoch_in_seconds_and_decimals() {
-	gdate +%s.%N
+	gdate "+%s.%N"
 }
 
 # Function to log the time taken for a process
@@ -23,8 +23,15 @@ function timestamp_log_to_stderr() {
 		check_emoji emoji || return 1
 		check_nonempty message || return 1
 
+		# Get the current time
+		local time
+		time=$(gdate "+%H:%M:%S.%2N") || {
+      echo "Error: Failed to get the current time." >&2
+      return 1
+    }
+
 		# Print the message to stderr
-		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
+		echo "[${time}] ${emoji} ${message}" >&2
 	fi
 
 	# Return successfully

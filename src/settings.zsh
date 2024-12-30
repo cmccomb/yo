@@ -41,7 +41,7 @@ TASK_MODEL_QUANT="Q4_K_M"
 TASK_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 # Generation parameters
-TASK_MODEL_TEMP=0.2
+TASK_MODEL_TEMP=0.1
 
 ### Define parameters for the casual model #############################################################################
 
