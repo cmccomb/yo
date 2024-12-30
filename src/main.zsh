@@ -34,6 +34,7 @@ source "${DIR}/repo_and_file_names.zsh"
 source "${DIR}/search.zsh"
 source "${DIR}/tokens.zsh"
 source "${DIR}/content_extraction.zsh"
+source "${DIR}/prompt_generators.zsh"
 source "${DIR}/llms_and_prompts.zsh"
 
 ########################################################################################################################

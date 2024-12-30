@@ -60,6 +60,7 @@ files=(
   "input_validation.zsh"
   "llms_and_prompts.zsh"
   "logs.zsh"
+  "prompt_generators.zsh"
   "repo_and_file_names.zsh"
   "search.zsh"
   "settings.zsh"
