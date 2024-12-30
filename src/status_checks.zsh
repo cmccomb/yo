@@ -21,7 +21,7 @@ function model_is_available() {
 	local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
 	if [[ ! -f "${model_path}" ]]; then
 		# Make sure we are online
-		check_online || {
+		system_is_online || {
 			echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
 			return 1
 		}

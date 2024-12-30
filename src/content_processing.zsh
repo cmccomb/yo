@@ -94,11 +94,13 @@ function extract_facts() {
 	local prompt
 	prompt=$(
 		cat <<-EOF
-			      =============== START OF TEXT===============
-			      ${chunk}
-			      =============== END OF TEXT===============
+			=============== START OF TEXT===============
+			${chunk}
+			=============== END OF TEXT===============
 
-			      Based on the unstructured text given above, provide a concise list of facts and information.
+			Based on the unstructured text given above, provide a concise list of facts and information.
+			Begin every fact on a new line and end with a period.
+			Do not provide any additional markup or information
 		EOF
 	)
 
