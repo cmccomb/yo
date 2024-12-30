@@ -19,4 +19,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Test
-        run: zsh tests/run.zsh
+        run: zsh tests/test_all.zsh
