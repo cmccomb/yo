@@ -52,7 +52,10 @@ function start_log() {
 # Function to log the time taken for a process
 function end_log() {
 	# Parse arguments
-	start_time=$1
+	local start_time=$1
+
+	# Make sure the inputs are valid
+	check_float start_time || return 1
 
 	# Remove a line if the terminal is set
 	[[ -n $TERM ]] && tput cuu1 && tput el
