@@ -54,6 +54,7 @@ read -r CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME <<<"$(
 	echo "Error: Failed to set the repository and model names for the casual model." >&2
 	return 1
 }
+# shellcheck disable=SC2034
 readonly CASUAL_MODEL_REPO_NAME CASUAL_MODEL_FILE_NAME
 
 # Set the repository and model names for the balanced model

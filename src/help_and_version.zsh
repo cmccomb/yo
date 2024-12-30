@@ -8,8 +8,7 @@
 readonly YO="✌️"
 
 ### All versioning follows semver as defined at https://semver.org/ ####################################################
-VERSION="0.1.0"
-readonly VERSION
+readonly VERSION="0.1.0"
 
 ### Display version information ########################################################################################
 function show_version() {
@@ -19,7 +18,7 @@ function show_version() {
 ### Display help instructions ##########################################################################################
 function show_help() {
 	cat <<-EOF
-		yo - A command-line AI assistant.
+		yo - A command-line AI assistant where you control the context ${YO}
 
 		Usage:
 		  yo [options] [question]

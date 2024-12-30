@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+# Disable SC2207 because we need to split the filenames into an array and I like using tr
+# shellcheck disable=SC2207
 
 ########################################################################################################################
 ### LLMs AND PROMPTS ###################################################################################################

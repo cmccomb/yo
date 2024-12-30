@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 ########################################################################################################################
-### PROMPT GENERATORS ##################################################################################################
+### SYSTEM PROMPT GENERATORS ############################################################################################
 ########################################################################################################################
 
 # Generate base prompt
@@ -10,6 +10,57 @@ function generate_base_prompt() {
 		You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. It is currently $(date).
 	EOF
 }
+
+# Generate prompt for one-off sessions
+function generate_oneoff_instructions() {
+
+	# Parse arguments
+	local query=$1
+
+	# Check that inputs are valid
+	check_nonempty query || return 1
+
+	cat <<-EOF
+		Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
+
+		Here is an example:
+		User Query:how large is the capital of france ${YO}
+		Your Super-Short Answer:41 square miles (105 square km) ${YO}
+
+		Here is another example:
+		User Query:what is the furthest planet from the sun ${YO}
+		Search Terms:Neptune is the furthest planet from the Sun. ${YO}
+
+		Here is the real user query.
+		User Query:${query} ${YO}
+		Your Super-Short Answer:
+	EOF
+}
+
+# Generate interactive instructions
+function generate_interactive_instructions() {
+	cat <<-EOF
+		Your task is to assist the user in an interactive session, responding concisely and accurately.
+	EOF
+}
+
+########################################################################################################################
+### STATIC PROMPT GENERATORS ###########################################################################################
+########################################################################################################################
+
+# Generate self context using help
+function generate_self_context() {
+	cat <<-EOF
+		A help message explaining how to use your command line interface
+		================= BEGINNING OF HELP MESSAGE =================
+		$(show_help)
+		===================== END OF HELP MESSAGE ====================
+	EOF
+}
+
+########################################################################################################################
+### OFFLINE PROMPT GENERATORS ##########################################################################################
+########################################################################################################################
 
 # Generate system information
 function generate_system_info_context() {
@@ -134,6 +185,10 @@ function generate_file_context() {
 	EOF
 }
 
+########################################################################################################################
+### ONLINE PROMPT GENERATORS ###########################################################################################
+########################################################################################################################
+
 # Generate website contents
 function generate_website_context() {
 
@@ -193,48 +248,5 @@ function generate_search_context() {
 		================= BEGINNING OF SEARCH RESULTS =================
 		${search_info}
 		===================== END OF SEARCH RESULTS ====================
-	EOF
-}
-
-# Generate self context using help
-function generate_self_context() {
-	cat <<-EOF
-		A help message explaining how to use your command line interface
-		================= BEGINNING OF HELP MESSAGE =================
-		$(show_help)
-		===================== END OF HELP MESSAGE ====================
-	EOF
-}
-
-# Generate prompt for one-off sessions
-function generate_oneoff_instructions() {
-
-	# Parse arguments
-	local query=$1
-
-	# Check that inputs are valid
-	check_nonempty query || return 1
-
-	cat <<-EOF
-		Your task is to directly answer the user's question. Your answer will be concise, helpful, and immediately usable. End your answer with the symbol ${YO}.
-
-		Here is an example:
-		User Query:how large is the capital of france ${YO}
-		Your Super-Short Answer:41 square miles (105 square km) ${YO}
-
-		Here is another example:
-		User Query:what is the furthest planet from the sun ${YO}
-		Search Terms:Neptune is the furthest planet from the Sun. ${YO}
-
-		Here is the real user query.
-		User Query:${query} ${YO}
-		Your Super-Short Answer:
-	EOF
-}
-
-# Generate interactive instructions
-function generate_interactive_instructions() {
-	cat <<-EOF
-		Your task is to assist the user in an interactive session, responding concisely and accurately.
 	EOF
 }
