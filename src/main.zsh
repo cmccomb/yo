@@ -21,7 +21,7 @@ DIR=$(dirname -- "$0")
 if [[ $DIR == *"src" ]]; then
   :
 elif [[ $DIR == *"bin" ]]; then
-  DIR+="/../share/yo/"
+  DIR+="/../share/yo"
 fi
 
 
