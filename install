@@ -56,12 +56,15 @@ sudo mkdir -p /usr/local/share/yo
 # Make an array of files to download
 files=(
   "app.zsh"
+  "check_inputs.zsh"
+  "check_status.zsh"
   "content_extraction.zsh"
   "llms_and_prompts.zsh"
+  "logs.zsh"
   "repo_and_file_names.zsh"
   "search.zsh"
   "settings.zsh"
-  "utilities.zsh"
+  "tokens.zsh"
 )
 
 # Download the files

@@ -1,19 +1,11 @@
 #!/usr/bin/env zsh
 
 ########################################################################################################################
-### UTILITY FUNCTIONS ##################################################################################################
+### INPUT CHECKING #####################################################################################################
 ########################################################################################################################
-
-function get_epoch_in_seconds_and_decimals() {
-	gdate +%s.%N
-}
 
 function get_value_from_name() {
 	eval echo "\${${variable_name}}"
-}
-
-function check_online() {
-	ping -c 1 google.com &>/dev/null
 }
 
 # Check if the input is empty
@@ -165,117 +157,3 @@ function check_emoji() {
 	fi
 }
 
-# Function to log the time taken for a process
-function timestamp_log_to_stderr() {
-
-	if [[ "${QUIET}" == false ]]; then
-
-		# Parse arguments
-		local emoji=$1
-		local message=$2
-
-		# Make sure the inputs are valid
-		check_emoji emoji || return 1
-		check_nonempty message || return 1
-
-		# Print the message to stderr
-		echo "[$(gdate "+%H:%M:%S.%2N")] ${emoji} ${message}" >&2
-	fi
-
-	# Return successfully
-	return 0
-}
-
-# Function that checks to see if a model exists and download it if not
-function check_model_status() {
-	# Parse arguments
-	local repo_name=$1 file_name=$2
-
-	# Check that inputs are valid
-	check_nonempty repo_name || return 1
-	check_nonempty file_name || return 1
-
-	# Check if the model exists
-	local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
-	if [[ ! -f "${model_path}" ]]; then
-		# Make sure we are online
-		check_online || {
-			echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
-			return 1
-		}
-
-		# Print a detailed timestamp, down to the decimal seconds
-		timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
-		if [[ "${VERBOSE}" == true ]]; then
-			# Print message about downloading model to stderr
-			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
-				echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
-				return 1
-			fi
-		else
-			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
-				echo "Error in ${funcstack[3]}: Failed to download ${repo_name}/${file_name}." >&2
-				return 1
-			fi
-		fi
-	fi
-
-	# Return successfully
-	return 0
-}
-
-# Write a function to convert tokens to characters
-function tokens_to_characters() {
-
-	# Parse arguments
-	local tokens=$1
-
-	# Check that inputs are valid
-	check_integer tokens || return 1
-
-	# Make variables
-	local characters
-
-	# Calculate the number of characters and divide by four
-	characters=$(((tokens * CHARACTERS_PER_TOKEN) / TOKEN_ESTIMATION_CORRECTION_FACTOR))
-
-	# Return result
-	printf "%.0f" "${characters}"
-
-	# Return successfully
-	return 0
-}
-
-# Write a function to convert tokens to characters
-function characters_to_tokens() {
-	# Parse arguments
-	local characters=$1
-
-	# Check that inputs are valid
-	check_integer characters || return 1
-
-	# Make variables
-	local tokens
-
-	# Calculate the number of characters and divide by four
-	tokens=$((((characters + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
-
-	# Return result
-	printf "%.0f" "${tokens}"
-
-	# Return successfully
-	return 0
-}
-
-# Function to calculate the approximate number of tokens
-function estimate_number_of_tokens() {
-
-	# Estimate the number of tokens
-	characters_to_tokens "${#1}" || {
-		echo "Error: Failed to estimate the number of tokens." >&2
-		return 1
-	}
-
-	# Return successfully
-	return 0
-}

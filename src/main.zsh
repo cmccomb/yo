@@ -27,9 +27,12 @@ fi
 # Source the necessary files
 source "${DIR}/app.zsh"
 source "${DIR}/settings.zsh"
-source "${DIR}/utilities.zsh"
+source "${DIR}/check_inputs.zsh"
+source "${DIR}/logs.zsh"
+source "${DIR}/check_status.zsh"
 source "${DIR}/repo_and_file_names.zsh"
 source "${DIR}/search.zsh"
+source "${DIR}/tokens.zsh"
 source "${DIR}/content_extraction.zsh"
 source "${DIR}/llms_and_prompts.zsh"
 

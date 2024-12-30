@@ -82,4 +82,3 @@ readonly GOOGLE_CSE_API_KEY GOOGLE_CSE_ID GOOGLE_CSE_BASE_URL
 
 ### Maximum length of file content to extract ##########################################################################
 MAX_FILE_CONTENT_LENGTH=300000
-
