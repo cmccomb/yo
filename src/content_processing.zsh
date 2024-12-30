@@ -81,7 +81,6 @@ function extract_url_info() {
 	return 0
 }
 
-
 function extract_facts() {
 
 	# Parse arguments

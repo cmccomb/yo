@@ -51,7 +51,7 @@ function start_log() {
 
 # Function to log the time taken for a process
 function end_log() {
-  # Parse arguments
+	# Parse arguments
 	start_time=$1
 
 	# Remove a line, cuz

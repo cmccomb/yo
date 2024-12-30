@@ -156,4 +156,3 @@ function check_emoji() {
 		return 0
 	fi
 }
-

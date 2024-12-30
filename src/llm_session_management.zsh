@@ -114,7 +114,7 @@ function generate_prompt() {
 	fi
 
 	# If any content was added, add an instruction about relying on the content
-	if [[
+	if [[ 
 		"${add_system_info}" == true ||
 		"${add_directory_info}" == true ||
 		"${add_clipboard_info}" == true ||
