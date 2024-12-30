@@ -7,13 +7,13 @@ source tests/utilities.zsh
 setup
 
 # Run test for basic queries
-answer_should_contain "Paris" "What is the capital of France --task-model"
+answer_should_contain "Paris" "--task-model What is the capital of France"
 
 # Run test for more queries with --surf flag
-answer_should_contain "Rome" "what city is the vatican located in --task-model"
+answer_should_contain "Rome" "--task-model what city is the vatican located in"
 
 # Run test for more queries with --surf flag
-answer_should_contain "German" "what nationality was Einstein --task-model"
+answer_should_contain "German" "--task-model what nationality was Einstein"
 
 # Run cleanup
 cleanup

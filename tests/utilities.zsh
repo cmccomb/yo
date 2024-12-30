@@ -5,7 +5,14 @@ function setup() {
 	# Make sure zsh exists, and install if not
 	if ! command -v yo &>/dev/null; then
 		echo "Yo is not installed. Installing..."
-		zsh <(curl -s https://cmccomb.com/yo/install)
+    curl -s https://cmccomb.com/yo/install -o /tmp/yo_install.sh || {
+          echo "Error: Failed to download the install script." >&2
+      return 1
+    }
+    sudo zsh /tmp/yo_install.sh || {
+      echo "Error: Failed to run the install script." >&2
+      return 1
+    }
 	fi
 
 	# Warm up yo
@@ -13,8 +20,9 @@ function setup() {
 
 	# Send a message of the form
 	local script_with_line="${funcfiletrace[1]:-"Yo"}"
-	echo "\n================================================================================================================"
-	echo "\n\033[1mRunning tests in ${script_with_line%%:*}\033[0m\n"
+	printf "\n===========================================================================================================\n"
+  printf "\033[1mRunning tests in %s\033[0m\n" "${script_with_line%%:*}"
+	printf "===========================================================================================================\n\n"
 
 	# Set up counters
 	PASSES=0
@@ -22,10 +30,11 @@ function setup() {
 }
 
 function cleanup() {
-	echo "  \033[1mTests complete. ${PASSES} passed, ${FAILS} failed.\033[0m"
-	if [[ $FAILS -gt 0 ]]; then
+	if [[ "${FAILS}" -gt 0 ]]; then
+  	printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
 		exit 1
 	else
+  	printf "  🎉 \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
 		exit 0
 	fi
 }
@@ -52,9 +61,9 @@ function answer_should_contain() {
 
 	# Calculate elapsed time
 	local elapsed_time
-	elapsed_time=$(echo "$end_time - $start_time" | bc | awk '{printf "%.2f", $0}')
+	elapsed_time=$(printf "%.2f" $((end_time - start_time)))
 
-	if [[ $output == *"${expected}"* ]]; then
+	if [[ "${output}" == *"${expected}"* ]]; then
 		echo "    ✅ Test passed in ${elapsed_time}s with answer: ${output}"
 		((PASSES += 1))
 		return 0
