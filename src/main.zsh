@@ -17,9 +17,17 @@
 # Get the directory where this file is saved
 DIR=$(dirname -- "$0")
 
-# Import the necessary files
+# Check DIR to see if it ends with src
+if [[ $DIR == *"src" ]]; then
+  :
+elif [[ $DIR == *"bin" ]]; then
+  DIR+="/../share/yo/"
+fi
+
+
 source "${DIR}/app.zsh"
 source "${DIR}/settings.zsh"
+
 
 ########################################################################################################################
 ### UTILITY FUNCTIONS ##################################################################################################
