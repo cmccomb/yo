@@ -54,8 +54,8 @@ function end_log() {
 	# Parse arguments
 	start_time=$1
 
-	# Remove a line, cuz
-	tput cuu1 && tput el
+	# Remove a line if the terminal is set
+	[[ -n $TERM ]] && tput cuu1 && tput el
 
 	# Print a detailed timestamp
 	end_time=$(get_epoch_in_seconds_and_decimals) || {
