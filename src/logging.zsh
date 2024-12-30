@@ -26,9 +26,9 @@ function timestamp_log_to_stderr() {
 		# Get the current time
 		local time
 		time=$(gdate "+%H:%M:%S.%2N") || {
-      echo "Error: Failed to get the current time." >&2
-      return 1
-    }
+			echo "Error: Failed to get the current time." >&2
+			return 1
+		}
 
 		# Print the message to stderr
 		echo "[${time}] ${emoji} ${message}" >&2

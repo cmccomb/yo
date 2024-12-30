@@ -14,4 +14,3 @@ answer_should_contain "--task-model" "--task-model --usage what are the options 
 
 # Run cleanup
 cleanup
-

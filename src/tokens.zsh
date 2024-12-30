@@ -29,6 +29,7 @@ function tokens_to_characters() {
 
 # Write a function to convert tokens to characters
 function characters_to_tokens() {
+
 	# Parse arguments
 	local characters=$1
 

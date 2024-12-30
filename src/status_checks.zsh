@@ -5,6 +5,7 @@
 ### CHECK STATUS #######################################################################################################
 ########################################################################################################################
 
+# Function that checks to see if the system is online
 function system_is_online() {
 	ping -c 1 google.com &>/dev/null
 }
@@ -19,8 +20,7 @@ function model_is_available() {
 	check_nonempty file_name || return 1
 
 	# Check if the model exists
-	local model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
-	if [[ ! -f "${model_path}" ]]; then
+	if [[ ! -f "/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}" ]]; then
 		# Make sure we are online
 		system_is_online || {
 			echo "Error: You are not connected to the internet, so models cannot be downloaded." >&2
