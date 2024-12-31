@@ -5,14 +5,14 @@ function setup() {
 	# Make sure zsh exists, and install if not
 	if ! command -v yo &>/dev/null; then
 		echo "Yo is not installed. Installing..."
-    curl -s https://cmccomb.com/yo/install -o /tmp/yo_install.sh || {
-          echo "Error: Failed to download the install script." >&2
-      return 1
-    }
-    sudo zsh /tmp/yo_install.sh || {
-      echo "Error: Failed to run the install script." >&2
-      return 1
-    }
+		curl -s https://cmccomb.com/yo/install -o /tmp/yo_install.sh || {
+			echo "Error: Failed to download the install script." >&2
+			return 1
+		}
+		sudo zsh /tmp/yo_install.sh || {
+			echo "Error: Failed to run the install script." >&2
+			return 1
+		}
 	fi
 
 	# Warm up yo
@@ -21,7 +21,7 @@ function setup() {
 	# Send a message of the form
 	local script_with_line="${funcfiletrace[1]:-"Yo"}"
 	printf "\n===========================================================================================================\n"
-  printf "\033[1mRunning tests in %s\033[0m\n" "${script_with_line%%:*}"
+	printf "\033[1mRunning tests in %s\033[0m\n" "${script_with_line%%:*}"
 	printf "===========================================================================================================\n\n"
 
 	# Set up counters
@@ -31,10 +31,10 @@ function setup() {
 
 function cleanup() {
 	if [[ "${FAILS}" -gt 0 ]]; then
-  	printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
+		printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
 		exit 1
 	else
-  	printf "  🎉 \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
+		printf "  🎉 \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
 		exit 0
 	fi
 }

@@ -7,18 +7,18 @@
 
 # Generate base prompt
 function generate_base_prompt() {
-  # Make variables
-  local date time
-  date=$(date "+%A, %B %d, %Y") || {
-    echo "Error: Failed to get the current date." >&2
-    return 1
-  }
-  time=$(date "+%I:%M %p") || {
-    echo "Error: Failed to get the current time." >&2
-    return 1
-  }
+	# Make variables
+	local date time
+	date=$(date "+%A, %B %d, %Y") || {
+		echo "Error: Failed to get the current date." >&2
+		return 1
+	}
+	time=$(date "+%I:%M %p") || {
+		echo "Error: Failed to get the current time." >&2
+		return 1
+	}
 
-  # Return the base prompt
+	# Return the base prompt
 	cat <<-EOF
 		You are playing the role of Yo, a highly-capable AI assistant living in the MacOS terminal. It is currently ${date} at ${time}.
 	EOF
@@ -65,14 +65,14 @@ function generate_interactive_instructions() {
 
 # Generate self context using help
 function generate_self_context() {
-  # Make variables
-  local help
-  help=$(show_help) || {
-    echo "Error: Failed to get help information." >&2
-    return 1
-  }
+	# Make variables
+	local help
+	help=$(show_help) || {
+		echo "Error: Failed to get help information." >&2
+		return 1
+	}
 
-  # Return self context
+	# Return self context
 	cat <<-EOF
 		A help message explaining how to use your command line interface
 		================= BEGINNING OF HELP MESSAGE =================

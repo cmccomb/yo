@@ -74,8 +74,8 @@ function extract_url_info() {
 
 	# Trim to max length if needed
 	if [[ -n "${max_length}" && "${max_length}" -gt 0 ]]; then
-	  file_info=${file_info:0:${max_length}}
-  fi
+		file_info=${file_info:0:${max_length}}
+	fi
 
 	# Return file_info
 	echo "${file_info}"
@@ -168,7 +168,7 @@ function compress_text() {
 		while [[ -n "${text}" ]]; do
 
 			# Increment counter
-			((counter +=1))
+			((counter += 1))
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
