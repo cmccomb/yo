@@ -159,3 +159,25 @@ function check_emoji() {
 		return 0
 	fi
 }
+
+# Check if the input is a valid mode
+function check_mode() {
+
+  # Parse arguments
+  local variable_name=$1
+
+  # Check that inputs are non-empty
+  check_nonempty variable_name || return 1
+
+  # Make variables
+  local variable_value
+  variable_value=$(get_value_from_name variable_name)
+
+  # Check if the input is a valid mode, meaning that it is one of "interactive", "one-off", or "task"
+  if [[ "${variable_value}" != "interactive" && "${variable_value}" != "one-off" && "${variable_value}" != "task" ]]; then
+    echo "Error in ${funcstack[2]}: Invalid input ${variable_name}=\"${variable_value}\", expected one of \"interactive\", \"one-off\", or \"task\"." >&2
+    return 1
+  else
+    return 0
+  fi
+}
