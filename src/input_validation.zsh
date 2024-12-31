@@ -15,8 +15,12 @@ function check_nonempty() {
 	# Parse arguments
 	local variable_name=$1
 
+	# Make variables
+	local variable_value
+	variable_value=$(get_value_from_name variable_name)
+
 	# Check if the input is empty
-	if [[ -z $(get_value_from_name variable_name) ]]; then
+	if [[ -z "${variable_value}" ]]; then
 		echo "Error in ${funcstack[2]:-"Yo"}: Invalid input for ${variable_name}, expected a non-empty string." >&2
 		return 1
 	else
