@@ -20,7 +20,7 @@ function generate_prompt() {
 	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
 
 	# Check that inputs are valid
-	check_nonempty mode || return 1
+	check_mode mode || return 1
 	check_boolean surf_and_add_results || return 1
 	check_boolean add_usage_info || return 1
 	check_boolean add_system_info || return 1
@@ -167,7 +167,7 @@ function start_llama_session() {
 	check_nonempty repo_name || return 1
 	check_nonempty file_name || return 1
 	check_nonempty prompt || return 1
-	check_nonempty mode || return 1
+	check_mode mode || return 1
 	check_integer number_of_tokens_to_generate || return 1
 	check_integer context_length || return 1
 	check_float temp || return 1
