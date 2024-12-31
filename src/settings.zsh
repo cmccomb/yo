@@ -33,7 +33,7 @@ INTERACTIVE_CONTEXT_LENGTH=$((8 * INTERACTIVE_GENERATION_LENGTH))
 ### Define parameters for the task model ###############################################################################
 
 # Model parameters
-TASK_USERNAME=${GENERAL_USERNAME}
+TASK_MODEL_USERNAME=${GENERAL_USERNAME}
 TASK_MODEL_SERIES="Llama-3.2"
 TASK_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 TASK_MODEL_SIZE="1B"
@@ -46,7 +46,7 @@ TASK_MODEL_TEMP=0.1
 ### Define parameters for the casual model #############################################################################
 
 # Model parameters
-CASUAL_GENERAL_USERNAME=${GENERAL_USERNAME}
+CASUAL_MODEL_USERNAME=${GENERAL_USERNAME}
 CASUAL_MODEL_SERIES="Qwen2.5"
 CASUAL_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 CASUAL_MODEL_SIZE="3B"
@@ -57,7 +57,7 @@ CASUAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 CASUAL_MODEL_TEMP=0.2
 
 ### Define parameters for the balanced model ###########################################################################
-BALANCED_GENERAL_USERNAME=${GENERAL_USERNAME}
+BALANCED_MODEL_USERNAME=${GENERAL_USERNAME}
 BALANCED_MODEL_SERIES="Qwen2.5"
 BALANCED_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 BALANCED_MODEL_SIZE="7B"
@@ -67,13 +67,13 @@ BALANCED_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 # Generation parameters
 BALANCED_MODEL_TEMP=0.2
 
-### Define the series model parameters #################################################################################
-SERIOUS_GENERAL_USERNAME=${GENERAL_USERNAME}
+### Define the serious model parameters #################################################################################
+SERIOUS_MODEL_USERNAME=${GENERAL_USERNAME}
 SERIOUS_MODEL_SERIES="Qwen2.5-Coder"
-SERIOUS_GENERAL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+SERIOUS_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
 SERIOUS_MODEL_SIZE="14B"
 SERIOUS_MODEL_QUANT="IQ4_XS"
-SERIOUS_GENERAL_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+SERIOUS_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 
 # Generation parameters
 SERIOUS_MODEL_TEMP=0.2
