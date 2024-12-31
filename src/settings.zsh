@@ -78,6 +78,17 @@ SERIOUS_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
 # Generation parameters
 SERIOUS_MODEL_TEMP=0.2
 
+### Define the vision model parameters #################################################################################
+VISION_MODEL_USERNAME=${GENERAL_USERNAME}
+VISION_MODEL_SERIES="Qwen2-VL"
+VISION_MODEL_FINETUNING_STYLE=${GENERAL_FINETUNING_STYLE}
+VISION_MODEL_SIZE="2B"
+VISION_MODEL_QUANT="Q4_K_M"
+VISION_MODEL_FILETYPE=${GENERAL_MODEL_FILETYPE}
+
+# Generation parameters
+VISION_MODEL_TEMP=0.2
+
 ### Custom search API key ##############################################################################################
 GOOGLE_CSE_API_KEY="AIzaSyBBXNq-DX1ENgFAiGCzTawQtWmRMSbDljk"
 GOOGLE_CSE_ID="003333935467370160898:f2ntsnftsjy"

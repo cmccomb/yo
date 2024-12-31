@@ -86,6 +86,40 @@ function extract_url_info() {
 	return 0
 }
 
+### Extract file_info from a file or URL (supports text and PDF files) #################################################
+function extract_image_info() {
+
+	# Parse arguments
+	local source=$1
+
+	# Check that inputs are valid
+	check_path source || return 1
+
+	# Make variables
+	local image_description
+
+	# Fetch image description
+	image_description=$(
+		start_llama_session \
+			"${VISION_MODEL_REPO_NAME:-"bartowski/Qwen2-VL-7B-Instruct-GGUF"}" \
+			"${VISION_MODEL_FILE_NAME:-"Qwen2-VL-7B-Instruct-Q4_K_M.gguf"}" \
+			"Describe the image in details. Transpose any clear text." \
+			"task" \
+			"128" \
+			"4096" \
+			"0.1"
+	) || {
+		echo "Error: Failed to extract information from image ${source}." >&2
+		return 1
+	}
+
+	# Return file_info
+	echo "${image_description}"
+
+	# Return successfully
+	return 0
+}
+
 function extract_facts() {
 
 	# Parse arguments

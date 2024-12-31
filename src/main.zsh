@@ -56,6 +56,7 @@ search_term_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+image_path=""
 
 # Make verbose a global variable
 VERBOSE=false
@@ -84,6 +85,17 @@ while [[ $# -gt 0 ]]; do
 			shift
 		else
 			echo "Error: --file requires a file." >&2
+			return 1
+		fi
+		;;
+
+	# Read in a file
+	-i | --image)
+		if [[ -n $2 && ! $2 =~ ^- ]]; then
+			image_path=$2
+			shift
+		else
+			echo "Error: --image requires a file." >&2
 			return 1
 		fi
 		;;
@@ -235,6 +247,7 @@ prompt=$(
 		"${file_path_list}" \
 		"${search_term_list}" \
 		"${website_url_list}" \
+		"${image_path}" \
 		"${surf_and_add_results}" \
 		"${add_usage_info}" \
 		"${add_system_info}" \

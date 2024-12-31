@@ -11,8 +11,8 @@ function generate_prompt() {
 
 	# Parse arguments
 	local mode=$1 query=$2
-	local filenames=$3 search_terms=$4 website_urls=$5
-	local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
+	local filenames=$3 search_terms=$4 website_urls=$5 image_path=$6
+	local surf_and_add_results=$7 add_usage_info=$8 add_system_info=$9 add_directory_info=${10} add_clipboard_info=${11}
 
 	# Split filenames into an array of files
 	filenames=($(echo "${filenames}" | tr '\n' ' '))
@@ -94,6 +94,15 @@ function generate_prompt() {
 		done
 	fi
 
+	# Add image information if available
+	if [[ -n "${image_path}" ]]; then
+    timestamp_log_to_stderr "🖼️" "Gazing longingly at \"${image_path}\"..." >&2
+    prompt+=$(generate_image_context "${image_path}")"\n\n" || {
+      echo "Error: Failed to generate image information context for ${image_path}." >&2
+      return 1
+    }
+  fi
+
 	# Add search information if available
 	if [[ "${surf_and_add_results}" == true ]]; then
 		timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
@@ -161,7 +170,7 @@ function start_llama_session() {
 
 	# Parse arguments
 	local repo_name=$1 file_name=$2 prompt=$3 mode=$4
-	local number_of_tokens_to_generate=$5 context_length=$6 temp=$7
+	local number_of_tokens_to_generate=$5 context_length=$6 temp=$7 image_path=$8
 
 	# Check that inputs are valid
 	check_nonempty repo_name || return 1
@@ -175,7 +184,7 @@ function start_llama_session() {
 	# Check if the model exists and download it if not
 	model_is_available "${repo_name}" "${file_name}" || return 1
 
-	# If context size is -1, count it it
+	# If context size is -1, count token length
 	if [[ "${context_length}" == -1 ]]; then
 		context_length=$(($(count_number_of_tokens "${repo_name}" "${file_name}" "${prompt}") + number_of_tokens_to_generate)) || {
 			echo "Error: Failed to estimate context length." >&2
@@ -196,8 +205,16 @@ function start_llama_session() {
 		--prio 3
 		--mirostat 2
 		--flash-attn
-		--no-warmup
 	)
+
+	# Check if the image is not empty and add an argument if it is not
+	local llama_command=llama-cli
+	if [[ -n "${image_path}" ]]; then
+		llama_command=llama-qwen2vl-cli
+		args+=(--image "${image}")
+	else
+		args+=(--no-warmup)
+	fi
 
 	# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
 	case ${mode} in
@@ -227,12 +244,12 @@ function start_llama_session() {
 
 	# Start session
 	if [[ "${VERBOSE}" == true ]]; then
-		if ! llama-cli "${args[@]}"; then
+		if ! "${llama_command}" "${args[@]}"; then
 			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
 			return 1
 		fi
 	else
-		if ! llama-cli "${args[@]}" 2>/dev/null; then
+		if ! "${llama_command}" "${args[@]}" 2>/dev/null; then
 			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
 			return 1
 		fi
