@@ -178,9 +178,9 @@ function start_llama_session() {
 		return 1
 	}
 
-	# If context size is -1, estimate it
+	# If context size is -1, count it it
 	if [[ "${context_length}" == -1 ]]; then
-		context_length=$(($(estimate_number_of_tokens "${prompt}") + number_of_tokens_to_generate)) || {
+		context_length=$(($(count_number_of_tokens "${repo_name}" "${file_name}" "${prompt}") + number_of_tokens_to_generate)) || {
 			echo "Error: Failed to estimate context length." >&2
 			return 1
 		}

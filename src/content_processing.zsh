@@ -160,6 +160,7 @@ function compress_text() {
 	fi
 
 	# If length of tokenized text is greater than cutoff, do something
+	# TODO: Replace this with more sophisticated counting function, but that will require feeding in model and repo names
 	if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH:-"1024"}" && "${summarize}" == true ]]; then
 
 		# Make variables
