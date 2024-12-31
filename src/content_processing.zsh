@@ -37,8 +37,10 @@ function extract_file_info() {
 		;;
 	esac
 
-	# Trim to max length if needed
-	[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
+	# Trim to max length if neeeded
+	if [[ "${#file_info}" -gt "${max_length}" ]]; then
+	  file_info=${file_info:0:${max_length}}
+  fi
 
 	# Return file_info
 	echo "${file_info}"
@@ -73,9 +75,9 @@ function extract_url_info() {
 	fi
 
 	# Trim to max length if needed
-	if [[ -n "${max_length}" && "${max_length}" -gt 0 ]]; then
-		file_info=${file_info:0:${max_length}}
-	fi
+	if [[ "${#file_info}" -gt "${max_length}" ]]; then
+	  file_info=${file_info:0:${max_length}}
+  fi
 
 	# Return file_info
 	echo "${file_info}"
