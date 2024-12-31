@@ -73,7 +73,9 @@ function extract_url_info() {
 	fi
 
 	# Trim to max length if needed
-	[[ -n "${max_length}" && "${max_length}" -gt 0 ]] && file_info=${file_info:0:${max_length}}
+	if [[ -n "${max_length}" && "${max_length}" -gt 0 ]]; then
+	  file_info=${file_info:0:${max_length}}
+  fi
 
 	# Return file_info
 	echo "${file_info}"
@@ -85,11 +87,10 @@ function extract_url_info() {
 function extract_facts() {
 
 	# Parse arguments
-	local chunk=$1 context_length=$2
+	local chunk=$1
 
 	# Check that inputs are valid
 	check_nonempty chunk || return 1
-	check_integer context_length || return 1
 
 	# Create prompt
 	local prompt
@@ -111,25 +112,13 @@ function extract_facts() {
 		"${prompt}" \
 		"task" \
 		"${COMPRESSION_GENERATION_LENGTH:-"128"}" \
-		"${context_length}" \
-		0.2 2>/dev/null || {
-
-		# Split the chunk in half
-		local half_length=$((chunk_length_in_chars / 2))
-		local chunk1="${chunk:0:${half_length}}"
-		local chunk2="${chunk:${half_length}}"
-
-		# Process the first half
-		local result1
-		result1=$(extract_facts "${chunk1}" "${context_length}")
-
-		# Process the second half
-		local result2
-		result2=$(extract_facts "${chunk2}" "${context_length}")
-
-		# Combine the results
-		echo "${result1}${result2}"
+		-1 \
+		0.2 || {
+		echo "Error: Failed to extract facts." >&2
+		return 1
 	}
+
+	return 0
 }
 
 ### Start by establishing some prompt generators #######################################################################
@@ -159,35 +148,34 @@ function compress_text() {
 		text=$(echo "${text}" | tr -d "[:punct:]")
 	fi
 
+	# Tokenize text
+	local approximate_length
+	approximate_length=$(estimate_number_of_tokens "${text}")
+
 	# If length of tokenized text is greater than cutoff, do something
-	# TODO: Replace this with more sophisticated counting function, but that will require feeding in model and repo names
-	if [[ "$(estimate_number_of_tokens "${text}")" -gt "${COMPRESSION_TRIGGER_LENGTH:-"1024"}" && "${summarize}" == true ]]; then
+	if [[ "${approximate_length}" -gt "${COMPRESSION_TRIGGER_LENGTH:-"1024"}" && "${summarize}" == true ]]; then
 
 		# Make variables
-		local compressed="" chunk_length_in_chars number_of_chunks
+		local compressed="" chunk_length_in_chars number_of_chunks counter=0
 
 		# Compress text
 		chunk_length_in_chars=$(tokens_to_characters "${COMPRESSION_CHUNK_LENGTH:-"4096"}")
 
 		# Estimate how the length of text divided by chunk_length_in_chars
-		number_of_chunks=$(((${#text} / chunk_length_in_chars) + 1))
-		number_of_chunks=$(printf "%.0f" "${number_of_chunks}")
-
-		local counter=0
+		number_of_chunks=$(printf "%.0f" $(((${#text} / chunk_length_in_chars) + 1)))
 
 		# While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
 		while [[ -n "${text}" ]]; do
 
 			# Increment counter
-			counter=$((counter + 1))
+			((counter +=1))
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
 
 			chunk="${text:0:${chunk_length_in_chars}}"
-			context_length=$((COMPRESSION_CHUNK_LENGTH + COMPRESSION_GENERATION_LENGTH))
 			text="${text:${chunk_length_in_chars}}"
-			compressed+=$(extract_facts "${chunk}" "${context_length}") || {
+			compressed+=$(extract_facts "${chunk}") || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}
