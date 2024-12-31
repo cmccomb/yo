@@ -84,17 +84,8 @@ function show_help() {
 		  * Integrate information from a URL:
 		    $ yo --website "https://en.wikipedia.org/wiki/Paris" how big is paris
 
-		  * Integrate Google search results:
-		    $ yo --search "what is the capital of Tobago"
-
 		  * Use LLM-selected search terms:
 		    $ yo --surf tell me about renewable energy trends.
-
-		  * Combine context sources:
-		    $ yo --file src --search "what is the capital of france"
-
-		  * Add verbosity to any of these commands
-		    $ yo what is the capital of france --verbose
 	EOF
 	return 0
 }
