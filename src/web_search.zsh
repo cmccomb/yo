@@ -21,14 +21,20 @@ function perform_search() {
 	url="${GOOGLE_CSE_BASE_URL:-""}?key=${GOOGLE_CSE_API_KEY:-""}&cx=${GOOGLE_CSE_ID:-""}&q=${terms// /+}"
 
 	# Perform search and extract relevant information
-	if ! response=$(curl -s "${url}" | grep -E "^\s*\"title\"|^\s*\"snippet\""); then
+	response=$(curl -s "${url}") || {
 		echo "Error: Failed to perform web search." >&2
 		return 1
-	else
-		# Return response
-		echo "${response}"
-		return 0
-	fi
+	}
+
+	#  Clean response using grep
+	response=$(echo "${response}" | grep -E "^\s*\"title\"|^\s*\"snippet\"") || {
+		echo "Error: Failed to extract relevant information from search results." >&2
+		return 1
+	}
+
+	# Return response
+	echo "${response}"
+	return 0
 }
 
 ### Extract optimized search terms using a small model #################################################################
@@ -84,7 +90,7 @@ function generate_search_terms() {
 	# Remove [end of text] marker if needed
 	terms="${terms//\[end of text\]/}"
 
-	# Return results
+	# Return results and trim whitespace
 	echo "${terms## }"
 
 	# Return successfully

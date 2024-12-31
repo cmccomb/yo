@@ -173,10 +173,7 @@ function start_llama_session() {
 	check_float temp || return 1
 
 	# Check if the model exists and download it if not
-	model_is_available "${repo_name}" "${file_name}" || {
-		echo "Error: Failed to check status of ${repo_name}/${file_name}." >&2
-		return 1
-	}
+	model_is_available "${repo_name}" "${file_name}" || return 1
 
 	# If context size is -1, count it it
 	if [[ "${context_length}" == -1 ]]; then
