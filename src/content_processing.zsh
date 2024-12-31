@@ -39,8 +39,8 @@ function extract_file_info() {
 
 	# Trim to max length if neeeded
 	if [[ "${#file_info}" -gt "${max_length}" ]]; then
-	  file_info=${file_info:0:${max_length}}
-  fi
+		file_info=${file_info:0:${max_length}}
+	fi
 
 	# Return file_info
 	echo "${file_info}"
@@ -76,8 +76,8 @@ function extract_url_info() {
 
 	# Trim to max length if needed
 	if [[ "${#file_info}" -gt "${max_length}" ]]; then
-	  file_info=${file_info:0:${max_length}}
-  fi
+		file_info=${file_info:0:${max_length}}
+	fi
 
 	# Return file_info
 	echo "${file_info}"
