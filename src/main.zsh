@@ -61,6 +61,22 @@ task_model_override=false casual_model_override=false balanced_model_override=fa
 VERBOSE=false
 QUIET=false
 
+
+# Update or uninstall based on the first argument
+case $1 in
+  update)
+    timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
+    update_yo && return 0
+    ;;
+  uninstall)
+    timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
+    uninstall_yo && return 0
+    ;;
+  *)
+    :
+    ;;
+esac
+
 # Start parsing arguments
 while [[ $# -gt 0 ]]; do
 	case $1 in
@@ -132,18 +148,6 @@ while [[ $# -gt 0 ]]; do
 		}
 
 		surf_and_add_results=true
-		;;
-
-	# Update system
-	-U | --update)
-		timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
-		update_yo && return 0
-		;;
-
-	# Uninstall system
-	-X | --uninstall)
-		timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
-		uninstall_yo && return 0
 		;;
 
 	# Add system information to the context
