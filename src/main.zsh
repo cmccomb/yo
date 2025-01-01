@@ -84,7 +84,7 @@ case $1 in
           timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
           model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
           ;;
-        all)
+        everything | all)
           timestamp_log_to_stderr "📥" "Downloading all models..." >&2
           model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" && \
           model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" && \
