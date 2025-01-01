@@ -74,3 +74,6 @@ files=(
 for file in "${files[@]}"; do
 	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/usr/local/share/yo/${file}"
 done
+
+# Download the yo models
+yo download everything

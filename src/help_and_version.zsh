@@ -68,8 +68,10 @@ function show_help() {
 		    -V, --version           Show the version and exit.
 
 		Subcommands:
-		  A portion of the yo syntax is resered for subcommands that make Yo perform specific tasks. The following subcommands
+		  A portion of the yo syntax is reserved for subcommands that make Yo perform specific tasks. The following subcommands
 		  are available:
+		    yo download <model>     Download the Yo internal language models prior to use. Options are task, casual,
+		                            balanced, serious, or everything.
 		    yo update               Update Yo to the latest version.
 		    yo uninstall            Uninstall Yo from your system.
 
