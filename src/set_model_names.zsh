@@ -89,3 +89,18 @@ read -r SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME <<<"$(
 	return 1
 }
 readonly SERIOUS_MODEL_REPO_NAME SERIOUS_MODEL_FILE_NAME
+
+# Set the repository and model names for the vision model
+read -r VISION_MODEL_REPO_NAME VISION_MODEL_FILE_NAME <<<"$(
+	compose_repo_and_model_file_name \
+		"${VISION_MODEL_USERNAME:-"bartowski"}" \
+		"${VISION_MODEL_SERIES:-"Qwen2-VL"}" \
+		"${VISION_MODEL_SIZE:-"2B"}" \
+		"${VISION_MODE_FINETUNING_STYLE:-"Instruct"}" \
+		"${VISION_MODEL_FILETYPE:-"GGUF"}" \
+		"${VISION_MODEL_QUANT:-"Q4_K_M"}"
+)" || {
+	echo "Error: Failed to set the repository and model names for the vision model." >&2
+	return 1
+}
+readonly VISION_MODEL_REPO_NAME VISION_MODEL_FILE_NAME

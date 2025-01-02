@@ -86,6 +86,29 @@ function extract_url_info() {
 	return 0
 }
 
+### Extract file_info from a file or URL (supports text and PDF files) #################################################
+function extract_image_text() {
+
+	# Parse arguments
+	local source=$1
+
+	# Check that inputs are valid
+	check_path source || return 1
+
+	# Apply ocr to image using tesseract
+  local image_text
+  image_text=$(tesseract "${source}" - 2>/dev/null) || {
+    echo "Error: Failed to extract text from image ${source}." >&2
+    return 1
+  }
+
+  # Return file_info
+  echo "${image_text}"
+
+	# Return successfully
+	return 0
+}
+
 function extract_facts() {
 
 	# Parse arguments

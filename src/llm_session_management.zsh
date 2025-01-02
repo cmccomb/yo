@@ -11,13 +11,14 @@ function generate_prompt() {
 
 	# Parse arguments
 	local mode=$1 query=$2
-	local filenames=$3 search_terms=$4 website_urls=$5
-	local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
+	local filenames=$3 search_terms=$4 website_urls=$5 image_paths=$6
+	local surf_and_add_results=$7 add_usage_info=$8 add_system_info=$9 add_directory_info=${10} add_clipboard_info=${11}
 
 	# Split filenames into an array of files
 	filenames=($(echo "${filenames}" | tr '\n' ' '))
 	search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
 	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
+	image_paths=($(echo "${image_paths}" | tr '\n' ' '))
 
 	# Check that inputs are valid
 	check_mode mode || return 1
@@ -91,6 +92,17 @@ function generate_prompt() {
 				echo "Error: Failed to generate search information context for ${termset}." >&2
 				return 1
 			}
+		done
+	fi
+
+	# Add search information if available
+	if [[ -n "${image_paths[*]}" ]]; then
+		for image_path in "${image_paths[@]}"; do
+      timestamp_log_to_stderr "🖼️" "Gazing longingly at \"${image_path}\"..." >&2
+      prompt+=$(generate_image_context "${image_path}")"\n\n" || {
+        echo "Error: Failed to extract text form image ${image_path}." >&2
+        return 1
+      }
 		done
 	fi
 
@@ -175,7 +187,7 @@ function start_llama_session() {
 	# Check if the model exists and download it if not
 	model_is_available "${repo_name}" "${file_name}" || return 1
 
-	# If context size is -1, count it it
+	# If context size is -1, count token length
 	if [[ "${context_length}" == -1 ]]; then
 		context_length=$(($(count_number_of_tokens "${repo_name}" "${file_name}" "${prompt}") + number_of_tokens_to_generate)) || {
 			echo "Error: Failed to estimate context length." >&2

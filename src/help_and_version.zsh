@@ -38,17 +38,19 @@ function show_help() {
 		    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 		    -d, --directory         Include a list of the files in the current directory in Yo's context.
 		    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
-		                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated multiple times
-		                            to bring in multiple files.
+		                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated to bring in
+		                            several files.
+		    -i, --image "PATH"      Extract text from the specified image into Yo's context. This flag can be repeated
+                                to bring in several images.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 		  Finally, we have several flags that require an internet connection:
 		    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
-		                            Yo's context. This flag can be repeated multiple times to perform unique searches.
+		                            Yo's context. This flag can be repeated to perform several searches.
 		    -S, --surf              Perform a web search using LLM-chosen terms based on the question and integrate the
 		                            results into Yo's context.
-		    -w, --website "URL"     Extract the specified website into Yo's context. This flag can be repeated multiple
-		                            times to bring in multiple sites.
+		    -w, --website "URL"     Extract the specified website into Yo's context. This flag can be repeated to bring in
+		                            multiple sites.
 
 		Model Size Flags:
 		  Yo uses four distinct models. In order of increasing size, they are: a task model (1B), a casual model (3B), a

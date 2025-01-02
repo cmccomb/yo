@@ -208,6 +208,33 @@ function generate_file_context() {
 	EOF
 }
 
+# Generate file contents context
+function generate_image_context() {
+
+	# Parse arguments
+	local filename=$1
+
+	# Check that inputs are valid
+	check_path filename || return 1
+
+	# Make variables
+	local image_description=""
+
+	# Check that inputs are valid
+	image_description=$(extract_image_text "${filename}") || {
+		echo "Error: Failed to extract information from image ${filename}." >&2
+		return 1
+	}
+
+	# Return file information
+	cat <<-EOF
+		Text extract from image ${filename}:
+		================= BEGINNING OF IMAGE TEXT =================
+		${image_description}
+		===================== END OF IMAGE TEXT ===================
+	EOF
+}
+
 ########################################################################################################################
 ### ONLINE PROMPT GENERATORS ###########################################################################################
 ########################################################################################################################
