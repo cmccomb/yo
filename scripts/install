@@ -3,7 +3,7 @@
 
 # Keep track of paackages to install
 brew_packages_to_install=()
-command_line_dependencies_to_install=(
+dependencies_to_check=(
   "llama-cli:llama.cpp"
   "llama-tokenize:llama.cpp"
   "tesseract:tesseract"
@@ -12,7 +12,7 @@ command_line_dependencies_to_install=(
 )
 
 # Check to see if the command line dependencies are installed and add them to the list if not
-for dependency in "${command_line_dependencies_to_install[@]}"; do
+for dependency in "${dependencies_to_check[@]}"; do
   # The dependency is in the format of "command:package"
   command="${dependency%%:*}"
   package="${dependency##*:}"
