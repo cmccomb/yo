@@ -65,7 +65,7 @@ files=(
 
 # Download the files
 for file in "${files[@]}"; do
-	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/usr/local/share/yo/${file}"
+	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/usr/share/yo/${file}"
 done
 
 # Download the yo models
