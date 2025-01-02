@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Prepare
-        run: mv scripts/install .; mv scripts/uninstall .;
+        run: mv scripts/install .
       - name: Cleanup
         run: rm -rf README.md .gitignore LICENSE .github scripts tests
       - name: Setup Pages

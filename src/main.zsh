@@ -25,7 +25,7 @@ DIR=$(dirname -- "$0")
 if [[ ${DIR} == *"src" ]]; then
 	:
 elif [[ ${DIR} == *"bin" ]]; then
-	DIR="/etc/yo"
+	DIR+="/.yo-scripts"
 fi
 
 # Source the necessary files

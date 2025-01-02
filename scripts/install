@@ -45,7 +45,7 @@ sudo curl --silent https://cmccomb.com/yo/src/main.zsh --output /usr/local/bin/y
 sudo chmod +x /usr/local/bin/yo
 
 # Install the side files
-sudo mkdir -p /etc/yo
+sudo mkdir -p /usr/loca/bin/.yo-scripts
 
 # Make an array of files to download
 files=(
@@ -65,7 +65,7 @@ files=(
 
 # Download the files
 for file in "${files[@]}"; do
-	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/etc/yo/${file}"
+	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/usr/local/bin/.yo-scripts/${file}"
 done
 
 # Download the yo models
