@@ -36,8 +36,8 @@ function uninstall_yo() {
 	}
 
 	# Remove the side files from /usr/local/share/yo
-	sudo rm -rf /usr/local/share/yo || {
-		echo "Error: Failed to remove /usr/local/share/yo." >&2
+	sudo rm -rf /usr/share/yo || {
+		echo "Error: Failed to remove /usr/share/yo." >&2
 		return 1
 	}
 }
