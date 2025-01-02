@@ -221,17 +221,17 @@ function generate_image_context() {
 	local image_description=""
 
 	# Check that inputs are valid
-	image_description=$(extract_image_info "${filename}") || {
+	image_description=$(extract_image_text "${filename}") || {
 		echo "Error: Failed to extract information from image ${filename}." >&2
 		return 1
 	}
 
 	# Return file information
 	cat <<-EOF
-		Description of image ${filename}:
-		================= BEGINNING OF IMAGE DESCRIPTION =================
+		Text extract from image ${filename}:
+		================= BEGINNING OF IMAGE TEXT =================
 		${image_description}
-		===================== END OF IMAGE DESCRIPTION ===================
+		===================== END OF IMAGE TEXT ===================
 	EOF
 }
 

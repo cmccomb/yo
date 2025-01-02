@@ -19,6 +19,15 @@ else
 	echo "llama-cli is already installed."
 fi
 
+# Check to see if tesseract is installed and install it if it is not
+if ! command -v tesseract &>/dev/null; then
+  echo "Tesseract not found. Installing Tesseract..."
+  brew install tesseract
+  echo "Tesseract installation complete."
+else
+  echo "Tesseract is already installed."
+fi
+
 # Check to see if pandoc is installed and install it if it is not
 if ! command -v pandoc &>/dev/null; then
 	echo "Pandoc not found. Installing Pandoc..."
