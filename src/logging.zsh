@@ -6,8 +6,15 @@
 ########################################################################################################################
 
 # Function to get the current epoch time in seconds and decimals
-function get_epoch_in_seconds_and_decimals() {
-	gdate "+%s.%N"
+function get_epoch_time_in_seconds() {
+	perl -MTime::HiRes=time -e 'printf "%.9f\n", time'
+}
+
+# Function to get the current epoch time in seconds and decimals
+function get_formatted_time() {
+  perl \
+    -MTime::HiRes=time \
+    -e 'use POSIX strftime; printf "%s.%02d\n", strftime("%H:%M:%S", localtime), (time-int(time))*100'
 }
 
 # Function to log the time taken for a process
@@ -25,7 +32,7 @@ function timestamp_log_to_stderr() {
 
 		# Get the current time
 		local time
-		time=$(gdate "+%H:%M:%S.%2N") || {
+		time=$(get_formatted_time) || {
 			echo "Error: Failed to get the current time." >&2
 			return 1
 		}
@@ -44,7 +51,7 @@ function start_log() {
 	timestamp_log_to_stderr "⏳" "Starting..." >&2
 
 	# Save starting time to calculate elapsed time later one
-	start_time=$(get_epoch_in_seconds_and_decimals) || {
+	start_time=$(get_epoch_time_in_seconds) || {
 		echo "Error: Failed to get the start time." >&2
 		return 1
 	}
@@ -69,7 +76,7 @@ function end_log() {
 	[[ -n "${TERM}" ]] && tput cuu1 && tput el
 
 	# Print a detailed timestamp
-	end_time=$(get_epoch_in_seconds_and_decimals) || {
+	end_time=$(get_epoch_time_in_seconds) || {
 		echo "Error: Failed to get the end time." >&2
 		return 1
 	}

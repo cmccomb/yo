@@ -49,7 +49,7 @@ function answer_should_contain() {
 
 	# Measure start time
 	local start_time
-	start_time=$(gdate +%s.%N)
+	start_time=$(perl -MTime::HiRes=time -e 'printf "%.9f\n", time')
 
 	# Make variables
 	local output
@@ -57,7 +57,7 @@ function answer_should_contain() {
 
 	# Measure end time
 	local end_time
-	end_time=$(gdate +%s.%N)
+	end_time=$(perl -MTime::HiRes=time -e 'printf "%.9f\n", time')
 
 	# Calculate elapsed time
 	local elapsed_time

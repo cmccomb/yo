@@ -1,59 +1,43 @@
 #!/usr/bin/env zsh
 # shellcheck enable=all
 
-# Check to see if homebrew is installed and install it if it is not
-if ! command -v brew &>/dev/null; then
-	echo "Homebrew not found. Installing Homebrew..."
-	NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	echo "Homebrew installation complete."
+# Keep track of paackages to install
+brew_packages_to_install=()
+dependencies_to_check=(
+  "llama-cli:llama.cpp"
+  "llama-tokenize:llama.cpp"
+  "tesseract:tesseract"
+  "pandoc:pandoc"
+  "pdftotext:poppler"
+)
+
+# Check to see if the command line dependencies are installed and add them to the list if not
+for dependency in "${dependencies_to_check[@]}"; do
+  # The dependency is in the format of "command:package"
+  command="${dependency%%:*}"
+  package="${dependency##*:}"
+  if ! command -v "${command}" &>/dev/null; then
+    brew_packages_to_install+=("${package}")
+  fi
+done
+
+# Install the command line dependencies
+if [[ ${#brew_packages_to_install} -gt 0 ]]; then
+  # Check to see if homebrew is installed and install it if it is not
+  if ! command -v brew &>/dev/null; then
+    echo "Homebrew not found. Installing Homebrew..."
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo "Homebrew installation complete."
+  else
+    echo "Homebrew is already installed."
+  fi
+  echo "Installing command line dependencies..."
+  brew install "${brew_packages_to_install[@]}"
+  echo "Command line dependencies installed."
 else
-	echo "Homebrew is already installed."
+  echo "Command line dependencies are already installed."
 fi
 
-# Check to see if llama-cli is installed and install it if it is not
-if ! command -v llama-cli &>/dev/null; then
-	echo "llama-cli not found. Installing llama.cpp..."
-	brew install llama.cpp
-	echo "llama.cpp installation complete."
-else
-	echo "llama-cli is already installed."
-fi
-
-# Check to see if tesseract is installed and install it if it is not
-if ! command -v tesseract &>/dev/null; then
-  echo "Tesseract not found. Installing Tesseract..."
-  brew install tesseract
-  echo "Tesseract installation complete."
-else
-  echo "Tesseract is already installed."
-fi
-
-# Check to see if pandoc is installed and install it if it is not
-if ! command -v pandoc &>/dev/null; then
-	echo "Pandoc not found. Installing Pandoc..."
-	brew install pandoc
-	echo "Pandoc installation complete."
-else
-	echo "Pandoc is already installed."
-fi
-
-# Check to see if pdftotext is installed and install it if it is not
-if ! command -v pdftotext &>/dev/null; then
-	echo "pdftotext not found. Installing poppler..."
-	brew install poppler
-	echo "poppler installation complete."
-else
-	echo "pdftotext is already installed."
-fi
-
-# Check to see if gdate is install and install it if it is not
-if ! command -v gdate &>/dev/null; then
-	echo "gdate not found. Installing coreutils..."
-	brew install coreutils
-	echo "coreutils installation complete."
-else
-	echo "gdate is already installed."
-fi
 
 # Download the latest version of yo
 echo "Downloading the latest version of yo..."

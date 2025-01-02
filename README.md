@@ -17,8 +17,8 @@ zsh <(curl -s https://cmccomb.com/yo/install)
 ```
 
 And when its time to say goodbye and uninstall, here's what you need:
-```zsh
-zsh <(curl -s https://cmccomb.com/yo/uninstall)
+```shell
+$ yo uninstall
 ```
 
 ## Usage
@@ -38,7 +38,7 @@ The capital of France is Paris.
 
 Integrate information from a file or URL:
 ```shell,no_run
-$ yo --read README.md how can I improve this source readme
+$ yo --file README.md how can I improve this source readme
  Review the README.md file for consistency and clarity, and consider adding examples and usage instructions. ✌️
 ```
 
