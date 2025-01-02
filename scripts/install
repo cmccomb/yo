@@ -45,7 +45,7 @@ sudo curl --silent https://cmccomb.com/yo/src/main.zsh --output /usr/local/bin/y
 sudo chmod +x /usr/local/bin/yo
 
 # Install the side files
-sudo mkdir -p /usr/loca/bin/.yo-scripts
+sudo mkdir -p /usr/local/bin/.yo-scripts
 
 # Make an array of files to download
 files=(
