@@ -18,7 +18,6 @@ function generate_prompt() {
 	filenames=($(echo "${filenames}" | tr '\n' ' '))
 	search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
 	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
-	image_paths=($(echo "${image_paths}" | tr '\n' ' '))
 
 	# Check that inputs are valid
 	check_mode mode || return 1
