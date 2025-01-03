@@ -25,6 +25,13 @@ function extract_file_info() {
 			return 1
 		}
 		;;
+  *.docx)
+    # Extract file info using pandoc
+    file_info=$(pandoc -f docx -t plain "${source}" --quiet) || {
+      echo "Error: Failed to extract text from docx file ${source}." >&2
+      return 1
+    }
+    ;;
   *.png | *.jpg | *.jpeg | *.tiff | *.bmp)
     file_info=$(tesseract "${source}" - 2>/dev/null) || {
       echo "Error: Failed to extract text from image ${source}." >&2
