@@ -9,11 +9,14 @@ setup
 # Run test for basic queries
 answer_should_contain "Paris" "--task-model What is the capital of France"
 
-# Run test for more queries with --surf flag
+# Run test for more queries
 answer_should_contain "Rome" "--task-model what city is the vatican located in"
 
-# Run test for more queries with --surf flag
+# Run test for more queries
 answer_should_contain "German" "--task-model what nationality was Einstein"
+
+# Run test for basic queries
+answer_should_contain "beans" " --task-model one word answer only is coffee made from beans or fruit"
 
 # Run cleanup
 cleanup
