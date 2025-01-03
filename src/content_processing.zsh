@@ -20,10 +20,6 @@ function extract_file_info() {
 
 	case ${source} in
 	*.pdf)
-		command -v pdftotext >/dev/null 2>&1 || {
-			echo "Error: pdftotext not installed. Install it using your package manager (e.g., brew install poppler)." >&2
-			return 1
-		}
 		file_info=$(pdftotext "${source}" - 2>/dev/null) || {
 			echo "Error: Failed to extract text from PDF file ${source}." >&2
 			return 1
