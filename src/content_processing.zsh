@@ -25,19 +25,19 @@ function extract_file_info() {
 			return 1
 		}
 		;;
-  *.docx)
-    # Extract file info using pandoc
-    file_info=$(pandoc -f docx -t plain "${source}" --quiet) || {
-      echo "Error: Failed to extract text from docx file ${source}." >&2
-      return 1
-    }
-    ;;
-  *.png | *.jpg | *.jpeg | *.tiff | *.bmp)
-    file_info=$(tesseract "${source}" - 2>/dev/null) || {
-      echo "Error: Failed to extract text from image ${source}." >&2
-      return 1
-    }
-  ;;
+	*.docx)
+		# Extract file info using pandoc
+		file_info=$(pandoc -f docx -t plain "${source}" --quiet) || {
+			echo "Error: Failed to extract text from docx file ${source}." >&2
+			return 1
+		}
+		;;
+	*.png | *.jpg | *.jpeg | *.tiff | *.bmp)
+		file_info=$(tesseract "${source}" - 2>/dev/null) || {
+			echo "Error: Failed to extract text from image ${source}." >&2
+			return 1
+		}
+		;;
 	*.txt | *)
 		file_info=$(cat "${source}") || {
 			echo "Error: Failed to extract text from file ${source}." >&2
@@ -149,22 +149,22 @@ function compress_text() {
 	check_boolean remove_punctuation || return 1
 	check_boolean summarize || return 1
 
-	# Remove spaces if flag is set
-	if [[ "${remove_spaces}" == true ]]; then
-		text=$(echo "${text}" | tr -s "[:space:]")
-	fi
-
-	# Remove punctuation if flag is set
-	if [[ "${remove_punctuation}" == true ]]; then
-		text=$(echo "${text}" | tr -d "[:punct:]")
-	fi
-
 	# Tokenize text
 	local approximate_length
 	approximate_length=$(estimate_number_of_tokens "${text}")
 
 	# If length of tokenized text is greater than cutoff, do something
 	if [[ "${approximate_length}" -gt "${COMPRESSION_TRIGGER_LENGTH:-"1024"}" && "${summarize}" == true ]]; then
+
+		# Remove spaces if flag is set
+		if [[ "${remove_spaces}" == true ]]; then
+			text=$(echo "${text}" | tr -s "[:space:]")
+		fi
+
+		# Remove punctuation if flag is set
+		if [[ "${remove_punctuation}" == true ]]; then
+			text=$(echo "${text}" | tr -d "[:punct:]")
+		fi
 
 		# Make variables
 		local compressed="" chunk_length_in_chars number_of_chunks counter=0
