@@ -14,7 +14,7 @@ answer_should_contain "3" "--task-model --clipboard what cup is the ball under"
 answer_should_contain "$(pwd)" "--task-model --directory what directory am I in"
 
 # Test the --file flag with a text file
-echo "the ball is under cup number 3" > "secret.txt"
+echo "the ball is under cup number 3" >"secret.txt"
 answer_should_contain "3" "--task-model --file secret.txt what cup is the ball under"
 
 # Test the --system flag
