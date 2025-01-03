@@ -38,10 +38,8 @@ function show_help() {
 		    -c, --clipboard         Copy the contents of the clipboard into Yo's context.
 		    -d, --directory         Include a list of the files in the current directory in Yo's context.
 		    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
-		                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated to bring in
-		                            several files.
-		    -i, --image "PATH"      Extract text from the specified image into Yo's context. This flag can be repeated
-		                                to bring in several images.
+		                            including .pdf, .docx, images (.png, .jpeg, .tiff, etc.), and any text file (.txt, .md,
+		                            .py, .zsh, etc.). This flag can be repeated to bring in several files.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 		  Finally, we have several flags that require an internet connection:
