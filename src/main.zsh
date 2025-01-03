@@ -62,58 +62,57 @@ image_path_list=""
 VERBOSE=false
 QUIET=false
 
-
 # Update or uninstall based on the first argument
 case $1 in
-  download)
-    # Check if there is a subsequent argument. if so, download that model ("task", "casual", "balanced", "serious") using model_is_available
-    if [[ -n $2 && ! $2 =~ ^- ]]; then
-      case $2 in
-        task)
-          timestamp_log_to_stderr "📥" "Downloading the task model..." >&2
-          model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" && return 0
-          ;;
-        casual)
-          timestamp_log_to_stderr "📥" "Downloading the casual model..." >&2
-          model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" && return 0
-          ;;
-        balanced)
-          timestamp_log_to_stderr "📥" "Downloading the balanced model..." >&2
-          model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" && return 0
-          ;;
-        serious)
-          timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
-          model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
-          ;;
-        everything | all)
-          timestamp_log_to_stderr "📥" "Downloading all models..." >&2
-          model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" && \
-          model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" && \
-          model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" && \
-          model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
-          ;;
-        *)
-          echo "Error: Unknown model: $2" >&2
-          return 1
-          ;;
-      esac
-    else
-      echo "Error: download requires a model name (task, casual, balanced, serious), or use all to download all models." >&2
-      return 1
-    fi
+download)
+	# Check if there is a subsequent argument. if so, download that model ("task", "casual", "balanced", "serious") using model_is_available
+	if [[ -n $2 && ! $2 =~ ^- ]]; then
+		case $2 in
+		task)
+			timestamp_log_to_stderr "📥" "Downloading the task model..." >&2
+			model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" && return 0
+			;;
+		casual)
+			timestamp_log_to_stderr "📥" "Downloading the casual model..." >&2
+			model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" && return 0
+			;;
+		balanced)
+			timestamp_log_to_stderr "📥" "Downloading the balanced model..." >&2
+			model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" && return 0
+			;;
+		serious)
+			timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
+			model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
+			;;
+		everything | all)
+			timestamp_log_to_stderr "📥" "Downloading all models..." >&2
+			model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" &&
+				model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" &&
+				model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" &&
+				model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
+			;;
+		*)
+			echo "Error: Unknown model: $2" >&2
+			return 1
+			;;
+		esac
+	else
+		echo "Error: download requires a model name (task, casual, balanced, serious), or use all to download all models." >&2
+		return 1
+	fi
 
-    ;;
-  update)
-    timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
-    update_yo && return 0
-    ;;
-  uninstall)
-    timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
-    uninstall_yo && return 0
-    ;;
-  *)
-    :
-    ;;
+	;;
+update)
+	timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
+	update_yo && return 0
+	;;
+uninstall)
+	timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
+	uninstall_yo && return 0
+	;;
+*)
+	:
+	;;
 esac
 
 # Start parsing arguments

@@ -98,11 +98,11 @@ function generate_prompt() {
 	# Add search information if available
 	if [[ -n "${image_paths[*]}" ]]; then
 		for image_path in "${image_paths[@]}"; do
-      timestamp_log_to_stderr "🖼️" "Gazing longingly at \"${image_path}\"..." >&2
-      prompt+=$(generate_image_context "${image_path}")"\n\n" || {
-        echo "Error: Failed to extract text form image ${image_path}." >&2
-        return 1
-      }
+			timestamp_log_to_stderr "🖼️" "Gazing longingly at \"${image_path}\"..." >&2
+			prompt+=$(generate_image_context "${image_path}")"\n\n" || {
+				echo "Error: Failed to extract text form image ${image_path}." >&2
+				return 1
+			}
 		done
 	fi
 

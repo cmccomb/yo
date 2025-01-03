@@ -41,7 +41,7 @@ function show_help() {
 		                            including .pdf, .docx, .txt, .md, .py, .zsh. This flag can be repeated to bring in
 		                            several files.
 		    -i, --image "PATH"      Extract text from the specified image into Yo's context. This flag can be repeated
-                                to bring in several images.
+		                                to bring in several images.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
 
 		  Finally, we have several flags that require an internet connection:

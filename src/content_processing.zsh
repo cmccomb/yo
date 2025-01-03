@@ -96,14 +96,14 @@ function extract_image_text() {
 	check_path source || return 1
 
 	# Apply ocr to image using tesseract
-  local image_text
-  image_text=$(tesseract "${source}" - 2>/dev/null) || {
-    echo "Error: Failed to extract text from image ${source}." >&2
-    return 1
-  }
+	local image_text
+	image_text=$(tesseract "${source}" - 2>/dev/null) || {
+		echo "Error: Failed to extract text from image ${source}." >&2
+		return 1
+	}
 
-  # Return file_info
-  echo "${image_text}"
+	# Return file_info
+	echo "${image_text}"
 
 	# Return successfully
 	return 0

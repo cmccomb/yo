@@ -12,9 +12,9 @@ function get_epoch_time_in_seconds() {
 
 # Function to get the current epoch time in seconds and decimals
 function get_formatted_time() {
-  perl \
-    -MTime::HiRes=time \
-    -e 'use POSIX strftime; printf "%s.%02d\n", strftime("%H:%M:%S", localtime), (time-int(time))*100'
+	perl \
+		-MTime::HiRes=time \
+		-e 'use POSIX strftime; printf "%s.%02d\n", strftime("%H:%M:%S", localtime), (time-int(time))*100'
 }
 
 # Function to log the time taken for a process
