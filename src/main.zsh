@@ -73,26 +73,26 @@ download)
 		case $2 in
 		task)
 			timestamp_log_to_stderr "📥" "Downloading the task model..." >&2
-			model_is_available "$(read_setting model.task.repo_name)" "$(read_setting model.task.file_name)" && return 0
+			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" && return 0
 			;;
 		casual)
 			timestamp_log_to_stderr "📥" "Downloading the casual model..." >&2
-			model_is_available "$(read_setting model.casual.repo_name)" "$(read_setting model.casual.file_name)" && return 0
+			model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" && return 0
 			;;
 		balanced)
 			timestamp_log_to_stderr "📥" "Downloading the balanced model..." >&2
-			model_is_available "$(read_setting model.balanced.repo_name)" "$(read_setting model.balanced.file_name)" && return 0
+			model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" && return 0
 			;;
 		serious)
 			timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
-			model_is_available "$(read_setting model.serious.repo_name)" "$(read_setting model.serious.file_name)" && return 0
+			model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && return 0
 			;;
 		everything | all)
 			timestamp_log_to_stderr "📥" "Downloading all models..." >&2
-			model_is_available "$(read_setting model.task.repo_name)" "$(read_setting model.task.file_name)" &&
-				model_is_available "$(read_setting model.casual.repo_name)" "$(read_setting model.casual.file_name)" &&
-				model_is_available "$(read_setting model.balanced.repo_name)" "$(read_setting model.balanced.file_name)" &&
-				model_is_available "$(read_setting model.serious.repo_name)" "$(read_setting model.serious.file_name)" && return 0
+			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" &&
+				model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" &&
+				model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" &&
+				model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && return 0
 			;;
 		*)
 			echo "Error: Unknown model: $2" >&2
