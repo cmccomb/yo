@@ -16,7 +16,7 @@ function update_yo() {
 		}
 
 		# Run the update script
-		sudo zsh /tmp/yo_install.sh >/dev/null || {
+		zsh /tmp/yo_install.sh >/dev/null || {
 			echo "Error: Failed to run the update script." >&2
 			return 1
 		}
