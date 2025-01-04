@@ -121,11 +121,13 @@ settings)
   else
     # If there is no third value, then read the setting
     if [[ -z $3 ]]; then
-      read_setting "$2"
-      return 0
-    elif [[ "$3" == "reset" ]]; then
-      write_default_settings_file
-      return 0
+      if [[ "$2" == "reset" ]]; then
+        write_default_settings_file
+        return 0
+      else
+        read_setting "$2"
+        return 0
+      fi
     else
       write_setting "$2" "$3"
       return 0
