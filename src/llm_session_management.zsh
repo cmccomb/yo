@@ -14,11 +14,6 @@ function generate_prompt() {
 	local filenames=$3 search_terms=$4 website_urls=$5
 	local surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
 
-	# Split filenames into an array of files
-	filenames=($(echo "${filenames}" | tr '\n' ' '))
-	search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
-	website_urls=($(echo "${website_urls}" | tr '\n' ' '))
-
 	# Check that inputs are valid
 	check_mode mode || return 1
 	check_boolean surf_and_add_results || return 1
@@ -62,7 +57,8 @@ function generate_prompt() {
 	fi
 
 	# Add file file_info if available
-	if [[ -n "${filenames[*]}" ]]; then
+	if [[ -n "${filenames}" ]]; then
+		IFS=$'\n' filenames=($(echo "${filenames}" | grep -E '(^.+$)'))
 		for filename in "${filenames[@]}"; do
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt+=$(generate_file_context "${filename}")"\n\n" || {
@@ -73,7 +69,8 @@ function generate_prompt() {
 	fi
 
 	# Add website information if available
-	if [[ -n "${website_urls[*]}" ]]; then
+	if [[ -n "${website_urls}" ]]; then
+	  IFS=$'\n' website_urls=($(echo "${website_urls}" | grep -E '(^.+$)'))
 		for website_url in "${website_urls[@]}"; do
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
 			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
@@ -84,7 +81,8 @@ function generate_prompt() {
 	fi
 
 	# Add search information if available
-	if [[ -n "${search_terms[*]}" ]]; then
+	if [[ -n "${search_terms}" ]]; then
+		search_terms=($(echo "${search_terms}" | tr ' ' '+' | tr '\n' ' '))
 		for termset in "${search_terms[@]}"; do
 			timestamp_log_to_stderr "🔎" "Searching for \"${termset//+/ }\"..." >&2
 			prompt+=$(generate_search_context "${termset}")"\n\n" || {
