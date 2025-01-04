@@ -69,4 +69,5 @@ for file in "${files[@]}"; do
 done
 
 # Download the yo models
-yo download everything
+yo download task
+yo download casual
