@@ -70,7 +70,7 @@ function generate_prompt() {
 
 	# Add website information if available
 	if [[ -n "${website_urls}" ]]; then
-	  IFS=$'\n' website_urls=($(echo "${website_urls}" | grep -E '(^.+$)'))
+		IFS=$'\n' website_urls=($(echo "${website_urls}" | grep -E '(^.+$)'))
 		for website_url in "${website_urls[@]}"; do
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
 			prompt+=$(generate_website_context "${website_url}")"\n\n" || {
