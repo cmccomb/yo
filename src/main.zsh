@@ -35,7 +35,6 @@ source "${DIR}/input_validation.zsh"
 source "${DIR}/logging.zsh"
 source "${DIR}/status_checks.zsh"
 source "${DIR}/installation_management.zsh"
-source "${DIR}/set_model_names.zsh"
 source "${DIR}/web_search.zsh"
 source "${DIR}/tokens.zsh"
 source "${DIR}/content_processing.zsh"
@@ -69,26 +68,26 @@ download)
 		case $2 in
 		task)
 			timestamp_log_to_stderr "📥" "Downloading the task model..." >&2
-			model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" && return 0
+			model_is_available "$(read_setting model.task.repo_name)" "$(read_setting model.task.file_name)" && return 0
 			;;
 		casual)
 			timestamp_log_to_stderr "📥" "Downloading the casual model..." >&2
-			model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" && return 0
+			model_is_available "$(read_setting model.casual.repo_name)" "$(read_setting model.casual.file_name)" && return 0
 			;;
 		balanced)
 			timestamp_log_to_stderr "📥" "Downloading the balanced model..." >&2
-			model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" && return 0
+			model_is_available "$(read_setting model.balanced.repo_name)" "$(read_setting model.balanced.file_name)" && return 0
 			;;
 		serious)
 			timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
-			model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
+			model_is_available "$(read_setting model.serious.repo_name)" "$(read_setting model.serious.file_name)" && return 0
 			;;
 		everything | all)
 			timestamp_log_to_stderr "📥" "Downloading all models..." >&2
-			model_is_available "${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" "${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" &&
-				model_is_available "${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}" "${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}" &&
-				model_is_available "${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}" "${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}" &&
-				model_is_available "${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}" "${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}" && return 0
+			model_is_available "$(read_setting model.task.repo_name)" "$(read_setting model.task.file_name)" &&
+				model_is_available "$(read_setting model.casual.repo_name)" "$(read_setting model.casual.file_name)" &&
+				model_is_available "$(read_setting model.balanced.repo_name)" "$(read_setting model.balanced.file_name)" &&
+				model_is_available "$(read_setting model.serious.repo_name)" "$(read_setting model.serious.file_name)" && return 0
 			;;
 		*)
 			echo "Error: Unknown model: $2" >&2
@@ -229,42 +228,42 @@ start_time=$(start_log)
 ### Configure the model based on whether its a one-off or interactive session ##########################################
 if [[ -n "${query}" ]]; then
 	model_name="casual"
-	repo_name="${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}"
-	file_name="${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}"
-	temp="${CASUAL_MODEL_TEMP:-"0.2"}"
+	repo_name="$(read_setting model.casual.repository)"
+	file_name="$(read_setting model.casual.filename)"
+	temp="$(read_setting model.casual.temperature)"
 	mode="one-off"
-	new_tokens="${ONEOFF_GENERATION_LENGTH:-"128"}"
-	context_length="${ONEOFF_CONTEXT_LENGTH:-"-1"}"
+	new_tokens="$(read_setting mode.oneoff.generation_length)"
+	context_length="$(read_setting mode.oneoff.context_length)"
 else
 	model_name="serious"
-	repo_name="${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}"
-	file_name="${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}"
-	temp=${SERIOUS_MODEL_TEMP:-"0.2"}
+	repo_name="$(read_setting model.serious.repository)"
+	file_name="$(read_setting model.serious.filename)"
+	temp="$(read_setting model.serious.temperature)"
 	mode="interactive"
-	new_tokens="${INTERACTIVE_GENERATION_LENGTH:-"512"}"
-	context_length="${INTERACTIVE_CONTEXT_LENGTH:-"0"}"
+	new_tokens="$(read_setting mode.interactive.generation_length)"
+	context_length="$(read_setting mode.interactive.context_length)"
 fi
 
 ### Override the model if needed #######################################################################################
 if [[ "${task_model_override}" == true ]]; then
-	repo_name="${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}"
-	file_name="${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}"
-	temp="${TASK_MODEL_TEMP:-"0.2"}"
+	repo_name="$(read_setting model.task.repository)"
+	file_name="$(read_setting model.task.filename)"
+	temp="$(read_setting model.task.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
 elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
-	repo_name="${CASUAL_MODEL_REPO_NAME:-"bartowski/Qwen2.5-3B-Instruct-GGUF"}"
-	file_name="${CASUAL_MODEL_FILE_NAME:-"Qwen2.5-3B-Instruct-Q4_K_M.gguf"}"
-	temp="${CASUAL_MODEL_TEMP:-"0.2"}"
+	repo_name="$(read_setting model.casual.repository)"
+	file_name="$(read_setting model.casual.filename)"
+	temp="$(read_setting model.casual.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
 elif [[ "${balanced_model_override}" == true ]]; then
-	repo_name="${BALANCED_MODEL_REPO_NAME:-"bartowski/Qwen2.5-7B-Instruct-GGUF"}"
-	file_name="${BALANCED_MODEL_FILE_NAME:-"Qwen2.5-7B-Instruct-Q4_K_M.gguf"}"
-	temp="${BALANCED_MODEL_TEMP:-"0.2"}"
+	repo_name="$(read_setting model.balanced.repository)"
+	file_name="$(read_setting model.balanced.filename)"
+	temp="$(read_setting model.balanced.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
 elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
-	repo_name="${SERIOUS_MODEL_REPO_NAME:-"bartowski/Qwen2.5-14B-Instruct-GGUF"}"
-	file_name="${SERIOUS_MODEL_FILE_NAME:-"Qwen2.5-14B-Instruct-IQ4_XS.gguf"}"
-	temp="${SERIOUS_MODEL_TEMP:-"0.2"}"
+	repo_name="$(read_setting model.serious.repository)"
+	file_name="$(read_setting model.serious.filename)"
+	temp="$(read_setting model.serious.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
 fi
 
