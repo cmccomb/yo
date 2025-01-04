@@ -73,7 +73,7 @@ function generate_search_terms() {
 	terms=$(
 		start_llama_session \
 			"$(read_setting model.task.repository)" \
-			"$(read_setting model.task.file)" \
+			"$(read_setting model.task.filename)" \
 			"${prompt}" \
 			"task" \
 			"$(read_setting mode.search_term_generation.generation_length)" \
