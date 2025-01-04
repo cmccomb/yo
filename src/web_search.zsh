@@ -18,7 +18,7 @@ function perform_search() {
 	local url response
 
 	# Example API call
-	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$$(read_setting search.google_cse.id)&q=${terms// /+}"
+	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=${terms// /+}"
 
 	# Perform search and extract relevant information
 	response=$(curl -s "${url}") || {
