@@ -9,6 +9,7 @@ dependencies_to_check=(
 	"tesseract:tesseract"
 	"pandoc:pandoc"
 	"pdftotext:poppler"
+	"yq:yq"
 )
 
 # Check to see if the command line dependencies are installed and add them to the list if not
