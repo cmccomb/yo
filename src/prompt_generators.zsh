@@ -187,7 +187,7 @@ function generate_file_context() {
 	local file_info=""
 
 	# Check that inputs are valid
-	file_info=$(extract_file_info "${filename}" "${MAX_FILE_CONTENT_LENGTH:-"100000"}") || {
+	file_info=$(extract_file_info "${filename}" "$(read_setting general.maximum_file_content_length)") || {
 		echo "Error: Failed to extract information from file ${filename}." >&2
 		return 1
 	}
@@ -225,7 +225,7 @@ function generate_website_context() {
 	website_info=""
 
 	# Check that inputs are valid
-	website_info=$(extract_url_info "${url}" "${MAX_FILE_CONTENT_LENGTH}") || {
+	website_info=$(extract_url_info "${url}" "$(read_setting general.maximum_file_content_length)") || {
 		echo "Error: Failed to extract information from URL ${url}." >&2
 		return 1
 	}
