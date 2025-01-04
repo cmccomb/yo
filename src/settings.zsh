@@ -56,14 +56,18 @@ function write_default_settings_file() {
 	EOF
 }
 
-write_default_settings_file
-
 # Read a value from the settings file
 function read_setting() {
-  yq ".${1}" ~/.yo.yaml
+  yq -e ".${1}" ~/.yo.yaml || {
+    echo "Error: Failed to read setting ${1}." >&2
+    return 1
+  }
 }
 
 # Write a value to the settings file
 function write_setting() {
-	yq ".${1} = \"${2}\"" ~/.yo.yaml
+  old_value=$(read_setting "${1}") || return 1
+  echo "Old value for ${1}: ${old_value}"
+	yq -i ".${1} = \"${2}\"" ~/.yo.yaml > /dev/null
+  echo "New value for ${1}: $(read_setting "${1}")"
 }

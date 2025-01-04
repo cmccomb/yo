@@ -41,6 +41,11 @@ source "${DIR}/content_processing.zsh"
 source "${DIR}/prompt_generators.zsh"
 source "${DIR}/llm_session_management.zsh"
 
+# Write a settings file if there isn't one already
+if [[ ! -f "${HOME}/.yo.yaml" ]]; then
+  write_default_settings_file
+fi
+
 ########################################################################################################################
 ### MAIN FUNCTION ######################################################################################################
 ########################################################################################################################
@@ -108,6 +113,25 @@ uninstall)
 	timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
 	uninstall_yo && return 0
 	;;
+settings)
+  # If there is no following value, read the settings
+  if [[ -z $2 ]]; then
+    read_setting ""
+    return 0
+  else
+    # If there is no third value, then read the setting
+    if [[ -z $3 ]]; then
+      read_setting "$2"
+      return 0
+    elif [[ "$3" == "reset" ]]; then
+      write_default_settings_file
+      return 0
+    else
+      write_setting "$2" "$3"
+      return 0
+    fi
+  fi
+  ;;
 *)
 	:
 	;;

@@ -70,10 +70,15 @@ function show_help() {
 		Subcommands:
 		  A portion of the yo syntax is reserved for subcommands that make Yo perform specific tasks. The following subcommands
 		  are available:
-		    yo download <model>     Download the Yo internal language models prior to use. Options are task, casual,
-		                            balanced, serious, or everything.
-		    yo update               Update Yo to the latest version.
-		    yo uninstall            Uninstall Yo from your system.
+		    yo download <model>          Download the Yo internal language models prior to use. Options are task, casual,
+		                                 balanced, serious, or everything.
+        yo settings                  Display the current settings.
+        yo settings SETTING          Read a setting from the settings file. SETTING should use dot notation to reference
+                                     nested dictionaries in ~/.yo.yaml (e.g., model.task.temperature).
+        yo settings SETTING [VALUE]  Write a setting to the settings file.
+        yo settings reset            Restore factor default settings.
+		    yo update                    Update Yo to the latest version.
+		    yo uninstall                 Uninstall Yo from your system.
 
 		Examples:
 		  * Answer a question:
