@@ -18,7 +18,7 @@ function tokens_to_characters() {
 	local characters
 
 	# Calculate the number of characters and divide by four
-	characters=$(((tokens * ${CHARACTERS_PER_TOKEN:-"4"}) / ${TOKEN_ESTIMATION_CORRECTION_FACTOR:-"1.2"}))
+	characters=$(((tokens * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)))
 
 	# Return result
 	printf "%.0f" "${characters}"
@@ -40,7 +40,7 @@ function characters_to_tokens() {
 	local tokens
 
 	# Calculate the number of characters and divide by four
-	tokens=$((((characters + CHARACTERS_PER_TOKEN - 1) / CHARACTERS_PER_TOKEN) * TOKEN_ESTIMATION_CORRECTION_FACTOR))
+	tokens=$((((characters + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor)))
 
 	# Return result
 	printf "%.0f" "${tokens}"

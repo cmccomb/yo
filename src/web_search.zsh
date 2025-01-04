@@ -18,7 +18,7 @@ function perform_search() {
 	local url response
 
 	# Example API call
-	url="${GOOGLE_CSE_BASE_URL:-""}?key=${GOOGLE_CSE_API_KEY:-""}&cx=${GOOGLE_CSE_ID:-""}&q=${terms// /+}"
+	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$$(read_setting search.google_cse.id)&q=${terms// /+}"
 
 	# Perform search and extract relevant information
 	response=$(curl -s "${url}") || {
@@ -72,13 +72,13 @@ function generate_search_terms() {
 	# Generate response
 	terms=$(
 		start_llama_session \
-			"${TASK_MODEL_REPO_NAME:-"bartowski/Llama-3.2-1B-Instruct-GGUF"}" \
-			"${TASK_MODEL_FILE_NAME:-"Llama-3.2-1B-Instruct-Q4_K_M.gguf"}" \
+			"$(read_setting model.task.repository)" \
+			"$(read_setting model.task.file)" \
 			"${prompt}" \
 			"task" \
-			"${SEARCH_TERM_GENERATION_LENGTH:-"8"}" \
-			"${SEARCH_TERM_CONTEXT_LENGTH:-"-1"}" \
-			"${TASK_MODEL_TEMP:-"0.2"}"
+			"$(read_setting mode.search_term_generation.generation_length)" \
+			"$(read_setting mode.search_term_generation.context_length)" \
+			"$(read_setting model.task.temperature)"
 	) || {
 		echo "Error: Failed to extract search terms." >&2
 		return 1
