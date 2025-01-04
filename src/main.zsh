@@ -43,7 +43,7 @@ source "${DIR}/llm_session_management.zsh"
 
 # Write a settings file if there isn't one already
 if [[ ! -f "${HOME}/.yo.yaml" ]]; then
-  write_default_settings_file
+	write_default_settings_file
 fi
 
 ########################################################################################################################
@@ -72,23 +72,18 @@ download)
 	if [[ -n $2 && ! $2 =~ ^- ]]; then
 		case $2 in
 		task)
-			timestamp_log_to_stderr "📥" "Downloading the task model..." >&2
 			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" && return 0
 			;;
 		casual)
-			timestamp_log_to_stderr "📥" "Downloading the casual model..." >&2
 			model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" && return 0
 			;;
 		balanced)
-			timestamp_log_to_stderr "📥" "Downloading the balanced model..." >&2
 			model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" && return 0
 			;;
 		serious)
-			timestamp_log_to_stderr "📥" "Downloading the serious model..." >&2
 			model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && return 0
 			;;
 		everything | all)
-			timestamp_log_to_stderr "📥" "Downloading all models..." >&2
 			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" &&
 				model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" &&
 				model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" &&
@@ -114,26 +109,26 @@ uninstall)
 	uninstall_yo && return 0
 	;;
 settings)
-  # If there is no following value, read the settings
-  if [[ -z $2 ]]; then
-    read_setting ""
-    return 0
-  else
-    # If there is no third value, then read the setting
-    if [[ -z $3 ]]; then
-      if [[ "$2" == "reset" ]]; then
-        write_default_settings_file
-        return 0
-      else
-        read_setting "$2"
-        return 0
-      fi
-    else
-      write_setting "$2" "$3"
-      return 0
-    fi
-  fi
-  ;;
+	# If there is no following value, read the settings
+	if [[ -z $2 ]]; then
+		read_setting ""
+		return 0
+	else
+		# If there is no third value, then read the setting
+		if [[ -z $3 ]]; then
+			if [[ "$2" == "reset" ]]; then
+				write_default_settings_file
+				return 0
+			else
+				read_setting "$2"
+				return 0
+			fi
+		else
+			write_setting "$2" "$3"
+			return 0
+		fi
+	fi
+	;;
 *)
 	:
 	;;
