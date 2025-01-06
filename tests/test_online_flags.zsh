@@ -11,7 +11,7 @@ answer_should_contain "-count" "--task-model --surf how do i output the total nu
 
 # Test the --search flag
 answer_should_contain "-count" "--task-model --search \"mdfind options\" how do i output the total number of matches from mdfind"
-answer_should_contain "-count" "--task-model --search \"mdfind options\" --search \"mdfind number of matches\" how do i output the total number of matches from mdfind"
+answer_should_contain "-count" "--task-model --search \"mdfind options\" --search \"macos mdfind usage\" how do i output the total number of matches from mdfind"
 
 # Test the --website flag
 answer_should_contain "-count" "--task-model --website \"https://ss64.com/mac/mdfind.html\" how do i output the total number of matches from mdfind"
