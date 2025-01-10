@@ -1,8 +1,7 @@
 name: Tests
 on:
-  # Runs on pushes targeting the default branch
+  # Runs on pushes to any branch
   push:
-    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -14,6 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install
-        run: zsh scripts/install.zsh
+        run: zsh scripts/install
       - name: Test
         run: zsh tests/test_all.zsh
