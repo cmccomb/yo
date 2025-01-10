@@ -13,6 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install
-        run: ls -ls && zsh scripts/install.zsh
+        run: zsh scripts/install
       - name: Test
         run: zsh tests/test_all.zsh
