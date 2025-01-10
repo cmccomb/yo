@@ -3,12 +3,13 @@ name: Deploy static content to Pages
 
 
 on:
-  # Runs on successful completion of static.yml
+  # Runs on successful completion of Installation as long as its the main branch
   workflow_run:
-      workflows: ["Installation"]
+      workflows: ["Tests"]
       types:
       - completed
-
+      branches:
+      - main
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
