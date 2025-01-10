@@ -1,11 +1,8 @@
 name: Tests
-
 on:
-  # Runs on successful completion of static.yml
-  workflow_run:
-      workflows: ["Installation"]
-      types:
-      - completed
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -14,9 +11,9 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
-      - name: Install
-        run: zsh <(curl -s https://cmccomb.com/yo/install)
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install
+        run: zsh tests/install.zsh
       - name: Test
         run: zsh tests/test_all.zsh

@@ -3,7 +3,7 @@ name: Installation
 on:
   # Runs on successful completion of static.yml
   workflow_run:
-      workflows: ["Deploy static content to Pages"]
+      workflows: ["Tests"]
       types:
       - completed
 

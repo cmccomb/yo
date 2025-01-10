@@ -2,21 +2,10 @@
 # shellcheck enable=all
 
 function setup() {
-	# Make sure zsh exists, and install if not
-	if ! command -v yo &>/dev/null; then
-		echo "Yo is not installed. Installing..."
-		curl -s https://cmccomb.com/yo/install -o /tmp/yo_install.sh || {
-			echo "Error: Failed to download the install script." >&2
-			return 1
-		}
-		sudo zsh /tmp/yo_install.sh || {
-			echo "Error: Failed to run the install script." >&2
-			return 1
-		}
-	fi
 
 	# Warm up yo
-	yo say hi -tm &>/dev/null
+	src/main.zsh download task
+	src/main.zsh say hi -tm &>/dev/null
 
 	# Send a message of the form
 	local script_with_line="${funcfiletrace[1]:-"Yo"}"
@@ -53,7 +42,7 @@ function answer_should_contain() {
 
 	# Make variables
 	local output
-	output=$(eval "yo ${query} --quiet")
+	output=$(eval "src/main.zsh ${query} --quiet")
 
 	# Measure end time
 	local end_time
