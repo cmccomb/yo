@@ -70,9 +70,6 @@ extract_url_info() {
 	check_url source || return 1
 	check_integer max_length || return 1
 
-	# Make variables
-	file_info response
-
 	# Fetch file_info from URL
 	if ! response=$(curl -s "${source}"); then
 		echo "Error: Failed to fetch information from ${source}." >&2
@@ -169,7 +166,8 @@ compress_text() {
 		fi
 
 		# Make variables
-		compressed="" chunk_length_in_chars number_of_chunks counter=0
+		compressed=""
+		counter=0
 
 		# Compress text
 		chunk_length_in_chars=$(tokens_to_characters "$(read_setting mode.compression.chunk_length)")
