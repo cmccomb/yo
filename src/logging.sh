@@ -79,5 +79,6 @@ end_log() {
 		echo "Error: Failed to get the end time." >&2
 		return 1
 	}
-	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" $((end_time - start_time))) seconds." >&2
+	elapsed_time=$(echo "${end_time} - ${start_time}" | bc)
+	timestamp_log_to_stderr "⌛️" "Elapsed time: $(printf "%.2f" "${elapsed_time}") seconds." >&2
 }

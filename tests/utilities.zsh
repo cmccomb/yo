@@ -4,8 +4,8 @@
 function setup() {
 
 	# Warm up yo
-	src/main.zsh download task
-	src/main.zsh say hi -tm &>/dev/null
+	src/main.sh download task
+	src/main.sh say hi -tm &>/dev/null
 
 	# Send a message of the form
 	local script_with_line="${funcfiletrace[1]:-"Yo"}"
@@ -42,7 +42,7 @@ function answer_should_contain() {
 
 	# Make variables
 	local output
-	output=$(eval "src/main.zsh ${query} --quiet")
+	output=$(eval "src/main.sh ${query} --quiet")
 
 	# Measure end time
 	local end_time
