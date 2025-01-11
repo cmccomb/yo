@@ -29,7 +29,7 @@ elif [[ ${DIR} == *"bin" ]]; then
 fi
 
 # Source the necessary files
-source "${DIR}/help_and_version.zsh"
+source "${DIR}/help_and_version.sh"
 source "${DIR}/settings.sh"
 source "${DIR}/input_validation.sh"
 source "${DIR}/logging.sh"
