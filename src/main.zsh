@@ -31,7 +31,7 @@ fi
 # Source the necessary files
 source "${DIR}/help_and_version.zsh"
 source "${DIR}/settings.sh"
-source "${DIR}/input_validation.zsh"
+source "${DIR}/input_validation.sh"
 source "${DIR}/logging.sh"
 source "${DIR}/status_checks.sh"
 source "${DIR}/installation_management.sh"

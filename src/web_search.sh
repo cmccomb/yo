@@ -15,7 +15,7 @@ perform_search() {
 	check_nonempty terms || return 1
 
 	# Example API call
-  url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=$(echo "${terms}" | sed 's/ /+/g')"
+	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=$(echo "${terms}" | sed 's/ /+/g')"
 
 	# Perform search and extract relevant information
 	response=$(curl -s "${url}") || {
