@@ -37,7 +37,7 @@ source "${DIR}/status_checks.sh"
 source "${DIR}/installation_management.sh"
 source "${DIR}/web_search.sh"
 source "${DIR}/tokens.sh"
-source "${DIR}/content_processing.zsh"
+source "${DIR}/content_processing.sh"
 source "${DIR}/prompt_generators.zsh"
 source "${DIR}/llm_session_management.zsh"
 
