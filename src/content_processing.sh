@@ -49,7 +49,7 @@ extract_file_info() {
 
 	# Trim to max length if neeeded
 	if [ "${#file_info}" -gt "${max_length}" ]; then
-    file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
+		file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
 	fi
 
 	# Return file_info
@@ -65,6 +65,9 @@ extract_url_info() {
 	# Parse arguments
 	source=$1
 	max_length=$2
+
+	# Remove leading and trailing quotes in source
+	#	source=$(echo "${source}" | sed -e 's/^"//' -e 's/"$//')
 
 	# Check that inputs are valid
 	check_url source || return 1
@@ -84,7 +87,7 @@ extract_url_info() {
 
 	# Trim to max length if needed
 	if [ "${#file_info}" -gt "${max_length}" ]; then
-    file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
+		file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
 	fi
 
 	# Return file_info
@@ -184,8 +187,8 @@ compress_text() {
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
 
-      chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
-      text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
+			chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
+			text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
 			compressed=compressed+$(extract_facts "${chunk}") || {
 				echo "Error: Failed to compress text." >&2
 				return 1

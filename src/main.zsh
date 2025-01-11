@@ -39,7 +39,7 @@ source "${DIR}/web_search.sh"
 source "${DIR}/tokens.sh"
 source "${DIR}/content_processing.sh"
 source "${DIR}/prompt_generators.sh"
-source "${DIR}/llm_session_management.zsh"
+source "${DIR}/llm_session_management.sh"
 
 # Write a settings file if there isn't one already
 if [[ ! -f "${HOME}/.yo.yaml" ]]; then
