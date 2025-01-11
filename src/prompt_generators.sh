@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -6,9 +6,8 @@
 ########################################################################################################################
 
 # Generate base prompt
-function generate_base_prompt() {
+generate_base_prompt() {
 	# Make variables
-	local date time
 	date=$(date "+%A, %B %d, %Y") || {
 		echo "Error: Failed to get the current date." >&2
 		return 1
@@ -25,10 +24,10 @@ function generate_base_prompt() {
 }
 
 # Generate prompt for one-off sessions
-function generate_oneoff_instructions() {
+generate_oneoff_instructions() {
 
 	# Parse arguments
-	local query=$1
+	query=$1
 
 	# Check that inputs are valid
 	check_nonempty query || return 1
@@ -53,7 +52,7 @@ function generate_oneoff_instructions() {
 }
 
 # Generate interactive instructions
-function generate_interactive_instructions() {
+generate_interactive_instructions() {
 	cat <<-EOF
 		Your task is to assist the user in an interactive session, responding concisely and accurately.
 	EOF
@@ -64,9 +63,8 @@ function generate_interactive_instructions() {
 ########################################################################################################################
 
 # Generate self context using help
-function generate_self_context() {
+generate_self_context() {
 	# Make variables
-	local help
 	help=$(show_help) || {
 		echo "Error: Failed to get help information." >&2
 		return 1
@@ -86,10 +84,7 @@ function generate_self_context() {
 ########################################################################################################################
 
 # Generate system information
-function generate_system_info_context() {
-
-	# Make variables
-	local model cores ram free_storage
+generate_system_info_context() {
 
 	# Get system information
 	model=$(system_profiler SPHardwareDataType | grep "Model Name" | awk -F": " '{print $2}') || {
@@ -118,10 +113,7 @@ function generate_system_info_context() {
 }
 
 # Generate directory information
-function generate_directory_info_context() {
-
-	# Make variables
-	local file_list file_previews
+generate_directory_info_context() {
 
 	# Generate file list and previews
 	file_list=$(ls -lahpSR | head -n 50)
@@ -151,10 +143,9 @@ function generate_directory_info_context() {
 }
 
 # Generate clipboard information
-function generate_clipboard_info_context() {
+generate_clipboard_info_context() {
 
 	# Make variables
-	local clipboard_info
 	clipboard_info=$(pbpaste) || {
 		echo "Error: Failed to get clipboard information." >&2
 		return 1
@@ -175,16 +166,13 @@ function generate_clipboard_info_context() {
 }
 
 # Generate file contents context
-function generate_file_context() {
+generate_file_context() {
 
 	# Parse arguments
-	local filename=$1
+	filename=$1
 
 	# Check that inputs are valid
 	check_path filename || return 1
-
-	# Make variables
-	local file_info=""
 
 	# Check that inputs are valid
 	file_info=$(extract_file_info "${filename}" "$(read_setting general.maximum_file_content_length)") || {
@@ -213,16 +201,13 @@ function generate_file_context() {
 ########################################################################################################################
 
 # Generate website contents
-function generate_website_context() {
+generate_website_context() {
 
 	# Parse arguments
-	local url=$1
+	url=$1
 
 	# Check that inputs are valid
 	check_url url || return 1
-
-	# Make variables
-	website_info=""
 
 	# Check that inputs are valid
 	website_info=$(extract_url_info "${url}" "$(read_setting general.maximum_file_content_length)") || {
@@ -246,10 +231,10 @@ function generate_website_context() {
 }
 
 # Generate search context
-function generate_search_context() {
+generate_search_context() {
 
 	# Parse arguments
-	local search_terms=$1
+	search_terms=$1
 
 	# Check that inputs are valid
 	check_nonempty search_terms || return 1

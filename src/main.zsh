@@ -38,7 +38,7 @@ source "${DIR}/installation_management.sh"
 source "${DIR}/web_search.sh"
 source "${DIR}/tokens.sh"
 source "${DIR}/content_processing.sh"
-source "${DIR}/prompt_generators.zsh"
+source "${DIR}/prompt_generators.sh"
 source "${DIR}/llm_session_management.zsh"
 
 # Write a settings file if there isn't one already
