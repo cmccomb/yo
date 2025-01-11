@@ -1,15 +1,12 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
-# Since this script is sourced into another script, many of the variables aren't used. For that reason, we disable SC2034
-# to hide the warnings.
-# shellcheck disable=SC2034
 
 ########################################################################################################################
 ### CONSTANTS AND SETTINGS #############################################################################################
 ########################################################################################################################
 
 # Write settings file
-function write_default_settings_file() {
+write_default_settings_file() {
 	cat <<-EOF >~/.yo.yaml
 		# General settings
 		general:
@@ -61,7 +58,7 @@ function write_default_settings_file() {
 }
 
 # Read a value from the settings file
-function read_setting() {
+read_setting() {
 	yq -e ".${1}" ~/.yo.yaml || {
 		echo "Error: Failed to read setting ${1}." >&2
 		return 1
@@ -69,7 +66,7 @@ function read_setting() {
 }
 
 # Write a value to the settings file
-function write_setting() {
+write_setting() {
 	old_value=$(read_setting "${1}") || return 1
 	echo "Old value for ${1}: ${old_value}"
 	yq -i ".${1} = \"${2}\"" ~/.yo.yaml >/dev/null

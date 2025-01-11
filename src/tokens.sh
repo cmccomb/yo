@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -6,19 +6,16 @@
 ########################################################################################################################
 
 # Write a function to convert tokens to characters
-function tokens_to_characters() {
+tokens_to_characters() {
 
 	# Parse arguments
-	local tokens=$1
+	tokens=$1
 
 	# Check that inputs are valid
 	check_integer tokens || return 1
 
-	# Make variables
-	local characters
-
 	# Calculate the number of characters and divide by four
-	characters=$(((tokens * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)))
+  characters=$(echo "scale=0; (${tokens} * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)" | bc)
 
 	# Return result
 	printf "%.0f" "${characters}"
@@ -28,19 +25,16 @@ function tokens_to_characters() {
 }
 
 # Write a function to convert tokens to characters
-function characters_to_tokens() {
+characters_to_tokens() {
 
 	# Parse arguments
-	local characters=$1
+	characters=$1
 
 	# Check that inputs are valid
 	check_integer characters || return 1
 
-	# Make variables
-	local tokens
-
 	# Calculate the number of characters and divide by four
-	tokens=$((((characters + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor)))
+  tokens=$(echo "(((${characters} + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor))" | bc)
 
 	# Return result
 	printf "%.0f" "${tokens}"
@@ -50,7 +44,7 @@ function characters_to_tokens() {
 }
 
 # Function to calculate the approximate number of tokens
-function estimate_number_of_tokens() {
+estimate_number_of_tokens() {
 
 	# Estimate the number of tokens
 	characters_to_tokens "${#1}" || {
@@ -62,18 +56,19 @@ function estimate_number_of_tokens() {
 	return 0
 }
 
-function count_number_of_tokens() {
+count_number_of_tokens() {
 
 	# Parse arguments
-	local repo_name=$1 file_name=$2 text=$3
+	repo_name=$1
+	file_name=$2
+	text=$3
 
 	# Check that inputs are valid
 	model_is_available "${repo_name}" "${file_name}" || return 1
 	check_nonempty text || return 1
 
 	# Make variables
-	local model_path tokens
-	model_path="/Users/${USER}/Library/Caches/llama.cpp/${repo_name//\//_}_${file_name}"
+	model_path="/Users/${USER}/Library/Caches/llama.cpp/$(echo "${repo_name}" | sed 's/\//_/g')_${file_name}"
 
 	# Count the number of tokens
 	tokens=$(llama-tokenize --model "${model_path}" --prompt "${text}" --show-count --log-disable) || {
