@@ -59,9 +59,9 @@ estimate_number_of_tokens() {
 count_number_of_tokens() {
 
 	# Parse arguments
-	 repo_name=$1
-	 file_name=$2
-	 text=$3
+	repo_name=$1
+	file_name=$2
+	text=$3
 
 	# Check that inputs are valid
 	model_is_available "${repo_name}" "${file_name}" || return 1
