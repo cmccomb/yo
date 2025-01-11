@@ -1,11 +1,11 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
 ### INSTALLATION MANAGEMENT ############################################################################################
 ########################################################################################################################
 
-function update_yo() {
+update_yo() {
 
 	# If online, do things
 	if system_is_online; then
@@ -27,7 +27,7 @@ function update_yo() {
 
 }
 
-function uninstall_yo() {
+uninstall_yo() {
 
 	# Remove you from /usr/local/bin
 	sudo rm /usr/local/bin/yo || {
