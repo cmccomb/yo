@@ -55,28 +55,27 @@ fi
 echo "Downloading and installing the latest version of yo..."
 
 # Install the side files
-sudo mkdir -p /usr/local/bin/.yo-scripts
-
+sudo mkdir -p /usr/local/yo
 
 # Check DIR to see if it ends with src
 case ${DIR} in
   *"scripts")
-    # Copy contents of src/ to .yo-scripts
-    sudo cp -r ${DIR}/../src/* /usr/local/bin/.yo-scripts/
+    # Copy contents of src/ to yo
+    sudo cp -r ${DIR}/../src/* /usr/local/yo/
     ;;
   *)
     # Download the whole project from git
-    sudo git clone https://github.com/cmccomb/yo.git /tmp/.yo-scripts
+    sudo git clone https://github.com/cmccomb/yo.git /tmp/yo
 
-    # Copy contents of src/ to .yo-scripts
-    sudo cp -r /tmp/.yo-scripts/src/* /usr/local/bin/.yo-scripts/
+    # Copy contents of src/ to yo
+    sudo cp -r /tmp/yo/src/* /usr/local/yo/
 
     ;;
 esac
 
 # Cleanup
-sudo rm -rf /tmp/.yo-scripts
+sudo rm -rf /tmp/yo
 
 # Move main.sh to /usr/local/bin and make it executable
-sudo mv /usr/local/bin/.yo-scripts/main.sh /usr/local/bin/yo
+sudo mv /usr/local/yo/main.sh /usr/local/bin/yo
 sudo chmod +x /usr/local/bin/yo
