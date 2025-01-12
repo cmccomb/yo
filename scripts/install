@@ -45,7 +45,7 @@ if [ -n "${brew_packages_to_install}" ]; then
 		echo "Homebrew is already installed."
 	fi
 	echo "Installing command line dependencies..."
-	brew install ${brew_packages_to_install}
+	eval "brew install ${brew_packages_to_install}"
 	echo "Command line dependencies installed."
 else
 	echo "Command line dependencies are already installed."
