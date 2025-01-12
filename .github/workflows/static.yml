@@ -38,7 +38,7 @@ jobs:
       - name: Prepare
         run: mv scripts/install .
       - name: Cleanup
-        run: rm -rf README.md .gitignore LICENSE .github scripts tests
+        run: rm -rf README.md .gitignore LICENSE .github scripts tests src
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact

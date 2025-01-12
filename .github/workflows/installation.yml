@@ -15,4 +15,4 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Install
-        run: zsh <(curl -s https://cmccomb.com/yo/install)
+        run: sh <(curl -s https://cmccomb.com/yo/install)

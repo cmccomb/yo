@@ -26,7 +26,7 @@ case ${DIR} in
   *"src")
     ;;
   *"bin")
-    DIR="${DIR}/.yo-scripts"
+    DIR="${DIR}/../yo"
     ;;
   *)
     echo "Error: The script is not in the correct directory." >&2

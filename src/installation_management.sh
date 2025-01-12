@@ -36,8 +36,8 @@ uninstall_yo() {
 	}
 
 	# Remove the side files from /usr/local/share/yo
-	sudo rm -rf /usr/local/bin/.yo-scripts || {
-		echo "Error: Failed to remove /usr/local/bin/.yo-scripts." >&2
+	sudo rm -rf /usr/local/yo || {
+		echo "Error: Failed to remove /usr/local/yo/." >&2
 		return 1
 	}
 }
