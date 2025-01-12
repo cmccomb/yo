@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -6,17 +6,18 @@
 ########################################################################################################################
 
 ### Extract file_info from a file or URL (supports text and PDF files) #################################################
-function extract_file_info() {
+extract_file_info() {
 
 	# Parse arguments
-	local source=$1 max_length=$2
+	source=$1
+	max_length=$2
 
 	# Check that inputs are valid
 	check_path source || return 1
 	check_integer max_length || return 1
 
 	# Make variables
-	local file_info=""
+	file_info=""
 
 	case ${source} in
 	*.pdf)
@@ -47,8 +48,8 @@ function extract_file_info() {
 	esac
 
 	# Trim to max length if neeeded
-	if [[ "${#file_info}" -gt "${max_length}" ]]; then
-		file_info=${file_info:0:${max_length}}
+	if [ "${#file_info}" -gt "${max_length}" ]; then
+		file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
 	fi
 
 	# Return file_info
@@ -59,17 +60,18 @@ function extract_file_info() {
 }
 
 ### Extract file_info from a file or URL (supports text and PDF files) #################################################
-function extract_url_info() {
+extract_url_info() {
 
 	# Parse arguments
-	local source=$1 max_length=$2
+	source=$1
+	max_length=$2
+
+	# Remove leading and trailing quotes in source
+	#	source=$(echo "${source}" | sed -e 's/^"//' -e 's/"$//')
 
 	# Check that inputs are valid
 	check_url source || return 1
 	check_integer max_length || return 1
-
-	# Make variables
-	local file_info response
 
 	# Fetch file_info from URL
 	if ! response=$(curl -s "${source}"); then
@@ -84,8 +86,8 @@ function extract_url_info() {
 	fi
 
 	# Trim to max length if needed
-	if [[ "${#file_info}" -gt "${max_length}" ]]; then
-		file_info=${file_info:0:${max_length}}
+	if [ "${#file_info}" -gt "${max_length}" ]; then
+		file_info=$(echo "${file_info}" | cut -c1-"${max_length}")
 	fi
 
 	# Return file_info
@@ -95,16 +97,16 @@ function extract_url_info() {
 	return 0
 }
 
-function extract_facts() {
+extract_facts() {
 
 	# Parse arguments
-	local chunk=$1
+	chunk=$1
 
 	# Check that inputs are valid
 	check_nonempty chunk || return 1
 
 	# Create prompt
-	local prompt
+	prompt
 	prompt=$(
 		cat <<-EOF
 			=============== START OF TEXT===============
@@ -136,13 +138,13 @@ function extract_facts() {
 ### Start by establishing some prompt generators #######################################################################
 
 # Compress text
-function compress_text() {
+compress_text() {
 
 	# Parse arguments
-	local text=$1
-	local remove_spaces=$2
-	local remove_punctuation=$3
-	local summarize=$4
+	text=$1
+	remove_spaces=$2
+	remove_punctuation=$3
+	summarize=$4
 
 	# Check that inputs are valid
 	check_nonempty text || return 1
@@ -151,24 +153,24 @@ function compress_text() {
 	check_boolean summarize || return 1
 
 	# Tokenize text
-	local approximate_length
 	approximate_length=$(estimate_number_of_tokens "${text}")
 
 	# If length of tokenized text is greater than cutoff, do something
-	if [[ "${approximate_length}" -gt "$(read_setting mode.compression.trigger_length)" && "${summarize}" == true ]]; then
+	if [ "${approximate_length}" -gt "$(read_setting mode.compression.trigger_length)" ] && [ "${summarize}" = true ]; then
 
 		# Remove spaces if flag is set
-		if [[ "${remove_spaces}" == true ]]; then
+		if [ "${remove_spaces}" = true ]; then
 			text=$(echo "${text}" | tr -s "[:space:]")
 		fi
 
 		# Remove punctuation if flag is set
-		if [[ "${remove_punctuation}" == true ]]; then
+		if [ "${remove_punctuation}" = true ]; then
 			text=$(echo "${text}" | tr -d "[:punct:]")
 		fi
 
 		# Make variables
-		local compressed="" chunk_length_in_chars number_of_chunks counter=0
+		compressed=""
+		counter=0
 
 		# Compress text
 		chunk_length_in_chars=$(tokens_to_characters "$(read_setting mode.compression.chunk_length)")
@@ -177,17 +179,17 @@ function compress_text() {
 		number_of_chunks=$(printf "%.0f" $(((${#text} / chunk_length_in_chars) + 1)))
 
 		# While text isn't empty, peel off chunk_length_in_chars characters and process those. Then remove them from text.
-		while [[ -n "${text}" ]]; do
+		while [ -n "${text}" ]; do
 
 			# Increment counter
-			((counter += 1))
+			counter=$((counter + 1))
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
 
-			chunk="${text:0:${chunk_length_in_chars}}"
-			text="${text:${chunk_length_in_chars}}"
-			compressed+=$(extract_facts "${chunk}") || {
+			chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
+			text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
+			compressed=compressed+$(extract_facts "${chunk}") || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}

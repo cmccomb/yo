@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -6,19 +6,16 @@
 ########################################################################################################################
 
 ### Perform a web search with user-provided terms ######################################################################
-function perform_search() {
+perform_search() {
 
 	# Parse arguments
-	local terms=$1
+	terms=$1
 
 	# Check that inputs are valid
 	check_nonempty terms || return 1
 
-	# Make variables
-	local url response
-
 	# Example API call
-	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=${terms// /+}"
+	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=$(echo "${terms}" | sed 's/ /+/g')"
 
 	# Perform search and extract relevant information
 	response=$(curl -s "${url}") || {
@@ -38,16 +35,13 @@ function perform_search() {
 }
 
 ### Extract optimized search terms using a small model #################################################################
-function generate_search_terms() {
+generate_search_terms() {
 
 	# Parse arguments
-	local query=$1
+	query=$1
 
 	# Check that inputs are valid
 	check_nonempty query || return 1
-
-	# Make variables
-	local prompt terms
 
 	# Generate prompt
 	prompt=$(
@@ -88,7 +82,7 @@ function generate_search_terms() {
 	terms=$(echo "${terms}" | head -n 1)
 
 	# Remove [end of text] marker if needed
-	terms="${terms//\[end of text\]/}"
+	terms=$(echo "${terms}" | sed 's/\[end of text\]//g')
 
 	# Return results and trim whitespace
 	echo "${terms## }"

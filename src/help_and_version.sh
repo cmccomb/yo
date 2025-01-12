@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -9,15 +9,15 @@
 readonly YO="✌️"
 
 ### All versioning follows semver as defined at https://semver.org/ ####################################################
-readonly VERSION="0.1.1"
+readonly VERSION="0.2.0"
 
 ### Display version information ########################################################################################
-function show_version() {
+show_version() {
 	echo "yo v${VERSION}"
 }
 
 ### Display help instructions ##########################################################################################
-function show_help() {
+show_help() {
 	cat <<-EOF
 		yo - A command-line AI assistant where you control the context ${YO}
 

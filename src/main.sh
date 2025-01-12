@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 ########################################################################################################################
@@ -22,27 +22,32 @@
 DIR=$(dirname -- "$0")
 
 # Check DIR to see if it ends with src
-if [[ ${DIR} == *"src" ]]; then
-	:
-elif [[ ${DIR} == *"bin" ]]; then
-	DIR+="/.yo-scripts"
-fi
+case ${DIR} in
+  *"src")
+    ;;
+  *"bin")
+    DIR="${DIR}/../yo"
+    ;;
+  *)
+    echo "Error: The script is not in the correct directory." >&2
+    exit 1
+esac
 
 # Source the necessary files
-source "${DIR}/help_and_version.zsh"
-source "${DIR}/settings.zsh"
-source "${DIR}/input_validation.zsh"
-source "${DIR}/logging.zsh"
-source "${DIR}/status_checks.zsh"
-source "${DIR}/installation_management.zsh"
-source "${DIR}/web_search.zsh"
-source "${DIR}/tokens.zsh"
-source "${DIR}/content_processing.zsh"
-source "${DIR}/prompt_generators.zsh"
-source "${DIR}/llm_session_management.zsh"
+. "${DIR}/help_and_version.sh"
+. "${DIR}/settings.sh"
+. "${DIR}/input_validation.sh"
+. "${DIR}/logging.sh"
+. "${DIR}/status_checks.sh"
+. "${DIR}/installation_management.sh"
+. "${DIR}/web_search.sh"
+. "${DIR}/tokens.sh"
+. "${DIR}/content_processing.sh"
+. "${DIR}/prompt_generators.sh"
+. "${DIR}/llm_session_management.sh"
 
 # Write a settings file if there isn't one already
-if [[ ! -f "${HOME}/.yo.yaml" ]]; then
+if [ ! -f "${HOME}/.yo.yaml" ]; then
 	write_default_settings_file
 fi
 
@@ -69,63 +74,63 @@ QUIET=false
 case $1 in
 download)
 	# Check if there is a subsequent argument. if so, download that model ("task", "casual", "balanced", "serious") using model_is_available
-	if [[ -n $2 && ! $2 =~ ^- ]]; then
+  if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
 		case $2 in
 		task)
-			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" && return 0
+			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" && exit 0
 			;;
 		casual)
-			model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" && return 0
+			model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" && exit 0
 			;;
 		balanced)
-			model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" && return 0
+			model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" && exit 0
 			;;
 		serious)
-			model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && return 0
+			model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && exit 0
 			;;
 		everything | all)
 			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" &&
 				model_is_available "$(read_setting model.casual.repository)" "$(read_setting model.casual.filename)" &&
 				model_is_available "$(read_setting model.balanced.repository)" "$(read_setting model.balanced.filename)" &&
-				model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && return 0
+				model_is_available "$(read_setting model.serious.repository)" "$(read_setting model.serious.filename)" && exit 0
 			;;
 		*)
 			echo "Error: Unknown model: $2" >&2
-			return 1
+			exit 1
 			;;
 		esac
 	else
 		echo "Error: download requires a model name (task, casual, balanced, serious), or use all to download all models." >&2
-		return 1
+		exit 1
 	fi
 
 	;;
 update)
 	timestamp_log_to_stderr "🔄" "Updating Yo..." >&2
-	update_yo && return 0
+	update_yo && exit 0
 	;;
 uninstall)
 	timestamp_log_to_stderr "🗑️" "Uninstalling Yo..." >&2
-	uninstall_yo && return 0
+	uninstall_yo && exit 0
 	;;
 settings)
 	# If there is no following value, read the settings
-	if [[ -z $2 ]]; then
+	if [ -z "$2" ]; then
 		read_setting ""
-		return 0
+		exit 0
 	else
 		# If there is no third value, then read the setting
-		if [[ -z $3 ]]; then
-			if [[ "$2" == "reset" ]]; then
+		if [ -z "$3" ]; then
+			if [ "$2" = "reset" ]; then
 				write_default_settings_file
-				return 0
+				exit 0
 			else
 				read_setting "$2"
-				return 0
+				exit 0
 			fi
 		else
 			write_setting "$2" "$3"
-			return 0
+			exit 0
 		fi
 	fi
 	;;
@@ -135,29 +140,29 @@ settings)
 esac
 
 # Start parsing arguments
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
 	case $1 in
 
 	# Early exit with help message
 	-h | --help)
 		show_help
-		return 0
+		exit 0
 		;;
 
 	# Early exit with version information
 	-V | --version)
 		show_version
-		return 0
+		exit 0
 		;;
 
 	# Read in a file
 	-f | --file)
-		if [[ -n $2 && ! $2 =~ ^- ]]; then
-			file_path_list+="$2\n"
+		if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+			file_path_list="${file_path_list}$2\n"
 			shift
 		else
 			echo "Error: --file requires a file." >&2
-			return 1
+			exit 1
 		fi
 		;;
 
@@ -165,14 +170,14 @@ while [[ $# -gt 0 ]]; do
 	-w | --website)
 		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --website flag is unavailable." >&2
-			return 1
+			exit 1
 		}
-		if [[ -n $2 && ! $2 =~ ^- ]]; then
-			website_url_list+="$2\n"
+		if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+			website_url_list="${website_url_list}$2\n"
 			shift
 		else
 			echo "Error: --website requires a url." >&2
-			return 1
+			exit 1
 		fi
 		;;
 
@@ -180,14 +185,14 @@ while [[ $# -gt 0 ]]; do
 	-s | --search)
 		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --search flag is unavailable." >&2
-			return 1
+			exit 1
 		}
-		if [[ -n $2 && $2 =~ ^".*"$ ]]; then
-			search_term_list+="$2\n"
+		if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+			search_term_list="${search_term_list}$2\n"
 			shift
 		else
 			echo "Error: --search requires quoted terms." >&2
-			return 1
+			exit 1
 		fi
 		;;
 
@@ -201,7 +206,7 @@ while [[ $# -gt 0 ]]; do
 	-S | --surf)
 		system_is_online || {
 			echo "Error: You are not connected to the internet, so the --surf flag is unavailable." >&2
-			return 1
+			exit 1
 		}
 
 		surf_and_add_results=true
@@ -234,11 +239,11 @@ while [[ $# -gt 0 ]]; do
 	# If its something that looks like a flag but isn't one of the above, show an error
 	-*)
 		echo "Error: Unknown flag: $1" >&2
-		return 1
+		exit 1
 		;;
 
 	# If its not a flag, add it to the general query
-	*) query+="$1 " ;;
+	*) query="${query} $1" ;;
 	esac
 	shift
 done
@@ -247,7 +252,7 @@ done
 start_time=$(start_log)
 
 ### Configure the model based on whether its a one-off or interactive session ##########################################
-if [[ -n "${query}" ]]; then
+if [ -n "${query}" ]; then
 	model_name="casual"
 	repo_name="$(read_setting model.casual.repository)"
 	file_name="$(read_setting model.casual.filename)"
@@ -266,22 +271,22 @@ else
 fi
 
 ### Override the model if needed #######################################################################################
-if [[ "${task_model_override}" == true ]]; then
+if [ "${task_model_override}" = true ]; then
 	repo_name="$(read_setting model.task.repository)"
 	file_name="$(read_setting model.task.filename)"
 	temp="$(read_setting model.task.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the task model ${file_name}..." >&2
-elif [[ "${casual_model_override}" == true && "${model_name}" != "casual" ]]; then
+elif [ "${casual_model_override}" = true ] && [ "${model_name}" != "casual" ]; then
 	repo_name="$(read_setting model.casual.repository)"
 	file_name="$(read_setting model.casual.filename)"
 	temp="$(read_setting model.casual.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the casual model ${file_name}..." >&2
-elif [[ "${balanced_model_override}" == true ]]; then
+elif [ "${balanced_model_override}" = true ]; then
 	repo_name="$(read_setting model.balanced.repository)"
 	file_name="$(read_setting model.balanced.filename)"
 	temp="$(read_setting model.balanced.temperature)"
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the balanced model ${file_name}..." >&2
-elif [[ "${serious_model_override}" == true && "${model_name}" != "serious" ]]; then
+elif [ "${serious_model_override}" = true ] && [ "${model_name}" != "serious" ]; then
 	repo_name="$(read_setting model.serious.repository)"
 	file_name="$(read_setting model.serious.filename)"
 	temp="$(read_setting model.serious.temperature)"
@@ -303,7 +308,7 @@ prompt=$(
 		"${add_clipboard_info}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
-	return 1
+	exit 1
 }
 
 ### Kick off the LLM ###################################################################################################
@@ -323,4 +328,4 @@ end_log "${start_time}"
 : "${VERBOSE} ${QUIET}"
 
 ### Return success #####################################################################################################
-return 0
+exit 0

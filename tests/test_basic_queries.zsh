@@ -10,7 +10,7 @@ setup
 answer_should_contain "Paris" "--task-model What is the capital of France"
 
 # Run test for more queries
-answer_should_contain "Rome" "--task-model what city is the vatican located in"
+answer_should_contain "Italy" "--task-model what country is the rome located in"
 
 # Run test for more queries
 answer_should_contain "German" "--task-model what nationality was Einstein"
