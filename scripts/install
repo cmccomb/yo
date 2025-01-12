@@ -1,31 +1,43 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
-# Keep track of paackages to install
-brew_packages_to_install=()
-dependencies_to_check=(
-	"llama-cli:llama.cpp"
-	"llama-tokenize:llama.cpp"
-	"tesseract:tesseract"
-	"pandoc:pandoc"
-	"pdftotext:poppler"
-	"yq:yq"
+# Get the directory where this file is saved
+DIR=$(dirname -- "$0")
+echo "DIR: ${DIR}"
+
+# Keep track of packages to install
+brew_packages_to_install=""
+dependencies_to_check=$(
+	cat <<-EOF
+		llama-cli:llama.cpp
+		llama-tokenize:llama.cpp
+		tesseract:tesseract
+		pandoc:pandoc
+		pdftotext:poppler
+		yq:yq
+	EOF
 )
 
 # Check to see if the command line dependencies are installed and add them to the list if not
-for dependency in "${dependencies_to_check[@]}"; do
+while [ -n "${dependencies_to_check}" ]; do
+  # Get the first dependency in the list
+  dependency=$(echo "${dependencies_to_check}" | head -n 1)
+  dependencies_to_check=$(echo "${dependencies_to_check}" | tail -n +2)
+
 	# The dependency is in the format of "command:package"
 	command="${dependency%%:*}"
 	package="${dependency##*:}"
-	if ! command -v "${command}" &>/dev/null; then
-		brew_packages_to_install+=("${package}")
+
+	# Check to see if the command is installed
+	if ! command -v "${command}"  > /dev/null 2>&1; then
+		brew_packages_to_install="${brew_packages_to_install}${package} "
 	fi
 done
 
 # Install the command line dependencies
-if [[ ${#brew_packages_to_install} -gt 0 ]]; then
+if [ -n "${brew_packages_to_install}" ]; then
 	# Check to see if homebrew is installed and install it if it is not
-	if ! command -v brew &>/dev/null; then
+	if ! command -v brew > /dev/null 2>&1; then
 		echo "Homebrew not found. Installing Homebrew..."
 		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 		echo "Homebrew installation complete."
@@ -33,41 +45,38 @@ if [[ ${#brew_packages_to_install} -gt 0 ]]; then
 		echo "Homebrew is already installed."
 	fi
 	echo "Installing command line dependencies..."
-	brew install "${brew_packages_to_install[@]}"
+	brew install "${brew_packages_to_install}"
 	echo "Command line dependencies installed."
 else
 	echo "Command line dependencies are already installed."
 fi
 
 # Download the latest version of yo
-echo "Downloading the latest version of yo..."
-sudo curl --silent https://cmccomb.com/yo/src/main.zsh --output /usr/local/bin/yo
-sudo chmod +x /usr/local/bin/yo
+echo "Downloading and installing the latest version of yo..."
 
 # Install the side files
 sudo mkdir -p /usr/local/bin/.yo-scripts
 
-# Make an array of files to download
-files=(
-	"content_processing.zsh"
-	"help_and_version.zsh"
-	"input_validation.zsh"
-	"installation_management.zsh"
-	"llm_session_management.zsh"
-	"logging.zsh"
-	"prompt_generators.zsh"
-	"set_model_names.zsh"
-	"settings.zsh"
-	"status_checks.zsh"
-	"tokens.zsh"
-	"web_search.zsh"
-)
 
-# Download the files
-for file in "${files[@]}"; do
-	sudo curl --silent "https://cmccomb.com/yo/src/${file}" --output "/usr/local/bin/.yo-scripts/${file}"
-done
+# Check DIR to see if it ends with src
+case ${DIR} in
+  *"scripts")
+    # Copy contents of src/ to .yo-scripts
+    sudo cp -r ${DIR}/../src/* /usr/local/bin/.yo-scripts/
+    ;;
+  *)
+    # Download the whole project from git
+    sudo git clone https://github.com/cmccomb/yo.git /tmp/.yo-scripts
 
-# Download the yo models
-yo download task
-yo download casual
+    # Copy contents of src/ to .yo-scripts
+    sudo cp -r /tmp/.yo-scripts/src/* /usr/local/bin/.yo-scripts/
+
+    ;;
+esac
+
+# Cleanup
+sudo rm -rf /tmp/.yo-scripts
+
+# Move main.sh to /usr/local/bin and make it executable
+sudo mv /usr/local/bin/.yo-scripts/main.sh /usr/local/bin/yo
+sudo chmod +x /usr/local/bin/yo
