@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 # shellcheck enable=all
 
+# Set up the test environment
 function setup() {
 
 	# Warm up yo
@@ -16,16 +17,6 @@ function setup() {
 	# Set up counters
 	PASSES=0
 	FAILS=0
-}
-
-function cleanup() {
-	if [[ "${FAILS}" -gt 0 ]]; then
-		printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
-		exit 1
-	else
-		printf "  🎉 \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
-		exit 0
-	fi
 }
 
 function answer_should_contain() {
@@ -60,5 +51,43 @@ function answer_should_contain() {
 		echo "    ❌ Test failed in ${elapsed_time}s with answer: ${output}"
 		((FAILS += 1))
 		return 1
+	fi
+}
+
+# Write text to a file
+function serve_text_on_port() {
+  # Parse arguments
+  local text=$1
+  local port=$2
+
+  # Start a web server
+  while true; do
+    echo -e "HTTP/1.1 200 OK\r\nContent-Length: ${#text}\r\n\r\n${text}" | nc -l "${port}"
+  done &
+
+  # Return the PID of the web server
+  echo $!
+}
+
+# Write text to a file
+function write_text_to_tmp() {
+  # Parse arguments
+  local text=$1
+
+  # Save the text to random filename in /tmp
+  echo "${text}" > "${file:=$(mktemp)}"
+
+  # Return the file path
+  echo "${file}"
+}
+
+# Clean up the test environment
+function cleanup() {
+	if [[ "${FAILS}" -gt 0 ]]; then
+		printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
+		exit 1
+	else
+		printf "  🎉 \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
+		exit 0
 	fi
 }
