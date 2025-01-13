@@ -198,7 +198,6 @@ start_llama_session() {
 	args="${args} --mirostat 2"
 	args="${args} --flash-attn"
 	args="${args} --no-warmup"
-	args="${args} --multiline-input"
 
 	# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
 	case ${mode} in
