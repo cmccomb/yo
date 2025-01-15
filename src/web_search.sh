@@ -78,14 +78,18 @@ generate_search_terms() {
 		return 1
 	}
 
-	# Only take the first line
-	terms=$(echo "${terms}" | head -n 1)
+	# Process the llm output
+	terms=$( \
+		echo "${terms}" |
+			head -n 1 | #Only take the first line
+			iconv -f utf-8 -t utf-8 -c | # Remove all non-utf-8 characters
+			sed 's/\[end of text\]//g' | # Remove [end of text] marker if needed
+			sed 's/^[[:space:]]*//g' | # Remove leading whitespace
+			sed 's/[[:space:]]*$//g' # Remove trailing whitespace
+	)
 
-	# Remove [end of text] marker if needed
-	terms=$(echo "${terms}" | sed 's/\[end of text\]//g')
-
-	# Return results and trim whitespace
-	echo "${terms## }"
+	# Return results
+	echo "${terms}"
 
 	# Return successfully
 	return 0

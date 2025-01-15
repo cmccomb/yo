@@ -97,7 +97,6 @@ generate_prompt() {
 	# Add search information if available
 	if [ "${surf_and_add_results}" = true ]; then
 		timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
-		llm_generated_search_terms
 		llm_generated_search_terms=$(generate_search_terms "${query}")
 		timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
 		prompt="${prompt} $(generate_search_context "${llm_generated_search_terms}")\n\n" || {

@@ -15,7 +15,7 @@ tokens_to_characters() {
 	check_integer tokens || return 1
 
 	# Calculate the number of characters and divide by four
-  characters=$(echo "scale=0; (${tokens} * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)" | bc)
+	characters=$(echo "scale=0; (${tokens} * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)" | bc)
 
 	# Return result
 	printf "%.0f" "${characters}"
@@ -34,7 +34,7 @@ characters_to_tokens() {
 	check_integer characters || return 1
 
 	# Calculate the number of characters and divide by four
-  tokens=$(echo "(((${characters} + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor))" | bc)
+	tokens=$(echo "(((${characters} + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor))" | bc)
 
 	# Return result
 	printf "%.0f" "${tokens}"

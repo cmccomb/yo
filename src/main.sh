@@ -23,14 +23,14 @@ DIR=$(dirname -- "$0")
 
 # Check DIR to see if it ends with src
 case ${DIR} in
-  *"src")
-    ;;
-  *"bin")
-    DIR="${DIR}/../yo"
-    ;;
-  *)
-    echo "Error: The script is not in the correct directory." >&2
-    exit 1
+*"src") ;;
+*"bin")
+	DIR="${DIR}/../yo"
+	;;
+*)
+	echo "Error: The script is not in the correct directory." >&2
+	exit 1
+	;;
 esac
 
 # Source the necessary files
@@ -74,7 +74,7 @@ QUIET=false
 case $1 in
 download)
 	# Check if there is a subsequent argument. if so, download that model ("task", "casual", "balanced", "serious") using model_is_available
-  if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+	if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
 		case $2 in
 		task)
 			model_is_available "$(read_setting model.task.repository)" "$(read_setting model.task.filename)" && exit 0
