@@ -30,12 +30,13 @@ write_default_settings_file() {
 		    chunk_length: 4096      # Length of the chunks to compress
 		    trigger_length: 4096    # Length of the text that triggers compression
 		    context_length: -1      # Context length to allow the model, -1 means to shrink to fit
-		    # Model settings
+
+		# Model settings
 		model:
 		  task:                                                    # The task model is invoked for search term generation and compression
 		    repository: bartowski/Llama-3.2-1B-Instruct-GGUF       # The HuggingFace repository where the model is stored
 		    filename: Llama-3.2-1B-Instruct-Q4_K_M.gguf            # The filename of the model in the repository
-		    temperature: 0.1                                       # The temperature to use for this model
+		    temperature: 0.2                                       # The temperature to use for this model
 		  casual:                                                  # The casual model is invoked for oneoff requests
 		    repository: bartowski/Qwen2.5-3B-Instruct-GGUF         # The HuggingFace repository where the model is stored
 		    filename: Qwen2.5-3B-Instruct-Q4_K_M.gguf              # The filename of the model in the repository
@@ -48,6 +49,7 @@ write_default_settings_file() {
 		    repository: bartowski/Qwen2.5-Coder-14B-Instruct-GGUF  # The HuggingFace repository where the model is stored
 		    filename: Qwen2.5-Coder-14B-Instruct-IQ4_XS.gguf       # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
+
 		# Search settings
 		search:
 		  google_cse:

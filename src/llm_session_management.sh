@@ -209,7 +209,7 @@ start_llama_session() {
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
 		;;
 	task)
-		args="${args} --repeat-penalty 3"
+#		args="${args} --repeat-penalty 3"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2

@@ -46,15 +46,16 @@ generate_search_terms() {
 	# Generate prompt
 	prompt=$(
 		cat <<-EOF
-			Your task is to create an appropriate web search query for a given user query.
-			Draw search terms directly from the query itself whenever possible. Do not infer additional information.
+			Your task is to select words from the user query to construct a web search.
+			You should ONLY select words directly from the query itself.
+			You should NEVER add new information or context to the search terms unless ABSOLUTELY ESSENTIAL.
 
 			Here is an example:
-			User Query: how large is the capital of france ${YO:-"✌️"}
+			User Query: how large is the capital of france
 			Search Terms: french capital size population area
 
 			Here is another example:
-			User Query: what is the furthest planet from the sun ${YO}
+			User Query: what is the furthest planet from the sun
 			Search Terms: solar system furthest planet distance
 
 			Here is the real user query.
@@ -90,7 +91,7 @@ generate_search_terms() {
 
 	# Return results
 	echo "${terms}"
-
+#  echo "${query}"
 	# Return successfully
 	return 0
 }
