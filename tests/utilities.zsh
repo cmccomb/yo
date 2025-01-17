@@ -56,29 +56,29 @@ function answer_should_contain() {
 
 # Write text to a file
 function serve_text_on_port() {
-  # Parse arguments
-  local text=$1
-  local port=$2
+	# Parse arguments
+	local text=$1
+	local port=$2
 
-  # Start a web server
-  while true; do
-    echo -e "HTTP/1.1 200 OK\r\nContent-Length: ${#text}\r\n\r\n${text}" | nc -l "${port}"
-  done &
+	# Start a web server
+	while true; do
+		echo -e "HTTP/1.1 200 OK\r\nContent-Length: ${#text}\r\n\r\n${text}" | nc -l "${port}"
+	done &
 
-  # Return the PID of the web server
-  echo $!
+	# Return the PID of the web server
+	echo $!
 }
 
 # Write text to a file
 function write_text_to_tmp() {
-  # Parse arguments
-  local text=$1
+	# Parse arguments
+	local text=$1
 
-  # Save the text to random filename in /tmp
-  echo "${text}" > "${file:=$(mktemp)}"
+	# Save the text to random filename in /tmp
+	echo "${text}" >"${file:=$(mktemp)}"
 
-  # Return the file path
-  echo "${file}"
+	# Return the file path
+	echo "${file}"
 }
 
 # Clean up the test environment

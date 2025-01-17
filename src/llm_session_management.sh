@@ -9,9 +9,16 @@
 generate_prompt() {
 
 	# Parse arguments
-	mode=$1 query=$2
-	filenames=$3 search_terms=$4 website_urls=$5
-	surf_and_add_results=$6 add_usage_info=$7 add_system_info=$8 add_directory_info=$9 add_clipboard_info=${10}
+	mode=$1
+	query=$2
+	filenames=$3
+	search_terms=$4
+	website_urls=$5
+	surf_and_add_results=$6
+	add_usage_info=$7
+	add_system_info=$8
+	add_directory_info=$9
+	add_clipboard_info=${10}
 
 	# Check that inputs are valid
 	check_mode mode || return 1
@@ -161,8 +168,13 @@ generate_prompt() {
 start_llama_session() {
 
 	# Parse arguments
-	repo_name=$1 file_name=$2 prompt=$3 mode=$4
-	number_of_tokens_to_generate=$5 context_length=$6 temp=$7
+	repo_name=$1
+	file_name=$2
+	prompt=$3
+	mode=$4
+	number_of_tokens_to_generate=$5
+	context_length=$6
+	temp=$7
 
 	# Check that inputs are valid
 	check_nonempty repo_name || return 1
@@ -209,7 +221,7 @@ start_llama_session() {
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
 		;;
 	task)
-#		args="${args} --repeat-penalty 3"
+		#		args="${args} --repeat-penalty 3"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2

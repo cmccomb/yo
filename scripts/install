@@ -20,16 +20,16 @@ dependencies_to_check=$(
 
 # Check to see if the command line dependencies are installed and add them to the list if not
 while [ -n "${dependencies_to_check}" ]; do
-  # Get the first dependency in the list
-  dependency=$(echo "${dependencies_to_check}" | head -n 1)
-  dependencies_to_check=$(echo "${dependencies_to_check}" | tail -n +2)
+	# Get the first dependency in the list
+	dependency=$(echo "${dependencies_to_check}" | head -n 1)
+	dependencies_to_check=$(echo "${dependencies_to_check}" | tail -n +2)
 
 	# The dependency is in the format of "command:package"
 	command="${dependency%%:*}"
 	package="${dependency##*:}"
 
 	# Check to see if the command is installed
-	if ! command -v "${command}"  > /dev/null 2>&1; then
+	if ! command -v "${command}" >/dev/null 2>&1; then
 		brew_packages_to_install="${brew_packages_to_install}${package} "
 	fi
 done
@@ -37,7 +37,7 @@ done
 # Install the command line dependencies
 if [ -n "${brew_packages_to_install}" ]; then
 	# Check to see if homebrew is installed and install it if it is not
-	if ! command -v brew > /dev/null 2>&1; then
+	if ! command -v brew >/dev/null 2>&1; then
 		echo "Homebrew not found. Installing Homebrew..."
 		NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 		echo "Homebrew installation complete."
@@ -59,18 +59,18 @@ sudo mkdir -p /usr/local/yo
 
 # Check DIR to see if it ends with src
 case ${DIR} in
-  *"scripts")
-    # Copy contents of src/ to yo
-    sudo cp -r ${DIR}/../src/* /usr/local/yo/
-    ;;
-  *)
-    # Download the whole project from git
-    sudo git clone https://github.com/cmccomb/yo.git /tmp/yo
+*"scripts")
+	# Copy contents of src/ to yo
+	sudo cp -r ${DIR}/../src/* /usr/local/yo/
+	;;
+*)
+	# Download the whole project from git
+	sudo git clone https://github.com/cmccomb/yo.git /tmp/yo
 
-    # Copy contents of src/ to yo
-    sudo cp -r /tmp/yo/src/* /usr/local/yo/
+	# Copy contents of src/ to yo
+	sudo cp -r /tmp/yo/src/* /usr/local/yo/
 
-    ;;
+	;;
 esac
 
 # Cleanup
