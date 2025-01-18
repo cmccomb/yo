@@ -22,10 +22,11 @@ function setup() {
 function answer_should_contain() {
 	# Parse arguments
 	local expected=$1
-	local query="${*:2}"
+	local arguments=$2
+	local query=$3
 
 	# Print test description
-	echo "  Testing query: 'yo ${query}' (answer must contain \"${expected}\")"
+	echo "  Testing query: 'yo ${arguments} ${query}' (answer must match \"${expected}\")"
 
 	# Measure start time
 	local start_time
@@ -33,7 +34,7 @@ function answer_should_contain() {
 
 	# Make variables
 	local output
-	output=$(eval "src/main.sh ${query} --quiet")
+	output=$(eval "src/main.sh ${arguments} ${query} --quiet")
 
 	# Measure end time
 	local end_time
@@ -43,7 +44,7 @@ function answer_should_contain() {
 	local elapsed_time
 	elapsed_time=$(printf "%.2f" $((end_time - start_time)))
 
-	if [[ "${output}" == *"${expected}"* ]]; then
+	if [[ "${output}" =~ ${expected} ]]; then
 		echo "    ✅ Test passed in ${elapsed_time}s with answer: ${output}"
 		((PASSES += 1))
 		return 0
