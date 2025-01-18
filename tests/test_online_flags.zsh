@@ -7,15 +7,33 @@ source tests/utilities.zsh
 setup
 
 # Test the --surf flag
-answer_should_contain "-count" "--task-model --surf how do i output the total number of matches from mdfind"
+answer_should_contain \
+  "blue" \
+  "--task-model --surf" \
+  "what color is the sky"
 
 # Test the --search flag
-answer_should_contain "-count" "--task-model --search \"mdfind options\" how do i output the total number of matches from mdfind"
-answer_should_contain "-count" "--task-model --search \"mdfind options\" --search \"macos mdfind usage\" how do i output the total number of matches from mdfind"
+answer_should_contain \
+  "more" \
+  "--task-model --search \"mass of earth\""\
+   "does the earth weigh more or less than 1 pound"
+answer_should_contain \
+  "more" \
+  "--task-model --search \"mass of earth\" --search \"mass of moon\" "\
+   "does the earth weigh more or less than the moon"
 
 # Test the --website flag
-answer_should_contain "-count" "--task-model --website \"https://ss64.com/mac/mdfind.html\" how do i output the total number of matches from mdfind"
-answer_should_contain "-count" "--task-model --website \"https://ss64.com/mac/mdfind.html\" --website \"https://superuser.com/questions/1063269/the-mdfind-command-on-mac-os-x\" how do i output the total number of matches from mdfind"
+#pid1=$(serve_text_on_port "the ball is under cup number 3" 8087)
+#pid2=$(serve_text_on_port "the ball is really really under cup number 3" 8086)
+#answer_should_contain \
+#  "3|three" \
+#  "--task-model --website \"http://localhost:8086\"" \
+#  "what cup is the ball under"
+#answer_should_contain \
+#  "3|three" \
+#  "--task-model --website \"http://localhost:8087\" --website \"http://localhost:8084\"" \
+#  "what cup is the ball under"
+#kill "${pid1}" "${pid2}"
 
 # Run cleanup
 cleanup
