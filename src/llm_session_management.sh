@@ -184,7 +184,6 @@ start_llama_session() {
 
 	# If context size is -1, count token length
 	if [ "${context_length}" = -1 ]; then
-	  echo "Counting tokens $(count_number_of_tokens "${repo_name}" "${file_name}" "${prompt}")" >&2
 		context_length=$(($(count_number_of_tokens "${repo_name}" "${file_name}" "${prompt}") + number_of_tokens_to_generate)) || {
 			echo "Error: Failed to estimate context length." >&2
 			return 1
@@ -205,7 +204,6 @@ start_llama_session() {
 	args="${args} --no-warmup"
 
 	# Switch case statement for mode variable to take on values of "interactive" or "one-off" or "task"
-	echo "${mode}" >&2
 	case ${mode} in
 	interactive)
 		timestamp_log_to_stderr "💭" "Getting ready for our conversation..." >&2
@@ -231,7 +229,6 @@ start_llama_session() {
 		args="${args} --no-display-prompt"
 	fi
 
-	echo "llama-cli ${args}" >&2
 	args="${args} --prompt \"${prompt}\""
 
 	# Start session

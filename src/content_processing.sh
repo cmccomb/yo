@@ -66,9 +66,6 @@ extract_url_info() {
 	source=$1
 	max_length=$2
 
-	# Remove leading and trailing quotes in source
-	#	source=$(echo "${source}" | sed -e 's/^"//' -e 's/"$//')
-
 	# Check that inputs are valid
 	check_url source || return 1
 	check_integer max_length || return 1
@@ -189,10 +186,9 @@ compress_text() {
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
-
-			chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
-			text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
-			compressed=compressed+$(extract_facts "${chunk}" "${query}") || {
+			chunk=$(printf "%s" "${text}" | head -c "${chunk_length_in_chars}")
+      text=$(printf "%s" "${text}" | tail -c +$((chunk_length_in_chars + 1)))
+			compressed="${compressed}$(extract_facts "${chunk}" "${query}" )" || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}
