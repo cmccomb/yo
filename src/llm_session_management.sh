@@ -91,9 +91,8 @@ generate_prompt() {
 	if [ -n "${search_terms}" ]; then
 		while [ -n "${search_terms}" ]; do
 			termset=$(echo "${search_terms}" | head -n 1)
-			termlist=$(echo "${search_terms}" | tr ' ' '+')
 			search_terms=$(echo "${search_terms}" | tail -n +2)
-			timestamp_log_to_stderr "🔎" "Searching for \"${termlist}\"..." >&2
+			timestamp_log_to_stderr "🔎" "Searching for \"${termset}\"..." >&2
 			prompt="${prompt} $(generate_search_context "${termset}")\n\n" || {
 				echo "Error: Failed to generate search information context for ${termset}." >&2
 				return 1

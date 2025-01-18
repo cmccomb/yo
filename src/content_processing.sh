@@ -155,8 +155,16 @@ compress_text() {
 	# Tokenize text
 	approximate_length=$(estimate_number_of_tokens "${text}")
 
+	# If verbatim, set compression trigger length to a huge number
+	if [ "${VERBATIM:-"false"}" = true ]; then
+    compression_trigger_length=1000000000
+  else
+		compression_trigger_length=$(read_setting mode.compression.trigger_length)
+  fi
+
+
 	# If length of tokenized text is greater than cutoff, do something
-	if [ "${approximate_length}" -gt "$(read_setting mode.compression.trigger_length)" ] && [ "${summarize}" = true ]; then
+	if [ "${approximate_length}" -gt "${compression_trigger_length}" ] && [ "${summarize}" = true ]; then
 
 		# Remove spaces if flag is set
 		if [ "${remove_spaces}" = true ]; then

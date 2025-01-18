@@ -69,6 +69,7 @@ task_model_override=false casual_model_override=false balanced_model_override=fa
 # Make verbose a global variable
 VERBOSE=false
 QUIET=false
+VERBATIM=false
 
 # Update or uninstall based on the first argument
 case $1 in
@@ -199,6 +200,9 @@ while [ $# -gt 0 ]; do
 	# Make the output verbose
 	-v | --verbose) VERBOSE=true ;;
 
+	# Read files verbatim
+	-b | --verbatim) VERBATIM=true ;;
+
 	# Make the output quiet
 	-q | --quiet) QUIET=true ;;
 
@@ -325,7 +329,7 @@ start_llama_session \
 end_log "${start_time}"
 
 ### Show that verbose and quiet are used ###############################################################################
-: "${VERBOSE} ${QUIET}"
+: "${VERBOSE} ${QUIET} ${VERBATIM}"
 
 ### Return success #####################################################################################################
 exit 0
