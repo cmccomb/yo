@@ -9,7 +9,7 @@
 readonly YO="✌️"
 
 ### All versioning follows semver as defined at https://semver.org/ ####################################################
-readonly VERSION="0.2.0"
+readonly VERSION="0.2.1"
 
 ### Display version information ########################################################################################
 show_version() {
