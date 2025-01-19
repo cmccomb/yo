@@ -66,9 +66,6 @@ extract_url_info() {
 	source=$1
 	max_length=$2
 
-	# Remove leading and trailing quotes in source
-	#	source=$(echo "${source}" | sed -e 's/^"//' -e 's/"$//')
-
 	# Check that inputs are valid
 	check_url source || return 1
 	check_integer max_length || return 1
@@ -101,21 +98,23 @@ extract_facts() {
 
 	# Parse arguments
 	chunk=$1
+	query=$2
 
 	# Check that inputs are valid
 	check_nonempty chunk || return 1
 
 	# Create prompt
-	prompt
 	prompt=$(
 		cat <<-EOF
 			=============== START OF TEXT===============
 			${chunk}
 			=============== END OF TEXT===============
 
-			Based on the unstructured text given above, provide a concise list of facts and information.
+			Based on the unstructured text given above, provide a concise list of facts and information that are useful for answering this user query:
+			${query}
+
 			Begin every fact on a new line and end with a period.
-			Do not provide any additional markup or information
+			Do not provide any additional markup or information.
 		EOF
 	)
 
@@ -145,6 +144,7 @@ compress_text() {
 	remove_spaces=$2
 	remove_punctuation=$3
 	summarize=$4
+	query=$5
 
 	# Check that inputs are valid
 	check_nonempty text || return 1
@@ -194,10 +194,9 @@ compress_text() {
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
-
-			chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
-			text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
-			compressed=compressed+$(extract_facts "${chunk}") || {
+			chunk=$(printf "%s" "${text}" | head -c "${chunk_length_in_chars}")
+      text=$(printf "%s" "${text}" | tail -c +$((chunk_length_in_chars + 1)))
+			compressed="${compressed}$(extract_facts "${chunk}" "${query}" )" || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}
