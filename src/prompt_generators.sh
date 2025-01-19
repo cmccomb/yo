@@ -145,6 +145,9 @@ generate_directory_info_context() {
 # Generate clipboard information
 generate_clipboard_info_context() {
 
+  # Parse arguments
+  query=$1
+
 	# Make variables
 	clipboard_info=$(pbpaste) || {
 		echo "Error: Failed to get clipboard information." >&2
@@ -152,7 +155,7 @@ generate_clipboard_info_context() {
 	}
 
 	# Compress if needed
-	clipboard_info=$(compress_text "${clipboard_info}" true true true) || {
+	clipboard_info=$(compress_text "${clipboard_info}" true true true "${query}") || {
 		echo "Error: Failed to compress clipboard information." >&2
 		return 1
 	}
@@ -170,6 +173,7 @@ generate_file_context() {
 
 	# Parse arguments
 	filename=$1
+	query=$2
 
 	# Check that inputs are valid
 	check_path filename || return 1
@@ -181,7 +185,7 @@ generate_file_context() {
 	}
 
 	# Compress if needed
-	file_info=$(compress_text "${file_info}" true true true) ||
+	file_info=$(compress_text "${file_info}" true true true "${query}") ||
 		{
 			echo "Error: Failed to compress file information." >&2
 			return 1
@@ -205,6 +209,7 @@ generate_website_context() {
 
 	# Parse arguments
 	url=$1
+	query=$2
 
 	# Check that inputs are valid
 	check_url url || return 1
@@ -216,7 +221,7 @@ generate_website_context() {
 	}
 
 	# Compress the info
-	website_info=$(compress_text "${website_info}" true true true) || {
+	website_info=$(compress_text "${website_info}" true true true "${query}") || {
 		echo "Error: Failed to compress website information." >&2
 		return 1
 	}
@@ -235,6 +240,7 @@ generate_search_context() {
 
 	# Parse arguments
 	search_terms=$1
+	query=$2
 
 	# Check that inputs are valid
 	check_nonempty search_terms || return 1
@@ -245,7 +251,7 @@ generate_search_context() {
 		return 1
 	}
 
-	search_info=$(compress_text "${search_info}" true true true) || {
+	search_info=$(compress_text "${search_info}" true true true "${query}") || {
 		echo "Error: Failed to compress search information." >&2
 		return 1
 	}

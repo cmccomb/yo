@@ -33,6 +33,7 @@ generate_prompt() {
 		echo "Error: Failed to generate base prompt." >&2
 		return 1
 	}
+	base_prompt_length="${#prompt}"
 
 	# Add system information if requested
 	if [ "${add_system_info}" = true ]; then
@@ -55,7 +56,7 @@ generate_prompt() {
 	# Add clipboard information if requested
 	if [ "${add_clipboard_info}" = true ]; then
 		timestamp_log_to_stderr "📋" "Checking out the clipboard..." >&2
-		prompt="${prompt} $(generate_clipboard_info_context)\n\n" || {
+		prompt="${prompt} $(generate_clipboard_info_context "${query}")\n\n" || {
 			echo "Error: Failed to generate clipboard information context." >&2
 			return 1
 		}
@@ -67,7 +68,7 @@ generate_prompt() {
 			filename=$(echo "${filenames}" | head -n 1)
 			filenames=$(echo "${filenames}" | tail -n +2)
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
-			prompt="${prompt}$(generate_file_context "${filename}")\n\n" || {
+			prompt="${prompt}$(generate_file_context "${filename}" "${query}")\n\n" || {
 				echo "Error: Failed to generate context from ${filename}." >&2
 				return 1
 			}
@@ -80,7 +81,7 @@ generate_prompt() {
 			website_url=$(echo "${website_urls}" | head -n 1)
 			website_urls=$(echo "${website_urls}" | tail -n +2)
 			timestamp_log_to_stderr "🔗" "Reviewing \"${website_url}\"..." >&2
-			prompt="${prompt} $(generate_website_context "${website_url}")\n\n" || {
+			prompt="${prompt} $(generate_website_context "${website_url}" "${query}")\n\n" || {
 				echo "Error: Failed to generate website information context for ${website_url}." >&2
 				return 1
 			}
@@ -94,7 +95,7 @@ generate_prompt() {
 			termlist=$(echo "${search_terms}" | tr ' ' '+')
 			search_terms=$(echo "${search_terms}" | tail -n +2)
 			timestamp_log_to_stderr "🔎" "Searching for \"${termlist}\"..." >&2
-			prompt="${prompt} $(generate_search_context "${termset}")\n\n" || {
+			prompt="${prompt} $(generate_search_context "${termset}" "${query}")\n\n" || {
 				echo "Error: Failed to generate search information context for ${termset}." >&2
 				return 1
 			}
@@ -106,7 +107,7 @@ generate_prompt() {
 		timestamp_log_to_stderr "🌐" "Deciding what to search for..." >&2
 		llm_generated_search_terms=$(generate_search_terms "${query}")
 		timestamp_log_to_stderr "🌐" "Searching for \"${llm_generated_search_terms}\"..." >&2
-		prompt="${prompt} $(generate_search_context "${llm_generated_search_terms}")\n\n" || {
+		prompt="${prompt} $(generate_search_context "${llm_generated_search_terms}" "${query}")\n\n" || {
 			echo "Error: Failed to generate search information context." >&2
 			return 1
 		}
@@ -121,15 +122,8 @@ generate_prompt() {
 		}
 	fi
 
-	# If any content was added, add an instruction about relying on the content
-	if [ "${add_system_info}" = true ] ||
-		[ "${add_directory_info}" = true ] ||
-		[ "${add_clipboard_info}" = true ] ||
-		[ -n "${filename}" ] ||
-		[ -n "${website_url}" ] ||
-		[ -n "${search_terms}" ] ||
-		[ "${surf_and_add_results}" = true ] \
-		; then
+	# If prompt is longer than base prompt, add an instruction about relying on the content
+	if [ "${#prompt}" -gt "${base_prompt_length}" ]; then
 		prompt="${prompt} Use the information above to help you answer the user's question.\n\n"
 	fi
 
@@ -200,7 +194,6 @@ start_llama_session() {
 	args="--threads $(sysctl -n hw.logicalcpu_max || sysctl -n hw.ncpu || echo 1)"
 	args="${args} --hf-repo ${repo_name}"
 	args="${args} --hf-file ${file_name}"
-	args="${args} --prompt \"${prompt}\""
 	args="${args} --predict ${number_of_tokens_to_generate}"
 	args="${args} --temp ${temp}"
 	args="${args} --ctx-size ${context_length}"
@@ -221,7 +214,7 @@ start_llama_session() {
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
 		;;
 	task)
-		#		args="${args} --repeat-penalty 3"
+    args="${args}"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2
@@ -235,6 +228,8 @@ start_llama_session() {
 	else
 		args="${args} --no-display-prompt"
 	fi
+
+	args="${args} --prompt \"${prompt}\""
 
 	# Start session
 	if [ "${VERBOSE}" = true ]; then
