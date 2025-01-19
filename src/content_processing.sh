@@ -26,24 +26,22 @@ extract_file_info() {
 			return 1
 		}
 		;;
-	*.docx)
-		# Extract file info using pandoc
-		file_info=$(pandoc -f docx -t plain "${source}" --quiet) || {
-			echo "Error: Failed to extract text from docx file ${source}." >&2
-			return 1
-		}
-		;;
-	*.png | *.jpg | *.jpeg | *.tiff | *.bmp)
+	*.png | *.jpg | *.jpeg | *.tiff | .tif | *.bmp | *.gif | *.webp)
 		file_info=$(tesseract "${source}" - 2>/dev/null) || {
 			echo "Error: Failed to extract text from image ${source}." >&2
 			return 1
 		}
 		;;
-	*.txt | *)
-		file_info=$(cat "${source}") || {
-			echo "Error: Failed to extract text from file ${source}." >&2
-			return 1
-		}
+	*)
+		# Try to extract file info using pandoc
+		if ! file_info=$(pandoc -t markdown "${source}" --quiet 2>/dev/null); then
+			# If pandoc fails, try to use cat
+			if ! file_info=$(cat "${source}" 2>/dev/null); then
+				# If cat fails, return an error
+				echo "Error: Failed to extract text from file ${source}." >&2
+				return 1
+			fi
+		fi
 		;;
 	esac
 
