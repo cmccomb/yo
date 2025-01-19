@@ -34,7 +34,7 @@ function answer_should_contain() {
 
 	# Make variables
 	local output
-  output=$(eval "src/main.sh ${arguments} ${query} --verbose" 2>&1)
+  output=$(eval "src/main.sh ${arguments} ${query} --quiet" 2>&1)
 
 	# Measure end time
 	local end_time

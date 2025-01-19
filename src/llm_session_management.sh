@@ -229,6 +229,8 @@ start_llama_session() {
 		args="${args} --no-display-prompt"
 	fi
 
+  echo "llama-cli ${args}" >&2
+
 	args="${args} --prompt \"${prompt}\""
 
 	# Start session
