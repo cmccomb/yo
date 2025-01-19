@@ -1,17 +1,19 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
 # Set up the test environment
-function setup() {
+setup() {
+
+	# Name of test block
+	title=$1
 
 	# Warm up yo
 	src/main.sh download task
-	src/main.sh say hi -tm &>/dev/null
+	src/main.sh say hi -tm >/dev/null 2>&1
 
 	# Send a message of the form
-	local script_with_line="${funcfiletrace[1]:-"Yo"}"
 	printf "\n===========================================================================================================\n"
-	printf "\033[1mRunning tests in %s\033[0m\n" "${script_with_line%%:*}"
+	printf "\033[1mRunning tests in %s\033[0m\n" "${title%%:*}"
 	printf "===========================================================================================================\n\n"
 
 	# Set up counters
@@ -19,51 +21,54 @@ function setup() {
 	FAILS=0
 }
 
-function answer_should_contain() {
+get_epoch_time_in_seconds() {
+	perl -MTime::HiRes=time -e 'printf "%.9f\n", time'
+}
+
+answer_should_contain() {
 	# Parse arguments
-	local expected=$1
-	local arguments=$2
-	local query=$3
+	expected=$1
+	arguments=$2
+	query=$3
 
 	# Print test description
 	echo "  Testing query: 'yo ${arguments} ${query}' (answer must match \"${expected}\")"
 
 	# Measure start time
-	local start_time
 	start_time=$(perl -MTime::HiRes=time -e 'printf "%.9f\n", time')
 
 	# Make variables
-	local output
-  output=$(eval "src/main.sh ${arguments} ${query} --verbose" 2>&1)
+	output=$(eval "src/main.sh ${arguments} ${query} --quiet" 2>&1)
 
 	# Measure end time
-	local end_time
 	end_time=$(perl -MTime::HiRes=time -e 'printf "%.9f\n", time')
 
 	# Calculate elapsed time
-	local elapsed_time
-	elapsed_time=$(printf "%.2f" $((end_time - start_time)))
+	elapsed_time=$(printf "%.2f" "$(echo "${end_time} - ${start_time}" | bc)")
 
-	if [[ "${output}" =~ ${expected} ]]; then
+	# Replace - with \- in expected
+	expected=$(echo "${expected}" | sed 's/-/\\-/g')
+
+	if echo "${output}" | grep -qE "${expected}"; then
 		echo "    ✅ Test passed in ${elapsed_time}s with answer: ${output}"
-		((PASSES += 1))
+		PASSES=$((PASSES + 1))
 		return 0
 	else
 		echo "    ❌ Test failed in ${elapsed_time}s with answer: ${output}"
-		((FAILS += 1))
+		FAILS=$((FAILS + 1))
 		return 1
 	fi
 }
 
 # Write text to a file
-function serve_text_on_port() {
+serve_text_on_port() {
 	# Parse arguments
-	local text=$1
-	local port=$2
+	text=$1
+	port=$2
 
 	# Start a web server
 	while true; do
-		echo -e "HTTP/1.1 200 OK\r\nContent-Length: ${#text}\r\n\r\n${text}" | nc -l "${port}"
+		printf "HTTP/1.1 200 OK\r\nContent-Length: %s\r\n\r\n%s" "${#text}" "${text}" | nc -l "${port}"
 	done &
 
 	# Return the PID of the web server
@@ -71,9 +76,9 @@ function serve_text_on_port() {
 }
 
 # Write text to a file
-function write_text_to_tmp() {
+write_text_to_tmp() {
 	# Parse arguments
-	local text=$1
+	text=$1
 
 	# Save the text to random filename in /tmp
 	echo "${text}" >"${file:=$(mktemp)}"
@@ -83,8 +88,8 @@ function write_text_to_tmp() {
 }
 
 # Clean up the test environment
-function cleanup() {
-	if [[ "${FAILS}" -gt 0 ]]; then
+cleanup() {
+	if [ "${FAILS}" -gt 0 ]; then
 		printf "  ⚠️ \033[1mTests complete. \033[32m%s passed\033[0m, \033[31m%s failed.\033[0m\033[0m\n" "${PASSES}" "${FAILS}"
 		exit 1
 	else

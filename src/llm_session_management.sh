@@ -212,14 +212,10 @@ start_llama_session() {
 	one-off)
 		timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
-		if [ "${GITHUB_ACTIONS:-"false"}" = false ]; then
-      args="${args} --no-conversation"
-    fi
+    args="${args} --no-conversation"
 		;;
 	task)
-		if [ "${GITHUB_ACTIONS:-"false"}" = false ]; then
-      args="${args} --no-conversation"
-    fi
+    args="${args} --no-conversation"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2
@@ -234,9 +230,9 @@ start_llama_session() {
 		args="${args} --no-display-prompt"
 	fi
 
-  if [ "${VERBOSE}" = true ]; then
-    echo "LLAMA CLI ARGS: llama-cli ${args}" >&2
-  fi
+	if [ "${VERBOSE}" = true ]; then
+		echo "LLAMA CLI ARGS: llama-cli ${args}" >&2
+	fi
 
 	args="${args} --prompt \"${prompt}\""
 

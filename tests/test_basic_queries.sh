@@ -1,7 +1,7 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
-source tests/utilities.zsh
+. tests/utilities.sh
 
 # Run setup
 setup
