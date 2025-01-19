@@ -149,11 +149,10 @@ compress_text() {
 
 	# If verbatim, set compression trigger length to a huge number
 	if [ "${VERBATIM:-"false"}" = true ]; then
-    compression_trigger_length=1000000000
-  else
+		compression_trigger_length=1000000000
+	else
 		compression_trigger_length=$(read_setting mode.compression.trigger_length)
-  fi
-
+	fi
 
 	# If length of tokenized text is greater than cutoff, do something
 	if [ "${approximate_length}" -gt "${compression_trigger_length}" ] && [ "${summarize}" = true ]; then
@@ -187,8 +186,8 @@ compress_text() {
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
 			chunk=$(printf "%s" "${text}" | head -c "${chunk_length_in_chars}")
-      text=$(printf "%s" "${text}" | tail -c +$((chunk_length_in_chars + 1)))
-			compressed="${compressed}$(extract_facts "${chunk}" "${query}" )" || {
+			text=$(printf "%s" "${text}" | tail -c +$((chunk_length_in_chars + 1)))
+			compressed="${compressed}$(extract_facts "${chunk}" "${query}")" || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}

@@ -133,8 +133,8 @@ generate_directory_info_context() {
 # Generate clipboard information
 generate_clipboard_info_context() {
 
-  # Parse arguments
-  query=$1
+	# Parse arguments
+	query=$1
 
 	# Make variables
 	clipboard_info=$(pbpaste) || {

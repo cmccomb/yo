@@ -179,8 +179,8 @@ start_llama_session() {
 
 	# If VERBATIM is true, set context length to -1
 	if [ "${VERBATIM:-"false"}" = true ]; then
-    context_length=-1
-  fi
+		context_length=-1
+	fi
 
 	# If context size is -1, count token length
 	if [ "${context_length}" = -1 ]; then
@@ -214,7 +214,7 @@ start_llama_session() {
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
 		;;
 	task)
-    args="${args}"
+		args="${args}"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2

@@ -12,9 +12,9 @@ answer_should_contain \
 	"--task-model --usage" \
 	"what option can I use to see your help message"
 answer_should_contain \
-  "-tm|--task-model" \
-  "--task-model --usage" \
-  "what are the options i can use to override the default model with the task model"
+	"-tm|--task-model" \
+	"--task-model --usage" \
+	"what are the options i can use to override the default model with the task model"
 
 # Run cleanup
 cleanup
