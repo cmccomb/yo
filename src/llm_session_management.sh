@@ -211,10 +211,15 @@ start_llama_session() {
 		;;
 	one-off)
 		timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
-		args="${args} --reverse-prompt ${YO:-"✌️"} --no-conversation"
+		args="${args} --reverse-prompt ${YO:-"✌️"}"
+		if [ "${GITHUB_ACTIONS:-"false"}" = false ]; then
+      args="${args} --no-conversation"
+    fi
 		;;
 	task)
-		args="${args} --no-conversation"
+		if [ "${GITHUB_ACTIONS:-"false"}" = false ]; then
+      args="${args} --no-conversation"
+    fi
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2
