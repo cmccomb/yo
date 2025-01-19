@@ -7,7 +7,10 @@ source tests/utilities.zsh
 setup
 
 # Run test for yo update
-answer_should_contain "" "update"
+answer_should_contain \
+  "" \
+  "" \
+  "update"
 
 # Run test for yo settings
 answer_should_contain "Llama-3.2-1B-Instruct-Q4_K_M.gguf" "settings"
