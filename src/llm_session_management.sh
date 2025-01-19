@@ -92,7 +92,6 @@ generate_prompt() {
 	if [ -n "${search_terms}" ]; then
 		while [ -n "${search_terms}" ]; do
 			termset=$(echo "${search_terms}" | head -n 1)
-			termlist=$(echo "${search_terms}" | tr ' ' '+')
 			search_terms=$(echo "${search_terms}" | tail -n +2)
 			timestamp_log_to_stderr "🔎" "Searching for \"${termlist}\"..." >&2
 			prompt="${prompt} $(generate_search_context "${termset}" "${query}")\n\n" || {
@@ -181,6 +180,11 @@ start_llama_session() {
 
 	# Check if the model exists and download it if not
 	model_is_available "${repo_name}" "${file_name}" || return 1
+
+	# If VERBATIM is true, set context length to -1
+	if [ "${VERBATIM:-"false"}" = true ]; then
+    context_length=-1
+  fi
 
 	# If context size is -1, count token length
 	if [ "${context_length}" = -1 ]; then
