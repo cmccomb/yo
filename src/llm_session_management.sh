@@ -229,7 +229,9 @@ start_llama_session() {
 		args="${args} --no-display-prompt"
 	fi
 
-  echo "llama-cli ${args}" >&2
+  if [ "${VERBOSE}" = true ]; then
+    echo "LLAMA CLI ARGS: llama-cli ${args}" >&2
+  fi
 
 	args="${args} --prompt \"${prompt}\""
 
