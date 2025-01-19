@@ -1,22 +1,18 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### THE YO #############################################################################################################
-########################################################################################################################
-
-### Define the Yo ######################################################################################################
+# Define the Yo
 readonly YO="✌️"
 
-### All versioning follows semver as defined at https://semver.org/ ####################################################
+# All versioning follows semver as defined at https://semver.org/
 readonly VERSION="0.2.1"
 
-### Display version information ########################################################################################
+# Display version information
 show_version() {
 	echo "yo v${VERSION}"
 }
 
-### Display help instructions ##########################################################################################
+# Display help instructions
 show_help() {
 	cat <<-EOF
 		yo - A command-line AI assistant where you control the context ${YO}

@@ -14,10 +14,6 @@
 ########################################################################################################################
 ########################################################################################################################
 
-########################################################################################################################
-### SOURCE EXTERNAL SCRIPTS ############################################################################################
-########################################################################################################################
-
 # Get the directory where this file is saved
 DIR=$(dirname -- "$0")
 
@@ -50,12 +46,6 @@ esac
 if [ ! -f "${HOME}/.yo.yaml" ]; then
 	write_default_settings_file
 fi
-
-########################################################################################################################
-### MAIN FUNCTION ######################################################################################################
-########################################################################################################################
-
-### Parse arguments ####################################################################################################
 
 # Define variables
 query=""
@@ -252,10 +242,10 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-### Print the starting time ############################################################################################
+# Print the starting time
 start_time=$(start_log)
 
-### Configure the model based on whether its a one-off or interactive session ##########################################
+# Configure the model based on whether its a one-off or interactive session ##
 if [ -n "${query}" ]; then
 	model_name="casual"
 	repo_name="$(read_setting model.casual.repository)"
@@ -274,7 +264,7 @@ else
 	context_length="$(read_setting mode.interactive.context_length)"
 fi
 
-### Override the model if needed #######################################################################################
+# Override the model if needed ###
 if [ "${task_model_override}" = true ]; then
 	repo_name="$(read_setting model.task.repository)"
 	file_name="$(read_setting model.task.filename)"
@@ -297,7 +287,7 @@ elif [ "${serious_model_override}" = true ] && [ "${model_name}" != "serious" ];
 	timestamp_log_to_stderr "⚠️" "Overriding the ${model_name} model with the serious model ${file_name}..." >&2
 fi
 
-### Generate the prompt ################################################################################################
+# Generate the prompt
 prompt=$(
 	generate_prompt \
 		"${mode}" \
@@ -315,7 +305,7 @@ prompt=$(
 	exit 1
 }
 
-### Kick off the LLM ###################################################################################################
+# Kick off the LLM ###
 start_llama_session \
 	"${repo_name}" \
 	"${file_name}" \
@@ -325,11 +315,11 @@ start_llama_session \
 	"${context_length}" \
 	"${temp}"
 
-### Print the elapsed time #############################################################################################
+# Print the elapsed time
 end_log "${start_time}"
 
-### Show that verbose and quiet are used ###############################################################################
+# Show that verbose and quiet are used
 : "${VERBOSE} ${QUIET} ${VERBATIM}"
 
-### Return success #####################################################################################################
+# Return success
 exit 0

@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### CONTENT EXTRACTION #################################################################################################
-########################################################################################################################
-
-### Extract file_info from a file or URL (supports text and PDF files) #################################################
+# Extract file_info from a file or URL (supports text and PDF files)
 extract_file_info() {
 
 	# Parse arguments
@@ -57,7 +53,7 @@ extract_file_info() {
 	return 0
 }
 
-### Extract file_info from a file or URL (supports text and PDF files) #################################################
+### Extract file_info from a file or URL (supports text and PDF files)
 extract_url_info() {
 
 	# Parse arguments
@@ -131,8 +127,6 @@ extract_facts() {
 
 	return 0
 }
-
-### Start by establishing some prompt generators #######################################################################
 
 # Compress text
 compress_text() {

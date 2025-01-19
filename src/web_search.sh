@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### SEARCH #############################################################################################################
-########################################################################################################################
-
-### Perform a web search with user-provided terms ######################################################################
+# Perform a web search with user-provided terms
 perform_search() {
 
 	# Parse arguments
@@ -34,7 +30,7 @@ perform_search() {
 	return 0
 }
 
-### Extract optimized search terms using a small model #################################################################
+# Extract optimized search terms using a small model
 generate_search_terms() {
 
 	# Parse arguments

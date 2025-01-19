@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### LLMs AND PROMPTS ###################################################################################################
-########################################################################################################################
-
-### Generate a prompt for one-off or interactive sessions ##############################################################
+# Generate a prompt for one-off or interactive sessions
 generate_prompt() {
 
 	# Parse arguments
@@ -157,7 +153,7 @@ generate_prompt() {
 	return 0
 }
 
-### Start a llama-cli session ##########################################################################################
+# Start a llama-cli session
 start_llama_session() {
 
 	# Parse arguments
