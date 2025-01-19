@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Prepare
+        run: export GITHUB_ACTIONS=true
       - name: Install
         run: sh scripts/install
       - name: Test
