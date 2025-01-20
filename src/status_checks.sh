@@ -33,7 +33,7 @@ model_is_available() {
 				return 1
 			fi
 		else
-			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 2>/dev/null; then
+			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" --no-warmup -p "hi" -n 0 --no-conversation 2>/dev/null; then
 				echo "Error in Yo: Failed to download ${repo_name}/${file_name}." >&2
 				return 1
 			fi
