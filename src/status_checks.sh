@@ -28,7 +28,7 @@ model_is_available() {
 		timestamp_log_to_stderr "📥" "Downloading ${repo_name}/${file_name}..." >&2
 		if [ "${VERBOSE:-"false"}" = true ]; then
 			# Print message about downloading model to stderr
-			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0; then
+			if ! llama-cli --hf-repo "${repo_name}" --hf-file "${file_name}" -p "hi" -n 0 --no-conversation; then
 				echo "Error in Yo: Failed to download ${repo_name}/${file_name}." >&2
 				return 1
 			fi
