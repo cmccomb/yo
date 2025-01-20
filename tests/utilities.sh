@@ -9,7 +9,6 @@ setup() {
 
 	# Warm up yo
 	src/main.sh download task
-	src/main.sh say hi -tm >/dev/null 2>&1
 
 	# Send a message of the form
 	printf "\n===========================================================================================================\n"
