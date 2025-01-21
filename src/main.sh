@@ -209,6 +209,11 @@ while [ $# -gt 0 ]; do
 		surf_and_add_results=true
 		;;
 
+  # Add screenshot info
+  -sc|--screenshot) add_screenshot_info=true ;;
+
+  # Add text info
+  -t|--text) add_text_info=true ;;
 
   # Pull in context from mail app
   --mail) add_mail_info=true ;;
