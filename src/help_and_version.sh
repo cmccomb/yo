@@ -5,7 +5,7 @@
 readonly YO="✌️"
 
 # All versioning follows semver as defined at https://semver.org/
-readonly VERSION="0.2.1"
+readonly VERSION="0.2.2"
 
 # Display version information
 show_version() {
