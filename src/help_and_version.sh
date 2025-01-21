@@ -5,7 +5,7 @@
 readonly YO="✌️"
 
 # All versioning follows semver as defined at https://semver.org/
-readonly VERSION="0.2.1"
+readonly VERSION="0.2.2"
 
 # Display version information
 show_version() {
@@ -37,6 +37,7 @@ show_help() {
 		                            including .pdf, .docx, images (.png, .jpeg, .tiff, etc.), and any text file (.txt, .md,
 		                            .py, .zsh, etc.). This flag can be repeated to bring in several files.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
+		    -t, --text "TEXT"       Include the specified text in Yo's context.
 
 		  Finally, we have several flags that require an internet connection:
 		    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
