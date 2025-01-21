@@ -207,6 +207,12 @@ while [ $# -gt 0 ]; do
 		surf_and_add_results=true
 		;;
 
+  # Add screenshot info
+  -sc|--screenshot) add_screenshot_info=true ;;
+
+  # Add text info
+  -t|--text) add_text_info=true ;;
+
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
 
@@ -300,7 +306,9 @@ prompt=$(
 		"${add_usage_info}" \
 		"${add_system_info}" \
 		"${add_directory_info}" \
-		"${add_clipboard_info}"
+		"${add_clipboard_info}" \
+		"${add_screenshot_info}" \
+		"${add_text_info}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
 	exit 1
