@@ -56,6 +56,7 @@ search_term_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+add_mail_info=false add_calendar_info=false add_notes_info=false add_reminders_info=false add_terminal_info=false add_safari_info=false
 
 # Make verbose a global variable
 VERBOSE=false
@@ -206,6 +207,25 @@ while [ $# -gt 0 ]; do
 
 		surf_and_add_results=true
 		;;
+
+
+  # Pull in context from mail app
+  --mail) add_mail_info=true ;;
+
+  # Pull in context from calendar app
+  --calendar) add_calendar_info=true ;;
+
+  # Pull in context from notes app
+  --notes) add_notes_info=true ;;
+
+  # Pull in context from reminders app
+  --reminders) add_reminders_info=true ;;
+
+  # Pull in context from terminal app
+  --terminal) add_terminal_info=true ;;
+
+  # Pull in context from safari app
+  --safari) add_safari_info=true ;;
 
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
