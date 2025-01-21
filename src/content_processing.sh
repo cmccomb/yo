@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### CONTENT EXTRACTION #################################################################################################
-########################################################################################################################
-
-### Extract file_info from a file or URL (supports text and PDF files) #################################################
+# Extract file_info from a file or URL (supports text and PDF files)
 extract_file_info() {
 
 	# Parse arguments
@@ -26,24 +22,22 @@ extract_file_info() {
 			return 1
 		}
 		;;
-	*.docx)
-		# Extract file info using pandoc
-		file_info=$(pandoc -f docx -t plain "${source}" --quiet) || {
-			echo "Error: Failed to extract text from docx file ${source}." >&2
-			return 1
-		}
-		;;
-	*.png | *.jpg | *.jpeg | *.tiff | *.bmp)
+	*.png | *.jpg | *.jpeg | *.tiff | .tif | *.bmp | *.gif | *.webp)
 		file_info=$(tesseract "${source}" - 2>/dev/null) || {
 			echo "Error: Failed to extract text from image ${source}." >&2
 			return 1
 		}
 		;;
-	*.txt | *)
-		file_info=$(cat "${source}") || {
-			echo "Error: Failed to extract text from file ${source}." >&2
-			return 1
-		}
+	*)
+		# Try to extract file info using pandoc
+		if ! file_info=$(pandoc -t markdown "${source}" --quiet 2>/dev/null); then
+			# If pandoc fails, try to use cat
+			if ! file_info=$(cat "${source}" 2>/dev/null); then
+				# If cat fails, return an error
+				echo "Error: Failed to extract text from file ${source}." >&2
+				return 1
+			fi
+		fi
 		;;
 	esac
 
@@ -59,15 +53,12 @@ extract_file_info() {
 	return 0
 }
 
-### Extract file_info from a file or URL (supports text and PDF files) #################################################
+### Extract file_info from a file or URL (supports text and PDF files)
 extract_url_info() {
 
 	# Parse arguments
 	source=$1
 	max_length=$2
-
-	# Remove leading and trailing quotes in source
-	#	source=$(echo "${source}" | sed -e 's/^"//' -e 's/"$//')
 
 	# Check that inputs are valid
 	check_url source || return 1
@@ -101,21 +92,23 @@ extract_facts() {
 
 	# Parse arguments
 	chunk=$1
+	query=$2
 
 	# Check that inputs are valid
 	check_nonempty chunk || return 1
 
 	# Create prompt
-	prompt
 	prompt=$(
 		cat <<-EOF
 			=============== START OF TEXT===============
 			${chunk}
 			=============== END OF TEXT===============
 
-			Based on the unstructured text given above, provide a concise list of facts and information.
+			Based on the unstructured text given above, provide a concise list of facts and information that are useful for answering this user query:
+			${query}
+
 			Begin every fact on a new line and end with a period.
-			Do not provide any additional markup or information
+			Do not provide any additional markup or information.
 		EOF
 	)
 
@@ -135,8 +128,6 @@ extract_facts() {
 	return 0
 }
 
-### Start by establishing some prompt generators #######################################################################
-
 # Compress text
 compress_text() {
 
@@ -145,6 +136,7 @@ compress_text() {
 	remove_spaces=$2
 	remove_punctuation=$3
 	summarize=$4
+	query=$5
 
 	# Check that inputs are valid
 	check_nonempty text || return 1
@@ -155,8 +147,15 @@ compress_text() {
 	# Tokenize text
 	approximate_length=$(estimate_number_of_tokens "${text}")
 
+	# If verbatim, set compression trigger length to a huge number
+	if [ "${VERBATIM:-"false"}" = true ]; then
+		compression_trigger_length=1000000000
+	else
+		compression_trigger_length=$(read_setting mode.compression.trigger_length)
+	fi
+
 	# If length of tokenized text is greater than cutoff, do something
-	if [ "${approximate_length}" -gt "$(read_setting mode.compression.trigger_length)" ] && [ "${summarize}" = true ]; then
+	if [ "${approximate_length}" -gt "${compression_trigger_length}" ] && [ "${summarize}" = true ]; then
 
 		# Remove spaces if flag is set
 		if [ "${remove_spaces}" = true ]; then
@@ -186,10 +185,9 @@ compress_text() {
 
 			# Update the user on what's happening
 			timestamp_log_to_stderr "📦" "Reading chunk ${counter} of ${number_of_chunks}..." >&2
-
-			chunk=$(printf "%s" "${text}" | cut -c1-"${chunk_length_in_chars}")
-			text=$(printf "%s" "${text}" | cut -c$((chunk_length_in_chars + 1))-)
-			compressed=compressed+$(extract_facts "${chunk}") || {
+			chunk=$(printf "%s" "${text}" | head -c "${chunk_length_in_chars}")
+			text=$(printf "%s" "${text}" | tail -c +$((chunk_length_in_chars + 1)))
+			compressed="${compressed}$(extract_facts "${chunk}" "${query}")" || {
 				echo "Error: Failed to compress text." >&2
 				return 1
 			}

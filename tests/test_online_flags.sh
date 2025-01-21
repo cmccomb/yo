@@ -1,26 +1,22 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # shellcheck enable=all
 
-source tests/utilities.zsh
+. tests/utilities.sh
 
 # Run setup
 setup
 
 # Test the --surf flag
 answer_should_contain \
-  "blue" \
-  "--task-model --surf" \
-  "what color is the sky"
+	"blue" \
+	"--task-model --surf" \
+	"what color is the sky"
 
 # Test the --search flag
 answer_should_contain \
-  "more" \
-  "--task-model --search \"mass of earth\""\
-   "does the earth weigh more or less than 1 pound"
-answer_should_contain \
-  "more" \
-  "--task-model --search \"mass of earth\" --search \"mass of moon\" "\
-   "does the earth weigh more or less than the moon"
+	"more" \
+	"--task-model --search \"mass of earth\" --search \"mass of moon\" " \
+	"does the earth weigh more or less than the moon"
 
 # Test the --website flag
 #pid1=$(serve_text_on_port "the ball is under cup number 3" 8087)

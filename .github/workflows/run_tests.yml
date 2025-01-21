@@ -15,4 +15,4 @@ jobs:
       - name: Install
         run: sh scripts/install
       - name: Test
-        run: zsh tests/test_all.zsh
+        run: sh tests/test_all.sh

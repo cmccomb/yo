@@ -1,10 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### INSTALLATION MANAGEMENT ############################################################################################
-########################################################################################################################
-
+# Update yo
 update_yo() {
 
 	# If online, do things
@@ -16,7 +13,7 @@ update_yo() {
 		}
 
 		# Run the update script
-		zsh /tmp/yo_install.sh >/dev/null || {
+		sh /tmp/yo_install.sh >/dev/null || {
 			echo "Error: Failed to run the update script." >&2
 			return 1
 		}
@@ -27,6 +24,7 @@ update_yo() {
 
 }
 
+# Uninstall yo
 uninstall_yo() {
 
 	# Remove you from /usr/local/bin

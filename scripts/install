@@ -51,6 +51,11 @@ else
 	echo "Command line dependencies are already installed."
 fi
 
+# Update all brew packages
+echo "Updating all brew packages..."
+brew update
+brew upgrade
+
 # Download the latest version of yo
 echo "Downloading and installing the latest version of yo..."
 

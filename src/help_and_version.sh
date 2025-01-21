@@ -1,22 +1,18 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-### THE YO #############################################################################################################
-########################################################################################################################
-
-### Define the Yo ######################################################################################################
+# Define the Yo
 readonly YO="✌️"
 
-### All versioning follows semver as defined at https://semver.org/ ####################################################
-readonly VERSION="0.2.0"
+# All versioning follows semver as defined at https://semver.org/
+readonly VERSION="0.2.1"
 
-### Display version information ########################################################################################
+# Display version information
 show_version() {
 	echo "yo v${VERSION}"
 }
 
-### Display help instructions ##########################################################################################
+# Display help instructions
 show_help() {
 	cat <<-EOF
 		yo - A command-line AI assistant where you control the context ${YO}
@@ -72,11 +68,11 @@ show_help() {
 		  are available:
 		    yo download <model>          Download the Yo internal language models prior to use. Options are task, casual,
 		                                 balanced, serious, or everything.
-		        yo settings                  Display the current settings.
-		        yo settings SETTING          Read a setting from the settings file. SETTING should use dot notation to reference
-		                                     nested dictionaries in ~/.yo.yaml (e.g., model.task.temperature).
-		        yo settings SETTING [VALUE]  Write a setting to the settings file.
-		        yo settings reset            Restore factor default settings.
+		    yo settings                  Display the current settings.
+		    yo settings SETTING          Read a setting from the settings file. SETTING should use dot notation to reference
+		                                 nested dictionaries in ~/.yo.yaml (e.g., model.task.temperature).
+		    yo settings SETTING [VALUE]  Write a setting to the settings file.
+		    yo settings reset            Restore factor default settings.
 		    yo update                    Update Yo to the latest version.
 		    yo uninstall                 Uninstall Yo from your system.
 
