@@ -306,7 +306,9 @@ prompt=$(
 		"${add_usage_info}" \
 		"${add_system_info}" \
 		"${add_directory_info}" \
-		"${add_clipboard_info}"
+		"${add_clipboard_info}" \
+		"${add_screenshot_info}" \
+		"${add_text_info}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
 	exit 1
