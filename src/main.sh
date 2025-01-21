@@ -55,6 +55,7 @@ search_term_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+add_screenshot_info=false add_text_info=false
 
 # Make verbose a global variable
 VERBOSE=false
