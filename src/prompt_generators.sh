@@ -156,7 +156,6 @@ generate_clipboard_info_context() {
 	EOF
 }
 
-
 # Generate text information
 generate_text_context() {
 

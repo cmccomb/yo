@@ -39,13 +39,13 @@ answer_should_contain \
 
 # Text the --text flag
 answer_should_contain \
-  "3|three" \
-  "--task-model --text 'the ball is under cup number 3'" \
-  "what cup is the ball under"
+	"3|three" \
+	"--task-model --text 'the ball is under cup number 3'" \
+	"what cup is the ball under"
 answer_should_contain \
-  "3|three" \
-  "--task-model --text 'the ball is under cup number 3' --text 'the ball is really really under cup number 3'" \
-  "what cup is the ball under"
+	"3|three" \
+	"--task-model --text 'the ball is under cup number 3' --text 'the ball is really really under cup number 3'" \
+	"what cup is the ball under"
 
 # Run cleanup
 cleanup

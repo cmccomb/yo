@@ -78,7 +78,7 @@ generate_prompt() {
 		while [ -n "${text_input_list}" ]; do
 			text_input=$(echo "${text_input_list}" | head -n 1)
 			text_input_list=$(echo "${text_input_list}" | tail -n +2)
-      timestamp_log_to_stderr "🔗" "Reviewing \"$(echo "${text_input}" | cut -c1-30)\"..." >&2
+			timestamp_log_to_stderr "🔗" "Reviewing \"$(echo "${text_input}" | cut -c1-30)\"..." >&2
 			prompt="${prompt} $(generate_text_context "${text_input}" "${query}")\n\n" || {
 				echo "Error: Failed to generate website information context for ${text_input}." >&2
 				return 1

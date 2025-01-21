@@ -218,8 +218,8 @@ while [ $# -gt 0 ]; do
 		surf_and_add_results=true
 		;;
 
-  # Add screenshot info
-  -sc|--screenshot) add_screenshot_info=true ;;
+	# Add screenshot info
+	-sc | --screenshot) add_screenshot_info=true ;;
 
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
