@@ -15,6 +15,14 @@ generate_prompt() {
 	add_system_info=$8
 	add_directory_info=$9
 	add_clipboard_info=${10}
+	add_screenshot_info=${11}
+	add_text_info=${12}
+	add_mail_info=${13}
+	add_calendar_info=${14}
+	add_notes_info=${15}
+	add_reminders_info=${16}
+	add_terminal_info=${17}
+	add_safari_info=${18}
 
 	# Check that inputs are valid
 	check_mode mode || return 1

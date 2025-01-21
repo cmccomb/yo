@@ -40,6 +40,7 @@ esac
 . "${DIR}/tokens.sh"
 . "${DIR}/content_processing.sh"
 . "${DIR}/prompt_generators.sh"
+. "${DIR}/app_context.sh"
 . "${DIR}/llm_session_management.sh"
 
 # Write a settings file if there isn't one already
@@ -55,6 +56,8 @@ search_term_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+add_screenshot_info=false add_text_info=false
+add_mail_info=false add_calendar_info=false add_notes_info=false add_reminders_info=false add_terminal_info=false add_safari_info=false
 
 # Make verbose a global variable
 VERBOSE=false
@@ -206,6 +209,30 @@ while [ $# -gt 0 ]; do
 		surf_and_add_results=true
 		;;
 
+  # Add screenshot info
+  -sc|--screenshot) add_screenshot_info=true ;;
+
+  # Add text info
+  -t|--text) add_text_info=true ;;
+
+  # Pull in context from mail app
+  --mail) add_mail_info=true ;;
+
+  # Pull in context from calendar app
+  --calendar) add_calendar_info=true ;;
+
+  # Pull in context from notes app
+  --notes) add_notes_info=true ;;
+
+  # Pull in context from reminders app
+  --reminders) add_reminders_info=true ;;
+
+  # Pull in context from terminal app
+  --terminal) add_terminal_info=true ;;
+
+  # Pull in context from safari app
+  --safari) add_safari_info=true ;;
+
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
 
@@ -299,7 +326,15 @@ prompt=$(
 		"${add_usage_info}" \
 		"${add_system_info}" \
 		"${add_directory_info}" \
-		"${add_clipboard_info}"
+		"${add_clipboard_info}" \
+		"${add_screenshot_info}" \
+		"${add_text_info}" \
+		"${add_mail_info}" \
+		"${add_calendar_info}" \
+		"${add_notes_info}" \
+		"${add_reminders_info}" \
+		"${add_terminal_info}" \
+		"${add_safari_info}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
 	exit 1
