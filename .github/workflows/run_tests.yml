@@ -14,7 +14,5 @@ jobs:
         uses: actions/checkout@v4
       - name: Install
         run: sh scripts/install
-      - name: llama-cli help
-        run: llama-cli --help
       - name: Test
         run: sh tests/test_all.sh

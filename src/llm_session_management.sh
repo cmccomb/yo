@@ -212,10 +212,10 @@ start_llama_session() {
 	one-off)
 		timestamp_log_to_stderr "💭" "Thinking about the question..." >&2
 		args="${args} --reverse-prompt ${YO:-"✌️"}"
-    args="${args} --no-conversation"
+		args="${args} --no-conversation"
 		;;
 	task)
-    args="${args} --no-conversation"
+		args="${args} --no-conversation"
 		;;
 	*)
 		echo "Error: Invalid mode: ${mode}" >&2
