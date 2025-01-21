@@ -38,6 +38,7 @@ show_help() {
 		                            .py, .zsh, etc.). This flag can be repeated to bring in several files.
 		    -sc, --screenshot       Take a screenshot and integrate the image into Yo's context.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
+		    -t, --text "TEXT"       Include the specified text in Yo's context.
 
 		  Finally, we have several flags that require an internet connection:
 		    -s, --search "TERMS"    Perform a web search using the specified quoted terms and integrate the results into
