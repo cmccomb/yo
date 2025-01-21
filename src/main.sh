@@ -40,6 +40,7 @@ esac
 . "${DIR}/tokens.sh"
 . "${DIR}/content_processing.sh"
 . "${DIR}/prompt_generators.sh"
+. "${DIR}/app_context.sh"
 . "${DIR}/llm_session_management.sh"
 
 # Write a settings file if there isn't one already
