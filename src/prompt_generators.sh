@@ -156,6 +156,28 @@ generate_clipboard_info_context() {
 	EOF
 }
 
+
+# Generate text information
+generate_text_context() {
+
+	# Parse arguments
+	text_info=$1
+	query=$2
+
+	# Compress if needed
+	text_info=$(compress_text "${clipboard_info}" true true true "${query}") || {
+		echo "Error: Failed to compress text_info information." >&2
+		return 1
+	}
+
+	cat <<-EOF
+		Here are the contents of a text input:
+		================= BEGINNING OF CURRENT CLIPBOARD CONTENTS =================
+		${text_info}
+		==================== END OF CURRENT CLIPBOARD CONTENTS ====================
+	EOF
+}
+
 # Generate file contents context
 generate_file_context() {
 

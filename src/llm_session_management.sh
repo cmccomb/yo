@@ -16,7 +16,7 @@ generate_prompt() {
 	add_directory_info=$9
 	add_clipboard_info=${10}
 	add_screenshot_info=${11}
-	add_text_info=${12}
+	text_input_list=${12}
 
 	# Check that inputs are valid
 	check_mode mode || return 1
@@ -68,6 +68,19 @@ generate_prompt() {
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt="${prompt}$(generate_file_context "${filename}" "${query}")\n\n" || {
 				echo "Error: Failed to generate context from ${filename}." >&2
+				return 1
+			}
+		done
+	fi
+
+	# Add website information if available
+	if [ -n "${text_input_list}" ]; then
+		while [ -n "${text_input_list}" ]; do
+			text_input=$(echo "${text_input_list}" | head -n 1)
+			text_input_list=$(echo "${text_input_list}" | tail -n +2)
+      timestamp_log_to_stderr "🔗" "Reviewing \"$(echo "${text_input}" | cut -c1-30)\"..." >&2
+			prompt="${prompt} $(generate_text_context "${text_input}" "${query}")\n\n" || {
+				echo "Error: Failed to generate website information context for ${text_input}." >&2
 				return 1
 			}
 		done

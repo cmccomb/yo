@@ -52,10 +52,11 @@ query=""
 file_path_list=""
 website_url_list=""
 search_term_list=""
+text_input_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
-add_screenshot_info=false add_text_info=false
+add_screenshot_info=false
 
 # Make verbose a global variable
 VERBOSE=false
@@ -157,6 +158,16 @@ while [ $# -gt 0 ]; do
 			exit 1
 		fi
 		;;
+	# Read in a text
+	-t | --text)
+		if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+			text_input_list="${text_input_list}$2\n"
+			shift
+		else
+			echo "Error: --file requires a file." >&2
+			exit 1
+		fi
+		;;
 
 	# Read in a file
 	-w | --website)
@@ -209,9 +220,6 @@ while [ $# -gt 0 ]; do
 
   # Add screenshot info
   -sc|--screenshot) add_screenshot_info=true ;;
-
-  # Add text info
-  -t|--text) add_text_info=true ;;
 
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
@@ -308,7 +316,7 @@ prompt=$(
 		"${add_directory_info}" \
 		"${add_clipboard_info}" \
 		"${add_screenshot_info}" \
-		"${add_text_info}"
+		"${text_input_list}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
 	exit 1
