@@ -209,6 +209,31 @@ generate_file_context() {
 	EOF
 }
 
+generate_screenshot_context() {
+	# Make filepath
+	screenshot_path=$(mktemp)
+
+	# Take the screenshot
+	screencapture -x "${screenshot_path}" || {
+		echo "Error: Failed to take a screenshot." >&2
+		return 1
+	}
+
+	# Return the screenshot
+	file_info=$(extract_file_info "${screenshot_path}" "$(read_setting general.maximum_file_content_length)") || {
+		echo "Error: Failed to extract information from file ${screenshot_path}." >&2
+		return 1
+	}
+
+	# Return screenshot information
+	cat <<-EOF
+		Here is information extracted from the screenshot of your screen:
+		================= BEGINNING OF SCREENSHOT =================
+		${file_info}
+		================== END OF SCREENSHOT ==================
+	EOF
+}
+
 # Generate website contents
 generate_website_context() {
 
