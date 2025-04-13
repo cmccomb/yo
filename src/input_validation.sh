@@ -2,6 +2,10 @@
 # shellcheck enable=all
 
 # Check if the input is empty
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is non-empty, false otherwise
 check_nonempty() {
 
 	# Parse arguments
@@ -20,6 +24,10 @@ check_nonempty() {
 }
 
 # Check if the input is an integer and print an error message with the name of the variable if not
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is an integer, false otherwise
 check_integer() {
 
 	# Parse arguments
@@ -41,6 +49,10 @@ check_integer() {
 }
 
 # Check if the input is Boolean
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is Boolean, false otherwise
 check_boolean() {
 
 	# Parse arguments
@@ -62,6 +74,10 @@ check_boolean() {
 }
 
 # Check if the input is a float
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is a float, false otherwise
 check_float() {
 
 	# Parse arguments
@@ -83,6 +99,10 @@ check_float() {
 }
 
 # Check if the input is a filepath
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is a valid path, false otherwise
 check_path() {
 
 	# Parse arguments
@@ -104,6 +124,10 @@ check_path() {
 }
 
 # Check if hte input is a url
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is a valid URL, false otherwise
 check_url() {
 
 	# Parse arguments
@@ -125,6 +149,10 @@ check_url() {
 }
 
 # Check if the input is a valid emoji
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is a valid emoji, false otherwise
 check_emoji() {
 
 	# Parse arguments
@@ -146,6 +174,10 @@ check_emoji() {
 }
 
 # Check if the input is a valid mode
+# Parameters:
+#   $1: The name of the variable to check
+# Returns:
+#   true if the input is a valid mode, false otherwise
 check_mode() {
 
 	# Parse arguments

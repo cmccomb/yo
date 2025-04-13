@@ -1,19 +1,6 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-########################################################################################################################
-######'                     `########'                ╭─────────────────────────────────────────╮                 `#####
-####'    db    db  .d88b.     `####'                  │  Your AI Assistant in the Command Line  │                  `####
-####     `8b  d8' .8P  Y8.     ####                   ╰─────────────────────────────────────────╯                   ####
-####      `8bd8'  88    88     ####     If you are here, you are probably trying to fix or change something. If     ####
-####        88    88    88     ####     you are here to fix something,  I am sorry it broke in the first place!     ####
-####        88    `8b  d8'     ####     But either way, I hope that the documentation is helpful and I wish you     ####
-####.       YP     `Y88P'     .####.     the best of luck. If you need help, please email: ccmcc2012@gmail.com     .####
-######.                     .########.                                                                           .######
-########################################################################################################################
-########################################################################################################################
-
 # Get the directory where this file is saved
 DIR=$(dirname -- "$0")
 
@@ -52,9 +39,11 @@ query=""
 file_path_list=""
 website_url_list=""
 search_term_list=""
+text_input_list=""
 surf_and_add_results=false
 add_directory_info=false add_system_info=false add_clipboard_info=false add_usage_info=false
 task_model_override=false casual_model_override=false balanced_model_override=false serious_model_override=false
+add_screenshot_info=false
 
 # Make verbose a global variable
 VERBOSE=false
@@ -156,6 +145,16 @@ while [ $# -gt 0 ]; do
 			exit 1
 		fi
 		;;
+	# Read in a text
+	-t | --text)
+		if [ -n "$2" ] && [ "${2#-}" = "$2" ]; then
+			text_input_list="${text_input_list}$2\n"
+			shift
+		else
+			echo "Error: --file requires a file." >&2
+			exit 1
+		fi
+		;;
 
 	# Read in a file
 	-w | --website)
@@ -205,6 +204,9 @@ while [ $# -gt 0 ]; do
 
 		surf_and_add_results=true
 		;;
+
+		# Add screenshot info
+	-sc | --screenshot) add_screenshot_info=true ;;
 
 	# Add system information to the context
 	-y | --system) add_system_info=true ;;
@@ -299,7 +301,9 @@ prompt=$(
 		"${add_usage_info}" \
 		"${add_system_info}" \
 		"${add_directory_info}" \
-		"${add_clipboard_info}"
+		"${add_clipboard_info}" \
+		"${add_screenshot_info}" \
+		"${text_input_list}"
 ) || {
 	echo "Error: Failed to generate prompt." >&2
 	exit 1

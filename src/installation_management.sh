@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-# Update yo
+# This function updates yo by downloading the latest version from the server and running the update script.
 update_yo() {
 
 	# If online, do things
@@ -24,7 +24,7 @@ update_yo() {
 
 }
 
-# Uninstall yo
+# This function uninstalls yo by removing the binary and all associated files.
 uninstall_yo() {
 
 	# Remove you from /usr/local/bin
