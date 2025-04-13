@@ -1,19 +1,6 @@
 #!/usr/bin/env sh
 # shellcheck enable=all
 
-########################################################################################################################
-########################################################################################################################
-######'                     `########'                ╭─────────────────────────────────────────╮                 `#####
-####'    db    db  .d88b.     `####'                  │  Your AI Assistant in the Command Line  │                  `####
-####     `8b  d8' .8P  Y8.     ####                   ╰─────────────────────────────────────────╯                   ####
-####      `8bd8'  88    88     ####     If you are here, you are probably trying to fix or change something. If     ####
-####        88    88    88     ####     you are here to fix something,  I am sorry it broke in the first place!     ####
-####        88    `8b  d8'     ####     But either way, I hope that the documentation is helpful and I wish you     ####
-####.       YP     `Y88P'     .####.     the best of luck. If you need help, please email: ccmcc2012@gmail.com     .####
-######.                     .########.                                                                           .######
-########################################################################################################################
-########################################################################################################################
-
 # Get the directory where this file is saved
 DIR=$(dirname -- "$0")
 

@@ -77,8 +77,7 @@ generate_prompt() {
 
 	# Add screenshot information if requested
 	if [ "${add_screenshot_info}" = true ]; then
-		timestamp_log_to_stderr "📸" "Taking a screenshot..." >&2
-		echo "Error: Failed to take a screenshot." >&2
+		timestamp_log_to_stderr "📸" "Checking out the screen..." >&2
 		prompt="${prompt}$(generate_screenshot_context)\n\n" || {
 			echo "Error: Failed to generate screenshot information context." >&2
 			return 1
