@@ -10,6 +10,7 @@ readonly VERSION="0.2.2"
 # Display version information
 show_version() {
 	echo "yo v${VERSION}"
+	return 0
 }
 
 # Display help instructions
@@ -36,6 +37,7 @@ show_help() {
 		    -f, --file "PATH"       Extract the specified file into Yo's context. Supports a variety of file formats,
 		                            including .pdf, .docx, images (.png, .jpeg, .tiff, etc.), and any text file (.txt, .md,
 		                            .py, .zsh, etc.). This flag can be repeated to bring in several files.
+		    -sc, --screenshot       Take a screenshot and integrate the image into Yo's context.
 		    -y, --system            Run a few system commands and integrate the information into Yo's context.
 		    -t, --text "TEXT"       Include the specified text in Yo's context.
 

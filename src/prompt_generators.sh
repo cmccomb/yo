@@ -20,6 +20,8 @@ generate_base_prompt() {
 }
 
 # Generate prompt for one-off sessions
+# Parameters:
+#   $1: The query
 generate_oneoff_instructions() {
 
 	# Parse arguments
@@ -164,16 +166,16 @@ generate_text_context() {
 	query=$2
 
 	# Compress if needed
-	text_info=$(compress_text "${clipboard_info}" true true true "${query}") || {
+	text_info=$(compress_text "${text_info}" true true true "${query}") || {
 		echo "Error: Failed to compress text_info information." >&2
 		return 1
 	}
 
 	cat <<-EOF
 		Here are the contents of a text input:
-		================= BEGINNING OF CURRENT CLIPBOARD CONTENTS =================
+		================= BEGINNING OF TEXT CONTENTS =================
 		${text_info}
-		==================== END OF CURRENT CLIPBOARD CONTENTS ====================
+		==================== END OF TEXT CONTENTS ====================
 	EOF
 }
 
@@ -206,6 +208,31 @@ generate_file_context() {
 		================= BEGINNING OF FILE CONTENTS =================
 		${file_info}
 		===================== END OF FILE CONTENTS ===================
+	EOF
+}
+
+generate_screenshot_context() {
+
+  screenshot_path=$(mktemp).png
+
+	# Take the screenshot
+	screencapture -x "${screenshot_path}" || {
+		echo "Error: Failed to take a screenshot." >&2
+		return 1
+	}
+
+	# Return the screenshot
+	file_info=$(extract_file_info "${screenshot_path}" "$(read_setting general.maximum_file_content_length)") || {
+		echo "Error: Failed to extract information from file ${screenshot_path}." >&2
+		return 1
+	}
+
+	# Return screenshot information
+	cat <<-EOF
+		Here is information extracted from the screenshot of your screen:
+		================= BEGINNING OF SCREENSHOT =================
+		${file_info}
+		================== END OF SCREENSHOT ==================
 	EOF
 }
 
