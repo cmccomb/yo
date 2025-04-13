@@ -10,6 +10,7 @@ readonly VERSION="0.2.2"
 # Display version information
 show_version() {
 	echo "yo v${VERSION}"
+	return 0
 }
 
 # Display help instructions
