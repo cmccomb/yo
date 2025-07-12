@@ -124,27 +124,6 @@ check_url() {
 	fi
 }
 
-# Check if the input is a valid emoji
-check_emoji() {
-
-	# Parse arguments
-	variable_name=$1
-
-	# Check that inputs are non-empty
-	check_nonempty variable_name || return 1
-
-	# Make variables
-	eval "variable_value=\${$1}"
-
-	# Check if the input is a valid emoji
-	if ! echo "${variable_value}" | grep -Eq '[😀-🙏🌀-🗿]'; then
-		echo "Error in Yo: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
-		return 1
-	else
-		return 0
-	fi
-}
-
 # Check if the input is a valid mode
 check_mode() {
 
