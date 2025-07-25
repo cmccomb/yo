@@ -31,19 +31,19 @@ write_default_settings_file() {
 		model:
 		  task:                                                    # The task model is invoked for search term generation and compression
 		    repository: bartowski/Qwen_Qwen3-0.6B-GGUF             # The HuggingFace repository where the model is stored
-		    filename: Qwen_Qwen3-0.6B-GGUF-Q4_K_M.gguf             # The filename of the model in the repository
+		    filename: Qwen_Qwen3-0.6B-Q4_K_M.gguf                  # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  casual:                                                  # The casual model is invoked for oneoff requests
 		    repository: bartowski/Qwen_Qwen3-4B-Instruct-GGUF      # The HuggingFace repository where the model is stored
-		    filename: Qwen_Qwen3-4B-GGUF-Q4_K_M.gguf               # The filename of the model in the repository
+		    filename: Qwen_Qwen3-4B-Q4_K_M.gguf                    # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  balanced:                                                # The balanced model is never invoked by default
 		    repository: bartowski/Qwen_Qwen3-8B-Instruct-GGUF      # The HuggingFace repository where the model is stored
-		    filename: Qwen_Qwen3-8B-GGUF-Q4_K_M.gguf               # The filename of the model in the repository
+		    filename: Qwen_Qwen3-8B-Q4_K_M.gguf                    # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  serious:                                                 # The serious model is invoked for interactive conversations
 		    repository: bartowski/Qwen_Qwen3-14B-Instruct-GGUF     # The HuggingFace repository where the model is stored
-		    filename: Qwen_Qwen3-14B-GGUF-IQ3_M.gguf               # The filename of the model in the repository
+		    filename: Qwen_Qwen3-14B-IQ3_M.gguf               # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 
 		# Search settings
