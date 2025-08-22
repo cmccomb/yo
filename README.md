@@ -22,6 +22,17 @@ $ yo uninstall
 ```
 
 ## Usage
+Check the installed version:
+```shell,no_run
+$ yo --version
+ yo v0.2.1
+```
+
+Display help information:
+```shell,no_run
+$ yo --help
+```
+
 Get a quick answer
 ```shell,no_run
 $ yo what is the capital of france
