@@ -4,6 +4,7 @@
 . tests/utilities.sh
 
 # Run setup
+export YO_TEST_WEB_SEARCH_RESPONSE=$(printf '%s\n' '"title": "Sky color"' '"snippet": "The sky is blue."' '"title": "Mass comparison"' '"snippet": "The Earth weighs more than the Moon."')
 setup
 
 # Test the --surf flag

@@ -10,6 +10,11 @@ perform_search() {
 	# Check that inputs are valid
 	check_nonempty terms || return 1
 
+	if [ -n "${YO_TEST_WEB_SEARCH_RESPONSE:-}" ]; then
+		echo "${YO_TEST_WEB_SEARCH_RESPONSE}"
+		return 0
+	fi
+
 	# Example API call
 	url="$(read_setting search.google_cse.base_url)?key=$(read_setting search.google_cse.api_key)&cx=$(read_setting search.google_cse.id)&q=$(echo "${terms}" | sed 's/ /+/g')"
 

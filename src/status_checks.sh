@@ -3,6 +3,9 @@
 
 # Function that checks to see if the system is online
 system_is_online() {
+	if [ -n "${YO_TEST_WEB_SEARCH_RESPONSE:-}" ]; then
+		return 0
+	fi
 	ping -c 1 google.com >/dev/null 2>&1
 }
 
