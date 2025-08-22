@@ -2,6 +2,21 @@
 # shellcheck enable=all
 
 # Generate a prompt for one-off or interactive sessions
+# Parameters:
+#   $1: The mode (interactive, one-off, or task)
+#   $2: The query
+#   $3: The filenames to include in the context
+#   $4: The search terms to include in the context
+#   $5: The website URLs to include in the context
+#   $6: Whether to surf and add results (true/false)
+#   $7: Whether to add usage information (true/false)
+#   $8: Whether to add system information (true/false)
+#   $9: Whether to add directory information (true/false)
+#   $10: Whether to add clipboard information (true/false)
+#   $11: Whether to add screenshot information (true/false)
+#   $12: The text input list to include in the context
+# Returns:
+#   The generated prompt
 generate_prompt() {
 
 	# Parse arguments
@@ -15,6 +30,8 @@ generate_prompt() {
 	add_system_info=$8
 	add_directory_info=$9
 	add_clipboard_info=${10}
+	add_screenshot_info=${11}
+	text_input_list=${12}
 
 	# Check that inputs are valid
 	check_mode mode || return 1
@@ -58,6 +75,15 @@ generate_prompt() {
 		}
 	fi
 
+	# Add screenshot information if requested
+	if [ "${add_screenshot_info}" = true ]; then
+		timestamp_log_to_stderr "📸" "Checking out the screen..." >&2
+		prompt="${prompt}$(generate_screenshot_context)\n\n" || {
+			echo "Error: Failed to generate screenshot information context." >&2
+			return 1
+		}
+	fi
+
 	# Add file file_info if available
 	if [ -n "${filenames}" ]; then
 		while [ -n "${filenames}" ]; do
@@ -66,6 +92,19 @@ generate_prompt() {
 			timestamp_log_to_stderr "📚" "Reviewing \"${filename}\"..." >&2
 			prompt="${prompt}$(generate_file_context "${filename}" "${query}")\n\n" || {
 				echo "Error: Failed to generate context from ${filename}." >&2
+				return 1
+			}
+		done
+	fi
+
+	# Add website information if available
+	if [ -n "${text_input_list}" ]; then
+		while [ -n "${text_input_list}" ]; do
+			text_input=$(echo "${text_input_list}" | head -n 1)
+			text_input_list=$(echo "${text_input_list}" | tail -n +2)
+			timestamp_log_to_stderr "🔗" "Reviewing \"$(echo "${text_input}" | cut -c1-30)\"..." >&2
+			prompt="${prompt} $(generate_text_context "${text_input}" "${query}")\n\n" || {
+				echo "Error: Failed to generate website information context for ${text_input}." >&2
 				return 1
 			}
 		done
@@ -164,6 +203,14 @@ awk '
 }
 
 # Start a llama-cli session
+# Parameters:
+#   $1: The repository name
+#   $2: The file name
+#   $3: The prompt
+#   $4: The mode (interactive, one-off, or task)
+#   $5: The number of tokens to generate
+#   $6: The context length
+#   $7: The temperature
 start_llama_session() {
 
 	# Parse arguments
