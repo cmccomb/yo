@@ -23,7 +23,7 @@ timestamp_log_to_stderr() {
 		message=$2
 
 		# Make sure the inputs are valid
-		check_emoji emoji || return 1
+		check_nonempty emoji || return 1
 		check_nonempty message || return 1
 
 		# Get the current time

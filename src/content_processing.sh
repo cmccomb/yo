@@ -2,6 +2,11 @@
 # shellcheck enable=all
 
 # Extract file_info from a file or URL (supports text and PDF files)
+# Parameters:
+#   $1: The file or URL to extract information from
+#   $2: The maximum length of the extracted information
+# Returns:
+#   0 on success, 1 on failure
 extract_file_info() {
 
 	# Parse arguments
@@ -22,7 +27,7 @@ extract_file_info() {
 			return 1
 		}
 		;;
-	*.png | *.jpg | *.jpeg | *.tiff | .tif | *.bmp | *.gif | *.webp)
+	*.png | *.jpg | *.jpeg | *.tiff | *.tif | *.bmp | *.gif | *.webp)
 		file_info=$(tesseract "${source}" - 2>/dev/null) || {
 			echo "Error: Failed to extract text from image ${source}." >&2
 			return 1
@@ -53,7 +58,12 @@ extract_file_info() {
 	return 0
 }
 
-### Extract file_info from a file or URL (supports text and PDF files)
+# Extract file_info from a file or URL (supports text and PDF files)
+# Parameters:
+#   $1: The file or URL to extract information from
+#   $2: The maximum length of the extracted information
+# Returns:
+#   0 on success, 1 on failure
 extract_url_info() {
 
 	# Parse arguments
@@ -88,6 +98,12 @@ extract_url_info() {
 	return 0
 }
 
+# Extract facts from a chunk of text
+# Parameters:
+#   $1: The chunk of text to extract facts from
+#   $2: The user query to guide the extraction
+# Returns:
+#   0 on success, 1 on failure
 extract_facts() {
 
 	# Parse arguments
@@ -128,7 +144,15 @@ extract_facts() {
 	return 0
 }
 
-# Compress text
+# Compress text using the LLM
+# Parameters:
+#   $1: The text to compress
+#   $2: Whether to remove spaces (true/false)
+#   $3: Whether to remove punctuation (true/false)
+#   $4: Whether to summarize (true/false)
+#   $5: The user query to guide the compression
+# Returns:
+#   0 on success, 1 on failure
 compress_text() {
 
 	# Parse arguments
