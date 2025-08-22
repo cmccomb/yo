@@ -10,7 +10,7 @@ tokens_to_characters() {
 	# Check that inputs are valid
 	check_integer tokens || return 1
 
-	# Calculate the number of characters and divide by four
+        # Calculate the number of characters using read_setting conversion values
 	characters=$(echo "scale=0; (${tokens} * $(read_setting general.characters_per_token)) / $(read_setting general.token_estimation_correction_factor)" | bc)
 
 	# Return result
@@ -29,7 +29,7 @@ characters_to_tokens() {
 	# Check that inputs are valid
 	check_integer characters || return 1
 
-	# Calculate the number of characters and divide by four
+        # Calculate the number of tokens using read_setting conversion values
 	tokens=$(echo "(((${characters} + $(read_setting general.characters_per_token) - 1) / $(read_setting general.characters_per_token)) * $(read_setting general.token_estimation_correction_factor))" | bc)
 
 	# Return result
