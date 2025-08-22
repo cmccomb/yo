@@ -11,8 +11,8 @@ perform_search() {
         check_nonempty terms || return 1
 
         if [ -n "${YO_TEST_WEB_SEARCH_RESPONSE:-}" ]; then
-                echo "${YO_TEST_WEB_SEARCH_RESPONSE}"
-                return 0
+            echo "${YO_TEST_WEB_SEARCH_RESPONSE}"
+            return 0
         fi
 
         # Example API call
