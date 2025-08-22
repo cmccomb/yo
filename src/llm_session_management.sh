@@ -153,6 +153,16 @@ generate_prompt() {
 	return 0
 }
 
+remove_reasoning_tags() {
+
+	# Filter out <think> and <reasoning> tags produced by some models
+awk '
+/<(think|reasoning)>/{flag=1; next}
+/<\/(think|reasoning)>/{flag=0; next}
+!flag
+'
+}
+
 # Start a llama-cli session
 start_llama_session() {
 
@@ -237,17 +247,17 @@ start_llama_session() {
 	args="${args} --prompt \"${prompt}\""
 
 	# Start session
-	if [ "${VERBOSE}" = true ]; then
-		if ! eval "llama-cli ${args}"; then
-			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-			return 1
-		fi
-	else
-		if ! eval "llama-cli ${args} 2>/dev/null"; then
-			echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
-			return 1
-		fi
-	fi
+        if [ "${VERBOSE}" = true ]; then
+                if ! eval "llama-cli ${args}" | remove_reasoning_tags; then
+                        echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+                        return 1
+                fi
+        else
+                if ! eval "llama-cli ${args} 2>/dev/null" | remove_reasoning_tags; then
+                        echo "Error: llama-cli command failed while attempting to call ${repo_name}/${file_name}." >&2
+                        return 1
+                fi
+        fi
 
 	# Return successfully
 	return 0
