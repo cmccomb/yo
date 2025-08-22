@@ -30,20 +30,20 @@ write_default_settings_file() {
 		# Model settings
 		model:
 		  task:                                                    # The task model is invoked for search term generation and compression
-		    repository: bartowski/Llama-3.2-1B-Instruct-GGUF       # The HuggingFace repository where the model is stored
-		    filename: Llama-3.2-1B-Instruct-Q4_K_M.gguf            # The filename of the model in the repository
+		    repository: bartowski/Qwen_Qwen3-0.6B-GGUF             # The HuggingFace repository where the model is stored
+		    filename: Qwen_Qwen3-0.6B-Q4_K_M.gguf                  # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  casual:                                                  # The casual model is invoked for oneoff requests
-		    repository: bartowski/Qwen2.5-3B-Instruct-GGUF         # The HuggingFace repository where the model is stored
-		    filename: Qwen2.5-3B-Instruct-Q4_K_M.gguf              # The filename of the model in the repository
+		    repository: bartowski/Qwen_Qwen3-4B-GGUF               # The HuggingFace repository where the model is stored
+		    filename: Qwen_Qwen3-4B-Q4_K_M.gguf                    # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  balanced:                                                # The balanced model is never invoked by default
-		    repository: bartowski/Qwen2.5-7B-Instruct-GGUF         # The HuggingFace repository where the model is stored
-		    filename: Qwen2.5-7B-Instruct-Q4_K_M.gguf              # The filename of the model in the repository
+		    repository: bartowski/Qwen_Qwen3-8B-GGUF               # The HuggingFace repository where the model is stored
+		    filename: Qwen_Qwen3-8B-Q4_K_M.gguf                    # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  serious:                                                 # The serious model is invoked for interactive conversations
-		    repository: bartowski/Qwen2.5-Coder-14B-Instruct-GGUF  # The HuggingFace repository where the model is stored
-		    filename: Qwen2.5-Coder-14B-Instruct-IQ4_XS.gguf       # The filename of the model in the repository
+		    repository: bartowski/Qwen_Qwen3-14B-GGUF              # The HuggingFace repository where the model is stored
+		    filename: Qwen_Qwen3-14B-IQ3_M.gguf                    # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 
 		# Search settings

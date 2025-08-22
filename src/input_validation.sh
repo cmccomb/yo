@@ -123,7 +123,7 @@ check_path() {
 	fi
 }
 
-# Check if hte input is a url
+# Check if the input is a url
 # Parameters:
 #   $1: The name of the variable to check
 # Returns:
@@ -142,31 +142,6 @@ check_url() {
 	# Check if the input is a valid URL
 	if ! echo "${variable_value}" | grep -Eq '^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(/.*)?$'; then
 		echo "Error in Yo: Invalid input ${variable_name}=\"${variable_value}\", expected a valid URL." >&2
-		return 1
-	else
-		return 0
-	fi
-}
-
-# Check if the input is a valid emoji
-# Parameters:
-#   $1: The name of the variable to check
-# Returns:
-#   true if the input is a valid emoji, false otherwise
-check_emoji() {
-
-	# Parse arguments
-	variable_name=$1
-
-	# Check that inputs are non-empty
-	check_nonempty variable_name || return 1
-
-	# Make variables
-	eval "variable_value=\${$1}"
-
-	# Check if the input is a valid emoji
-	if ! echo "${variable_value}" | grep -Eq '[😀-🙏🌀-🗿]'; then
-		echo "Error in Yo: Invalid input ${variable_name}=\"${variable_value}\", expected a valid emoji." >&2
 		return 1
 	else
 		return 0
