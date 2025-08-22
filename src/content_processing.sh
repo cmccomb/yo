@@ -22,7 +22,7 @@ extract_file_info() {
 			return 1
 		}
 		;;
-	*.png | *.jpg | *.jpeg | *.tiff | .tif | *.bmp | *.gif | *.webp)
+	*.png | *.jpg | *.jpeg | *.tiff | *.tif | *.bmp | *.gif | *.webp)
 		file_info=$(tesseract "${source}" - 2>/dev/null) || {
 			echo "Error: Failed to extract text from image ${source}." >&2
 			return 1
