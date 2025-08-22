@@ -30,8 +30,8 @@ write_default_settings_file() {
 		# Model settings
 		model:
 		  task:                                                    # The task model is invoked for search term generation and compression
-		    repository: bartowski/Qwen_Qwen3-0.6B-GGUF             # The HuggingFace repository where the model is stored
-		    filename: Qwen_Qwen3-0.6B-Q4_K_M.gguf                  # The filename of the model in the repository
+		    repository: bartowski/Qwen_Qwen3-1.7B-GGUF             # The HuggingFace repository where the model is stored
+		    filename: Qwen_Qwen3-1.7B-Q4_K_M.gguf                  # The filename of the model in the repository
 		    temperature: 0.2                                       # The temperature to use for this model
 		  casual:                                                  # The casual model is invoked for oneoff requests
 		    repository: bartowski/Qwen_Qwen3-4B-GGUF               # The HuggingFace repository where the model is stored
