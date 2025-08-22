@@ -103,7 +103,7 @@ check_path() {
 	fi
 }
 
-# Check if hte input is a url
+# Check if the input is a URL
 check_url() {
 
 	# Parse arguments
